@@ -1,10 +1,11 @@
-[![Regovar datamodel](https://raw.githubusercontent.com/REGOVAR/REGOVAR/master/docs/diagrams/db_schema.png)](https://raw.githubusercontent.com/REGOVAR/REGOVAR/master/docs/diagrams/db_schema.png)
+[![Regovar datamodel](https://raw.githubusercontent.com/REGOVAR/regovar-server/master/database/v1.0.0/doc/db_schema.png)](https://raw.githubusercontent.com/REGOVAR/regovar-server/master/database/v1.0.0/doc/db_schema.png)
 
 ***
 
-* Download [create_all sql](https://github.com/REGOVAR/REGOVAR/blob/master/sandbox/create_all.sql)
-* Download [drop_all sql](https://github.com/REGOVAR/REGOVAR/blob/master/sandbox/drop_all.sql)
-
+Current version : **V1.0.0**
+* Download [create_all sql](https://raw.githubusercontent.com/REGOVAR/regovar-server/master/database/v1.0.0/create_all.sql)
+* Download [drop_all sql](https://raw.githubusercontent.com/REGOVAR/regovar-server/master/database/v1.0.0/drop_all.sql)
+* Download [import_all sql](https://raw.githubusercontent.com/REGOVAR/regovar-server/master/database/v1.0.0/import_all.sql)
 ***
 
 ## Tables descriptions
@@ -240,4 +241,4 @@ Parameter :
 * **HeavyClientLastVersion** : the version available (and complient with this version of the database) for the last Regovar heavy client;
 * **HeavyClient** : JSON dictionary with all information usefull for the Regovar Launcher to be able to download/update the heavy clients;
 * **LastBackupDate** : the date of the last database dump;
-* **RegovarDatabaseUUID* : UUID of the Regovar database; will be used for during export/import or synchronization with other databases in order to be able to know from where are comming new data imported into the database 
+* **RegovarDatabaseUUID* : UUID of the Regovar database; will be used for during export/import or synchronization with other databases in order to be able to know from where are comming new data imported into the database
