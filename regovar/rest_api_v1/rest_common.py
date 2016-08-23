@@ -1,8 +1,8 @@
 #!env/python3
 # coding: utf-8
 from flask import Flask, jsonify, render_template, session, request
-from flask.ext.session import Session
-from flask.ext.login import LoginManager
+from flask_session import Session
+from flask_login import LoginManager
 
 
 
@@ -10,7 +10,7 @@ from flask.ext.login import LoginManager
 # Building response ===============================================================================
 #
 
-def build_success(response_data=None, pagination_data=None):
+def rest_success(response_data=None, pagination_data=None):
 	if response_data is None:
 		results = {"success":True}
 	else:
@@ -22,7 +22,7 @@ def build_success(response_data=None, pagination_data=None):
 	return jsonify(results)
 
 
-def build_error(message="Unknown", code="0"):
+def rest_error(message="Unknown", code="0"):
 	results = {"success":False, "msg":message, "error_code":code, "error_url":ERROR_ROOT_URL + code}
 	return jsonify(results)
 
@@ -34,7 +34,7 @@ def build_error(message="Unknown", code="0"):
 #
 def db_request(connection, sql_req, ):
 	if connection is None:
-		return build_error(ERROR.)
+		return rest_error(ERRC_00001)
 
 
 
@@ -55,8 +55,8 @@ def get_config(sql_connection=None):
 
 	result = { 
 		"domain" :          REST_DOMAIN, 
-		"version" :         REST_VERSION
-		"range_max" :       REST_RANGE_MAX
+		"version" :         REST_VERSION,
+		"range_max" :       REST_RANGE_MAX,
 		"range_default" :   REST_RANGE_DEFAULT
 	}
 
@@ -68,58 +68,6 @@ def get_config(sql_connection=None):
 
 
 
-# 
-# User authentication =============================================================================
-#
-
-
-'''  '''
-def check_auth(f):
-	def called(*args, **kargs):
-		if 'user_id' in session:
-			user = User.from_id(session["user_id"])
-			if user is not None:
-				return f(*args, **kargs)
-		return error_response("Authentification is required", 403)
-	return called
-
-def current_user():
-	if 'user_id' in session:
-		user = User.from_id(session["user_id"])
-		return user
-	return None
-
-
-
-''' check authent on all request '''
-@app.before_request
-def before_request():
-	if session and "user_id" in session:
-		print("Check auth : " + str(session))
-		if 'user_id' in session:
-			user = User.from_id(ObjectId(session["user_id"]))
-			if user is not None:
-				print ("Session Valid")
-				session['username'] = user.fullname
-				return
-
-		print ("Session not valid")
-		return error_response("Authentification is required", 403)
-	else:
-		if request.url_root == 'login_user' or request.url_root == 'login':
-			print("Trying to connect, not checking session auth yet")
-		else:
-			print (request.url_root)
-			print ("Session not valid -> need to login")
-			#return error_response("Authentification is required", 403)
-
-'''
-	if request :
-		print( "Endpoint : " + str(request))
-	else:
-		print("Endpoint : None")
-    #if 'logged_in' not in session and request.endpoint != 'login':
-'''
 
 
 

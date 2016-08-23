@@ -23,6 +23,8 @@ from sqlalchemy.ext.declarative import declarative_base
 
 
 
+
+
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 # TOOLS
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
@@ -174,43 +176,3 @@ def is_transition(ref, alt):
 
 
 
-
-
-
-
-# Init SQLAlchemy database engine thanks to a connection string
-SQLBase = declarative_base()
-
-class PostgreBench(BaseBench):
-
-
-	def __init__(self, config):
-		super(PostgreBench, self).__init__(config)
-
-		self.connection = None
-		self.session = None
-		self.job_in_progress = 0
-
-
-
-	def exec_sql_query(self, raw_sql):
-		self.job_in_progress += 1
-		self.connection.execute(raw_sql)
-		self.job_in_progress -= 1
-
-
-
-	def init_db(self):
-		global SQLBase
-		#Connect to database
-		self.connection, meta = connect(self.config["DB_USER"], self.config["DB_PWD"], self.config["DB_NAME"], self.config["DB_HOST"], self.config["DB_PORT"])
-
-
-		# Associate model with connected database
-		SQLBase.metadata.create_all(self.connection)
-
-		# if need to reset
-		# if (DB_RESET) : 
-		# 	# TODO
-
-		self.session = Session(self.connection)
