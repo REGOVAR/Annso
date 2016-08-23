@@ -1,5 +1,42 @@
- 
+#!env/python3
+# coding: utf-8
+import os
+import jinja2
+from flask import Flask, jsonify, render_template, session, request
+from flask.ext.session import Session
+from flask.ext.login import LoginManager
 
+from regovar.application import app
+
+
+
+# 
+# CONFIG parameters for the website package =======================================================
+#
+
+# Flask Folders
+BASEDIR			= os.path.abspath(os.path.dirname(__file__))
+TPL_FOLDER 		= os.path.join(BASEDIR, 'templates/')
+ASSET_FOLDER 	= os.path.join(BASEDIR, 'statics/')
+
+
+
+
+# 
+# Customise flask app with package path ===========================================================
+#
+my_loader = jinja2.ChoiceLoader([
+    app.jinja_loader, 						# first is default template path
+    jinja2.FileSystemLoader(TPL_FOLDER),	# second, regovar www custom folder
+    jinja2.FileSystemLoader(ASSET_FOLDER),	# second, regovar www custom folder
+])
+app.jinja_loader = my_loader
+
+
+
+@app.route('/')
+def index():
+	return render_template('welcom.html')
 
 
 

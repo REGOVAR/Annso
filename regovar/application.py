@@ -17,7 +17,8 @@ import logging
 
 
 # Specifi packages
-from flask import Flask
+from flask import Flask, session
+from flask.ext.session import Session
 from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 

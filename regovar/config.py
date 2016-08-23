@@ -17,8 +17,6 @@ DB_RESET                  = True
 
 # Flask Folders
 BASEDIR                   = os.path.abspath(os.path.dirname(__file__))
-STATIC_FOLDER			  = os.path.join(BASEDIR, 'templates/assets/')
-
 
 # Regovar files repository
 REP_VCF                   = os.path.join(BASEDIR, '../files/vcf')
