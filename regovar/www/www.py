@@ -3,10 +3,11 @@
 import os
 import jinja2
 from flask import Flask, jsonify, render_template, session, request
-from flask.ext.session import Session
-from flask.ext.login import LoginManager
+from flask_session import Session
+from flask_login import LoginManager
 
 from regovar.application import app
+from regovar.application import Base, db_session
 
 
 
@@ -15,9 +16,9 @@ from regovar.application import app
 #
 
 # Flask Folders
-BASEDIR			= os.path.abspath(os.path.dirname(__file__))
-TPL_FOLDER 		= os.path.join(BASEDIR, 'templates/')
-ASSET_FOLDER 	= os.path.join(BASEDIR, 'statics/')
+WWWDIR			= os.path.abspath(os.path.dirname(__file__))
+TPL_FOLDER 		= os.path.join(WWWDIR, 'templates/')
+ASSET_FOLDER 	= os.path.join(WWWDIR, 'statics/')
 
 
 
@@ -27,8 +28,8 @@ ASSET_FOLDER 	= os.path.join(BASEDIR, 'statics/')
 #
 my_loader = jinja2.ChoiceLoader([
 	app.jinja_loader, 						# first is default template path
-	jinja2.FileSystemLoader(TPL_FOLDER),	# second, regovar www custom folder
-	jinja2.FileSystemLoader(ASSET_FOLDER),	# second, regovar www custom folder
+	jinja2.FileSystemLoader(TPL_FOLDER),	# second, regovar templates custom folder
+	jinja2.FileSystemLoader(ASSET_FOLDER),	# third, regovar assets custom folder
 ])
 app.jinja_loader = my_loader
 
@@ -36,8 +37,14 @@ app.jinja_loader = my_loader
 
 @app.route('/')
 def index():
-	return render_template('welcom.html')
+	Parameter = Base.classes.parameter
+	params = db_session.query(Parameter)
+	return render_template('welcom.html', params=params)
 
+
+# mapped classes are now created with names by default
+# matching that of the table name.
+User = Base.classes.user
 
 
 # 

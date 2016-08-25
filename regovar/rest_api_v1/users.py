@@ -1,6 +1,12 @@
 #!env/python3
 # coding: utf-8
+from regovar.config import *
+from regovar.common import *
 from regovar.application import app
+
+from regovar.rest_api_v1.rest_common import *
+
+
 
 @app.route('/users/')
 def get_users():

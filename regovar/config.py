@@ -13,10 +13,10 @@ DB_PORT                   = 5432
 DB_USER                   = "regovar"
 DB_PWD                    = "regovar"
 DB_NAME                   = "regovar"
-DB_RESET                  = True
 
-# Flask Folders
+# Folders
 BASEDIR                   = os.path.abspath(os.path.dirname(__file__))
+LOGDIR                    = os.path.join(BASEDIR, '../logs')
 
 # Regovar files repository
 REP_VCF                   = os.path.join(BASEDIR, '../files/vcf')

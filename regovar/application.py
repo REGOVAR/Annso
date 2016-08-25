@@ -18,15 +18,27 @@ import logging
 
 # Specifi packages
 from flask import Flask, session
-from flask.ext.session import Session
+from flask_session import Session
+from sqlalchemy.ext.automap import automap_base
+from sqlalchemy.orm import Session
 from sqlalchemy import create_engine
-from sqlalchemy.ext.declarative import declarative_base
 
 
 # Regovar common packages
 from regovar.config import *
 from regovar.common import *
 
+
+
+
+
+# 
+# Log init ========================================================================================
+#
+if DEBUG :
+	logging.basicConfig(filename='regovar.log',level=logging.DEBUG)
+else:
+	logging.basicConfig(filename='regovar.log',level=logging.INFO)
 
 
 # 
@@ -41,11 +53,14 @@ app = Flask(__name__)
 app.config.from_pyfile("config.py")
 
 
-# Creat/connect database
-# connect(app.config["DATABASE"])
-# engine = create_engine('sqlite:///webmgmt.db', convert_unicode=True, echo=False)
-# Base = declarative_base()
-# Base.metadata.reflect(engine)
+# Connect and map the engine to the database
+Base = automap_base()
+db_engine = create_engine("postgresql://" + DB_USER + ":" + DB_PWD + "@" + DB_HOST + ":" + str(DB_PORT) + "/" + DB_NAME)
+#engine = create_engine("postgresql://regovar:regovar@localhost:5432/regovar")
+Base.prepare(db_engine, reflect=True)
+
+db_session = Session(db_engine)
+
 
 
 # Create/Check directories and permissions

@@ -1,10 +1,13 @@
 #!env/python3
 # coding: utf-8
-from flask import Flask, jsonify, render_template, session, request
+from flask import Flask, jsonify, session, request
 from flask_session import Session
 from flask_login import LoginManager
 
 
+from regovar.config import *
+from regovar.common import *
+from regovar.application import Base, db_session
 
 # 
 # Building response ===============================================================================
@@ -44,14 +47,18 @@ def db_request(connection, sql_req, ):
 # 
 # Server configuration ============================================================================
 #
-def get_config(sql_connection=None):
+
+def api_get_config():
 
 	db_data = {}
-	if sql_connection is None:
+	if db_session is None:
 		db_data = {"db_version": ERRC_00001}
 	else:
-		sql_connection.execute("SELECT * FROM parameter")
-		# TODO : Retrieve data from database with manage error methode
+		Parameter = Base.classes.parameter
+		params = db_session.query(Parameter)
+		db_session.execute("SELECT * FROM parameter")
+		for p in params:
+			db_data[p.key] = p.value
 
 	result = { 
 		"domain" :          REST_DOMAIN, 

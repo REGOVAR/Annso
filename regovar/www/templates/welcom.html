@@ -7,4 +7,13 @@
 </head>
 <body>
 	<h1>Welcom on the Regovar web page !</h1>
+	<table>
+	{% for p in params %}
+		<tr><td>{{ p.key }}</td><td>{{ p.value }}</td><td>{{ p.description }}</td></tr>
+	{% endfor %}
+	</table>
+
+	<p>
+		{{ params[0].key }}
+	</p>
 </body>
