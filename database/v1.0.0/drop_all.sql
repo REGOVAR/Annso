@@ -30,6 +30,7 @@ DROP SEQUENCE IF EXISTS public."reference_id_seq";
 DROP SEQUENCE IF EXISTS public."subject_id_seq";
 DROP SEQUENCE IF EXISTS public."selection_id_seq";
 DROP SEQUENCE IF EXISTS public."analyze_id_seq";
+DROP SEQUENCE IF EXISTS public."project_id_seq";
 DROP SEQUENCE IF EXISTS public."template_id_seq";
 DROP SEQUENCE IF EXISTS public."user_id_seq";
 
