@@ -10,3 +10,6 @@ from regovar.application import app
 @app.route('/config/')
 def api_get_config():
 	return rest_common.api_get_config()
+
+
+

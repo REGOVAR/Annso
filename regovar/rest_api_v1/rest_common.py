@@ -1,5 +1,7 @@
 #!env/python3
 # coding: utf-8
+import re
+
 from flask import Flask, jsonify, session, request
 from flask_session import Session
 from flask_login import LoginManager
@@ -7,13 +9,30 @@ from flask_login import LoginManager
 
 from regovar.config import *
 from regovar.common import *
-from regovar.application import Base, db_session
+
+
+
+
+
+
+
+
+
+
+
 
 # 
 # Building response ===============================================================================
 #
 
-def rest_success(response_data=None, pagination_data=None):
+def fmk_rest_success(response_data=None, pagination_data=None):
+	"""
+		Build the REST success response that will encapsulate the given data (in python dictionary format)
+
+		:param response_data: 	The data to wrap in the JSON success response
+		:param pagination_data:	The data regarding the pagination
+	"""
+
 	if response_data is None:
 		results = {"success":True}
 	else:
@@ -25,8 +44,25 @@ def rest_success(response_data=None, pagination_data=None):
 	return jsonify(results)
 
 
-def rest_error(message="Unknown", code="0"):
-	results = {"success":False, "msg":message, "error_code":code, "error_url":ERROR_ROOT_URL + code}
+
+def fmk_rest_error(message:str="Unknow", code:str="0", error_id:str=""):
+	"""
+		Build the REST error response
+
+		:param message: 	The short "friendly user" error message
+		:param code:		The code of the error type
+		:param error_id:	The id of the error, to return to the end-user. 
+							This code will allow admins to find in logs where exactly this error occure
+	"""
+
+	results = {
+		"success":		False, 
+		"msg":			message, 
+		"error_code":	code, 
+		"error_url":	ERROR_ROOT_URL + code,
+		"error_id":		error_id
+	}
+
 	return jsonify(results)
 
 
@@ -35,6 +71,7 @@ def rest_error(message="Unknown", code="0"):
 # 
 # Database helper ============================================================================
 #
+
 def db_request(connection, sql_req, ):
 	if connection is None:
 		return rest_error(ERRC_00001)
@@ -44,32 +81,108 @@ def db_request(connection, sql_req, ):
 
 
 
+
+
+
+
 # 
-# Server configuration ============================================================================
+# URL query string parsing ========================================================================
 #
 
-def api_get_config():
 
-	db_data = {}
-	if db_session is None:
-		db_data = {"db_version": ERRC_00001}
+def fmk_get_query_multiset_parameter(f_name:str, f_default:str, f_allowed:object="*", f_type:object=object):
+	"""
+		Return a list a value for a provided query string attribute. 
+		Manage default value, and check validity of values
+	"""
+
+	# 1- retrieve parameter or default value if doesn't exists
+	fields = request.args.get(f_name, default=','.join(f_default), type=f_type)
+	fields_t = fields.split(',')
+
+	# 2- check that value are allowed
+	result = []
+	if f_allowed != "*":
+		for entry in fields_t:
+			if entry in f_allowed:
+				result.append(entry)
 	else:
-		Parameter = Base.classes.parameter
-		params = db_session.query(Parameter)
-		db_session.execute("SELECT * FROM parameter")
-		for p in params:
-			db_data[p.key] = p.value
+		result = fields_t
 
-	result = { 
-		"domain" :          REST_DOMAIN, 
-		"version" :         REST_VERSION,
-		"range_max" :       REST_RANGE_MAX,
-		"range_default" :   REST_RANGE_DEFAULT
-	}
+	return result;
 
-	result.update(db_data)
 
-	return jsonify(result)
+
+
+def fmk_get_fields_to_sql(f_default:str, f_allowed:object="*", f_type:object=object):
+	""" 
+		Default fmk method to retrieve list of fields that shall be loaded. 
+
+		:param f_default:	The list of default value that shall be used if nothing is found in the query string
+		:param f_allowed:	The list of allowed value
+		:param f_type:		The type of the value in the field (can be : int, str, object...)
+		:return: 			The sql raw string
+	"""
+
+	fields = fmk_get_query_multiset_parameter('fields', f_default, f_allowed, f_type)
+	return "SELECT " + ', '.join(fields)
+
+
+
+
+def fmk_get_ordering_to_sql(o_default:str, o_allowed:object="*", f_type:object=object):
+	"""
+		Retrieve if exists query string attributes that specify the ordering.
+		Otherwise return the provided default ordering
+
+		:param o_default:	The list of default value that shall be used if nothing is found in the query string
+		:param o_allowed:	The list of allowed value
+		:param f_type:		The type of the value in the field (can be : int, str, object...)
+		:return: 			The sql raw string
+	"""
+
+	asc  = fmk_get_query_multiset_parameter('order', f_default=['lastname', 'firstname'], f_allowed=o_allowed)
+	desc = fmk_get_query_multiset_parameter('desc', f_default='', f_allowed=o_allowed, f_type=str)
+
+	sql_ordering = ""
+	if len(asc) > 0:
+		sql_ordering = " ORDER BY "
+		for i in range(0, len(asc)):
+			sql_ordering += asc[i]
+			if asc[i] in desc :
+				sql_ordering += " DESC,"
+			else:
+				sql_ordering += " ASC,"
+
+	return sql_ordering[:-1]
+
+
+
+
+def fmk_get_pagination_to_sql(p_default:str):
+	"""
+		Retrieve if exists query string attributes that specify the pagination for the returned result.
+
+		:param p_default: 	Default pagination to used if nothing found in the query
+		:return:			The sql raw string
+	"""
+
+	pagination = request.args.get('range', default=p_default, type=str)
+
+	# 4.1- checking that range provided by user is valid
+	range_pattern = re.compile("^[0-9]*-[0-9]*$")
+	check = range_pattern.match(pagination)
+
+	if check is None:
+		pagination = "0-" + str(REST_RANGE_DEFAULT)
+
+	# 4.2- parsing range
+	pagination = pagination.split("-")
+	limit = min(int(pagination[1]) - int(pagination[0]), REST_RANGE_MAX)
+	offset = pagination[0]
+
+	# 4.3- building sql_raw
+	return " LIMIT " + str(limit) + " OFFSET " + str(offset)
 
 
 
@@ -85,6 +198,7 @@ def api_get_config():
 # Unknow error
 # data error  : consistency, missing entry, ...
 # db error    : structure, bad req (missing field,...), wrong db version, no connection to database, ...
+# query error : error while parsing the url (bad format, 404, missing attributes, bad values, ...)
 # 
 
 
