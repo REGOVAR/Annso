@@ -26,9 +26,9 @@ ASSET_FOLDER 	= os.path.join(BASEDIR, 'statics/')
 # Customise flask app with package path ===========================================================
 #
 my_loader = jinja2.ChoiceLoader([
-    app.jinja_loader, 						# first is default template path
-    jinja2.FileSystemLoader(TPL_FOLDER),	# second, regovar www custom folder
-    jinja2.FileSystemLoader(ASSET_FOLDER),	# second, regovar www custom folder
+	app.jinja_loader, 						# first is default template path
+	jinja2.FileSystemLoader(TPL_FOLDER),	# second, regovar www custom folder
+	jinja2.FileSystemLoader(ASSET_FOLDER),	# second, regovar www custom folder
 ])
 app.jinja_loader = my_loader
 

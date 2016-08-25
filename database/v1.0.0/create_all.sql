@@ -17,8 +17,7 @@ CREATE SEQUENCE public.user_id_seq
 	MAXVALUE 9223372036854775807
 	START 1
 	CACHE 1;
-ALTER TABLE public.user_id_seq
-	OWNER TO regovar;
+ALTER TABLE public.user_id_seq OWNER TO regovar;
 
 CREATE TABLE public."user"
 (
@@ -33,11 +32,8 @@ CREATE TABLE public."user"
 	CONSTRAINT user_pkey PRIMARY KEY (id),
 	CONSTRAINT user_email_key UNIQUE (email)
 )
-WITH (
-	OIDS=FALSE
-);
-ALTER TABLE public."user"
-	OWNER TO postgres;
+WITH ( OIDS=FALSE );
+ALTER TABLE public."user" OWNER TO regovar;
 
 
 
@@ -49,8 +45,7 @@ CREATE SEQUENCE public.project_id_seq
 	MAXVALUE 9223372036854775807
 	START 1
 	CACHE 1;
-ALTER TABLE public.project_id_seq
-	OWNER TO regovar;
+ALTER TABLE public.project_id_seq OWNER TO regovar;
 CREATE TABLE public.project
 (
 	id integer NOT NULL DEFAULT nextval('project_id_seq'::regclass),
@@ -60,11 +55,8 @@ CREATE TABLE public.project
 	data text COLLATE pg_catalog."C.UTF-8",
 	CONSTRAINT project_pkey PRIMARY KEY (id)
 )
-WITH (
-	OIDS=FALSE
-);
-ALTER TABLE public.project
-	OWNER TO postgres;
+WITH ( OIDS=FALSE );
+ALTER TABLE public.project OWNER TO regovar;
 
 
 
@@ -76,8 +68,7 @@ CREATE SEQUENCE public.template_id_seq
 	MAXVALUE 9223372036854775807
 	START 1
 	CACHE 1;
-ALTER TABLE public.template_id_seq
-	OWNER TO regovar;
+ALTER TABLE public.template_id_seq OWNER TO regovar;
 CREATE TABLE public.template
 (
 	id integer NOT NULL DEFAULT nextval('template_id_seq'::regclass),
@@ -96,11 +87,8 @@ CREATE TABLE public.template
 		ON UPDATE NO ACTION ON DELETE NO ACTION,
 	CONSTRAINT template_author_id_name_version_key UNIQUE (author_id, name, version)
 )
-WITH (
-	OIDS=FALSE
-);
-ALTER TABLE public.template
-	OWNER TO regovar;
+WITH ( OIDS=FALSE );
+ALTER TABLE public.template OWNER TO regovar;
 
 
 
@@ -112,8 +100,7 @@ CREATE SEQUENCE public.analysis_id_seq
 	MAXVALUE 9223372036854775807
 	START 1
 	CACHE 1;
-ALTER TABLE public.analysis_id_seq
-	OWNER TO regovar;
+ALTER TABLE public.analysis_id_seq OWNER TO regovar;
 CREATE TABLE public.analysis
 (
 	id integer NOT NULL DEFAULT nextval('analysis_id_seq'::regclass),
@@ -139,11 +126,8 @@ CREATE TABLE public.analysis
 		REFERENCES public."user" (id) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION
 )
-WITH (
-	OIDS=FALSE
-);
-ALTER TABLE public.analysis
-	OWNER TO regovar;
+WITH ( OIDS=FALSE );
+ALTER TABLE public.analysis OWNER TO regovar;
 
 
 
@@ -153,8 +137,7 @@ CREATE SEQUENCE public.selection_id_seq
 	MAXVALUE 9223372036854775807
 	START 1
 	CACHE 1;
-ALTER TABLE public.selection_id_seq
-	OWNER TO regovar;
+ALTER TABLE public.selection_id_seq OWNER TO regovar;
 CREATE TABLE public.selection
 (
 	id integer NOT NULL DEFAULT nextval('selection_id_seq'::regclass),
@@ -168,11 +151,8 @@ CREATE TABLE public.selection
 		REFERENCES public."analysis" (id) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION
 )
-WITH (
-	OIDS=FALSE
-);
-ALTER TABLE public.selection
-	OWNER TO regovar;
+WITH ( OIDS=FALSE );
+ALTER TABLE public.selection OWNER TO regovar;
 
 
 
@@ -188,8 +168,7 @@ CREATE SEQUENCE public.subject_id_seq
 	MAXVALUE 9223372036854775807
 	START 1
 	CACHE 1;
-ALTER TABLE public.subject_id_seq
-	OWNER TO regovar;
+ALTER TABLE public.subject_id_seq OWNER TO regovar;
 CREATE TABLE public.subject
 (
 	id integer NOT NULL DEFAULT nextval('subject_id_seq'::regclass),
@@ -198,11 +177,8 @@ CREATE TABLE public.subject
 	comments text COLLATE pg_catalog."C.UTF-8",
 	CONSTRAINT subject_pkey PRIMARY KEY (id)
 )
-WITH (
-	OIDS=FALSE
-);
-ALTER TABLE public.subject
-	OWNER TO regovar;
+WITH ( OIDS=FALSE );
+ALTER TABLE public.subject OWNER TO regovar;
 
 
 
@@ -212,13 +188,10 @@ CREATE TABLE public.subject_relation
 	subject1_id integer NOT NULL,
 	subject2_id integer NOT NULL,
 	relation subject_relation_type NOT NULL DEFAULT 'parent'::subject_relation_type,
-	CONSTRAINT subject_relation_pkey PRIMARY KEY (subject1_id, subject2_id, relation),
+	CONSTRAINT subject_relation_pkey PRIMARY KEY (subject1_id, subject2_id, relation)
 )
-WITH (
-	OIDS=FALSE
-);
-ALTER TABLE public.subject_relation
-	OWNER TO regovar;
+WITH ( OIDS=FALSE );
+ALTER TABLE public.subject_relation OWNER TO regovar;
 
 
 
@@ -237,11 +210,8 @@ CREATE TABLE public.subject_patient
 		REFERENCES public."subject" (id) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION
 )
-WITH (
-	OIDS=FALSE
-);
-ALTER TABLE public.subject_patient
-	OWNER TO regovar;
+WITH ( OIDS=FALSE );
+ALTER TABLE public.subject_patient OWNER TO regovar;
 
 
 
@@ -252,9 +222,8 @@ CREATE SEQUENCE public.reference_id_seq
 	MAXVALUE 9223372036854775807
 	START 1
 	CACHE 1;
-ALTER TABLE public.reference_id_seq
-	OWNER TO regovar;
-CREATE TABLE public.reference
+ALTER TABLE public.reference_id_seq OWNER TO regovar;
+CREATE TABLE public."reference"
 (
 	id integer NOT NULL DEFAULT nextval('reference_id_seq'::regclass),
 	name character varying(50) COLLATE pg_catalog."C.UTF-8" NOT NULL,
@@ -263,11 +232,8 @@ CREATE TABLE public.reference
 	table_suffix character varying(10) COLLATE pg_catalog."C.UTF-8" NOT NULL,
 	CONSTRAINT reference_pkey PRIMARY KEY (id)
 )
-WITH (
-	OIDS=FALSE
-);
-ALTER TABLE public.reference
-	OWNER TO regovar;
+WITH ( OIDS=FALSE );
+ALTER TABLE public."reference" OWNER TO regovar;
 
 
 
@@ -278,8 +244,7 @@ CREATE SEQUENCE public.file_id_seq
 	MAXVALUE 9223372036854775807
 	START 1
 	CACHE 1;
-ALTER TABLE public.file_id_seq
-	OWNER TO regovar;
+ALTER TABLE public.file_id_seq OWNER TO regovar;
 CREATE TABLE public.file
 (
 	id integer NOT NULL DEFAULT nextval('file_id_seq'::regclass),
@@ -292,11 +257,8 @@ CREATE TABLE public.file
 		REFERENCES public."reference" (id) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION
 )
-WITH (
-	OIDS=FALSE
-);
-ALTER TABLE public.file
-	OWNER TO regovar;
+WITH ( OIDS=FALSE );
+ALTER TABLE public.file OWNER TO regovar;
 
 
 
@@ -311,8 +273,7 @@ CREATE SEQUENCE public.sample_id_seq
 	MAXVALUE 9223372036854775807
 	START 1
 	CACHE 1;
-ALTER TABLE public.sample_id_seq
-	OWNER TO regovar;
+ALTER TABLE public.sample_id_seq OWNER TO regovar;
 CREATE TABLE public.sample
 (
 	id integer NOT NULL DEFAULT nextval('sample_id_seq'::regclass),
@@ -322,16 +283,10 @@ CREATE TABLE public.sample
 	CONSTRAINT sample_pkey PRIMARY KEY (id),
 	CONSTRAINT sample_subject_id_fkey FOREIGN KEY (subject_id)
 		REFERENCES public."subject" (id) MATCH SIMPLE
-		ON UPDATE NO ACTION ON DELETE NO ACTION,
-	CONSTRAINT sample_file_id_fkey FOREIGN KEY (file_id)
-		REFERENCES public."file" (id) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION
 )
-WITH (
-	OIDS=FALSE
-);
-ALTER TABLE public.sample
-	OWNER TO regovar;
+WITH ( OIDS=FALSE );
+ALTER TABLE public.sample OWNER TO regovar;
 
 
 
@@ -347,11 +302,8 @@ CREATE TABLE public.sample_file
 		REFERENCES public."file" (id) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION
 )
-WITH (
-	OIDS=FALSE
-);
-ALTER TABLE public.sample_file
-	OWNER TO regovar;
+WITH ( OIDS=FALSE );
+ALTER TABLE public.sample_file OWNER TO regovar;
 
 
 
@@ -367,11 +319,8 @@ CREATE TABLE public.project_sample
 		REFERENCES public."sample" (id) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION
 )
-WITH (
-	OIDS=FALSE
-);
-ALTER TABLE public.project_sample
-	OWNER TO regovar;
+WITH ( OIDS=FALSE );
+ALTER TABLE public.project_sample OWNER TO regovar;
 
 
 
@@ -385,8 +334,7 @@ CREATE SEQUENCE public.variant_hg19_id_seq
 	MAXVALUE 9223372036854775807
 	START 1
 	CACHE 1;
-ALTER TABLE public.variant_hg19_id_seq
-	OWNER TO regovar;
+ALTER TABLE public.variant_hg19_id_seq OWNER TO regovar;
 CREATE TABLE public.variant_hg19
 (
 	id integer NOT NULL DEFAULT nextval('variant_hg19_id_seq'::regclass),
@@ -402,11 +350,8 @@ CREATE TABLE public.variant_hg19
 	CONSTRAINT variant_hg19_pkey PRIMARY KEY (id),
 	CONSTRAINT variant_hg19_ukey UNIQUE (chr, pos, ref, alt)
 )
-WITH (
-	OIDS=FALSE
-);
-ALTER TABLE public.variant_hg19
-	OWNER TO regovar;
+WITH ( OIDS=FALSE );
+ALTER TABLE public.variant_hg19 OWNER TO regovar;
 
 
 
@@ -432,11 +377,8 @@ CREATE TABLE public.regmut_hg19
 	sex character varying(50) COLLATE pg_catalog."C.UTF-8",
 	CONSTRAINT regmut_hg19_pkey PRIMARY KEY (chr, pos, ref, alt)
 )
-WITH (
-	OIDS=FALSE
-);
-ALTER TABLE public.regmut_hg19
-	OWNER TO regovar;
+WITH ( OIDS=FALSE );
+ALTER TABLE public.regmut_hg19 OWNER TO regovar;
 
 
 
@@ -455,17 +397,14 @@ CREATE TABLE public.sample_variant_hg19
 	info character varying(255)[][] COLLATE pg_catalog."C.UTF-8",
 	CONSTRAINT sample_variant_hg19_pkey PRIMARY KEY (sample_id, chr, pos, ref, alt),
 	CONSTRAINT sample_variant_hg19_variant_id_fkey FOREIGN KEY (variant_id)
-		REFERENCES public."variant" (id) MATCH SIMPLE
+		REFERENCES public."variant_hg19" (id) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION,
 	CONSTRAINT sample_variant_hg19_sample_id_fkey FOREIGN KEY (sample_id)
 		REFERENCES public."sample" (id) MATCH SIMPLE
 		ON UPDATE NO ACTION ON DELETE NO ACTION
 )
-WITH (
-	OIDS=FALSE
-);
-ALTER TABLE public.variant_hg19
-	OWNER TO regovar;
+WITH ( OIDS=FALSE );
+ALTER TABLE public.variant_hg19 OWNER TO regovar;
 
 
 
@@ -478,11 +417,8 @@ CREATE TABLE public."parameter"
 	description character varying(255) COLLATE pg_catalog."C.UTF-8",
 	CONSTRAINT parameter_pkey PRIMARY KEY (key)
 )
-WITH (
-	OIDS=FALSE
-);
-ALTER TABLE public."parameter"
-	OWNER TO postgres;
+WITH ( OIDS=FALSE );
+ALTER TABLE public."parameter" OWNER TO regovar;
 
 
 --
@@ -492,17 +428,18 @@ CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
 
 
-INSERT INTO public.reference (name, description, url, table_suffix) VALUES
-	("Human Genom 19", "Human Genom version 19", "", "hg19");
+INSERT INTO public.reference(name, description, url, table_suffix)
+VALUES ('Human Genom 19', 'Human Genom version 19', 'http://hgdownload.cse.ucsc.edu/goldenpath/hg19/chromosomes/', 'hg19');
 
 
 
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 INSERT INTO public."parameter" (key, description, value) VALUES
-	("DatabaseVersion",        "The current version of the database",                                      "V1.0.0"),
-	("HeavyClientLastVersion", "Last complient version of the heavy client",                               "V1.0.0"),
-	("HeavyClient",            "Information for the Launcher to be able to download/update the client",    "{}"),
-	("LastBackupDate",         "The date of the last database dump",                                       to_char(current_timestamp, 'YYYY-MM-DD')),
-	("RegovarDatabaseUUID",    "Unique ID of the Regovar database", "The current version of the database", uuid_generate_v4());
+	('DatabaseVersion',        'The current version of the database',                                      'V1.0.0'),
+	('HeavyClientLastVersion', 'Last complient version of the heavy client',                               'V1.0.0'),
+	('HeavyClient',            'Information for the Launcher to be able to download/update the client',    '{}'),
+	('LastBackupDate',         'The date of the last database dump',                                       to_char(current_timestamp, 'YYYY-MM-DD')),
+	('RegovarDatabaseUUID',    'Unique ID of the Regovar database',                                        uuid_generate_v4());
 
 
 
