@@ -435,11 +435,11 @@ VALUES ('Human Genom 19', 'Human Genom version 19', 'http://hgdownload.cse.ucsc.
 
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 INSERT INTO public."parameter" (key, description, value) VALUES
-	('DatabaseVersion',        'The current version of the database',                                      'V1.0.0'),
-	('HeavyClientLastVersion', 'Last complient version of the heavy client',                               'V1.0.0'),
-	('HeavyClient',            'Information for the Launcher to be able to download/update the client',    '{}'),
-	('LastBackupDate',         'The date of the last database dump',                                       to_char(current_timestamp, 'YYYY-MM-DD')),
-	('RegovarDatabaseUUID',    'Unique ID of the Regovar database',                                        uuid_generate_v4());
+	('database_version',          'The current version of the database',                                      'V1.0.0'),
+	('heavy_client_last_version', 'Last complient version of the heavy client',                               'V1.0.0'),
+	('heavy_client',              'Information for the Launcher to be able to download/update the client',    '{}'),
+	('last_backup_date',          'The date of the last database dump',                                       to_char(current_timestamp, 'YYYY-MM-DD')),
+	('regovar_database_uuid',     'Unique ID of the Regovar database',                                        uuid_generate_v4());
 
 
 
