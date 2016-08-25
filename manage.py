@@ -7,12 +7,8 @@ from regovar.application import app
 
 
 manager = Manager(app, description="manage regovar application")
-#manager.add_command("dbtools", db.manager)
+#manager.add_command("runtests", db.manager)
 
-# @manager.command
-# def hello():
-# 	'''Says hello'''
-# 	print ("hello")
 
 
 
