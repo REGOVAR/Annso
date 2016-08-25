@@ -68,8 +68,6 @@ db_session = Session(db_engine)
 # 	os.makedirs(app.config["UPLOAD_FOLDER"])
 
 
-# Manage user session
-session = Session(app)
 
 
 

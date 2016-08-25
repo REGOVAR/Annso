@@ -46,7 +46,7 @@ User = Base.classes.user
 
 @app.route('/users/help')
 def api_get_users_help():
-	return {
+	return fmk_rest_success({
 		'GET /users/help/' : ['this help'],
 		'GET /users/' : 
 		{
@@ -57,9 +57,7 @@ def api_get_users_help():
 			'ordering_allowed' :		ordering_fields,
 			'ordering_default' :		ordering_default
 		}
-
-
-	}
+	})
 
 
 
@@ -120,9 +118,15 @@ def get_user_me():
 
 
 
+
+
 @app.route('/users/', methods=['POST'])
 def new_user():
 	return '/users/<user_id>'
+
+
+
+
 
 @app.route('/users/<user_id>', methods=['PUT'])
 def edit_user(user_id):
@@ -130,9 +134,13 @@ def edit_user(user_id):
 
 
 
+
+
 @app.route('/users/login', methods=['GET'])
 def login_user():
 	return '/users/login'
+
+
 
 
 
