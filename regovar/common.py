@@ -11,15 +11,8 @@ import time
 import logging
 import threading
 
-from progress.bar import Bar
-from progress.spinner import Spinner
 from multiprocessing import Pool
 
-from sqlalchemy import Table, Column, Integer, String, Boolean, ForeignKey, Sequence, UniqueConstraint, Index, func, distinct
-from sqlalchemy.orm import relationship, Session
-from sqlalchemy.exc import IntegrityError
-from sqlalchemy.sql.expression import ClauseElement
-from sqlalchemy.ext.declarative import declarative_base
 
 
 

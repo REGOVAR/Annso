@@ -3,8 +3,6 @@
 import re
 
 from flask import Flask, jsonify, session, request
-from flask_session import Session
-from flask_login import LoginManager
 
 
 from regovar.config import *
@@ -38,7 +36,7 @@ def fmk_rest_success(response_data=None, pagination_data=None):
 	else:
 		results = {"success":True, "data":response_data}
 
-	if pagination_data is None:
+	if pagination_data is not None:
 		results.update(pagination_data)
 
 	return jsonify(results)
@@ -80,7 +78,12 @@ def db_request(connection, sql_req, ):
 
 
 
+def fmk_row2dict(row):
+    d = {}
+    for column in row.keys():
+        d[column] = str(getattr(row, column))
 
+    return d
 
 
 
@@ -204,7 +207,7 @@ def fmk_get_pagination_to_sql(p_default:str):
 
 # error code = "0"
 ERRC_00000 = "Sorry, an unhandled error occure :s ... \nThanks to ask an admin to check what appened.\nDont hesitate to report this error to the dev@regovar.org team in order to fix it."
-ERRC_00001 = "No Data"
+ERRC_00001 = "Requested data doesn't exists"
 
 
 

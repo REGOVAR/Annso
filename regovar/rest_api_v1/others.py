@@ -5,12 +5,16 @@ from regovar.config import *
 from regovar.common import *
 
 from regovar.rest_api_v1.rest_common import *
+from regovar.application import app 
+
 
 
 # 
 # Server configuration ============================================================================
 #
 
+
+@app.route('/config/')
 def api_get_config():
 
 	db_data = {}

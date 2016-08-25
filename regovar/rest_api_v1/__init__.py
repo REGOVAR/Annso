@@ -15,4 +15,4 @@ from regovar.rest_api_v1 import users
 
 
 
-from regovar.rest_api_v1 import routes
+from regovar.rest_api_v1 import others

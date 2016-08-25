@@ -441,7 +441,9 @@ INSERT INTO public."parameter" (key, description, value) VALUES
 	('last_backup_date',          'The date of the last database dump',                                       to_char(current_timestamp, 'YYYY-MM-DD')),
 	('regovar_database_uuid',     'Unique ID of the Regovar database',                                        uuid_generate_v4());
 
-
+INSERT INTO public."user"(lastname, firstname, email, location, function, last_activity_date, settings) VALUES 
+('Gueudelot', 'Olivier', 'olivier.gueudelot@univ-angers.fr', 'CHU Angers', 'Ingénieur informatique', current_timestamp, '{}'),
+('Dénommé', 'Anne-Sophie', 'asdp@chu-angers.fr', 'CHU Angers', 'Interne en génétique', current_timestamp, '{}');
 
 
 

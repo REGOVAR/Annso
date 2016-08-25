@@ -5,6 +5,7 @@ from regovar.common import *
 from regovar.application import app
 
 from regovar.rest_api_v1.rest_common import *
+from regovar.application import Base, db_engine
 
 
 
@@ -31,14 +32,15 @@ from regovar.rest_api_v1.rest_common import *
 # }
 
 
-# Config User API
+# Global variables
 fields_allowed 		= ['id', 'email', 'firstname', 'lastname', 'function', 'location', 'last_activity', 'settings']
 fields_default 		= ['id', 'firstname', 'lastname']
 filter_fields  		= ['email', 'firstname', 'lastname', 'function', 'location', 'last_activity']
 ordering_fields  	= ['id', 'email', 'firstname', 'lastname', 'function', 'location', 'last_activity', 'settings']
 ordering_default 	= ['lastname' 'firstname']
 
-
+""" This globla variable to manipulate user database model object (SQLAlchemy) """
+User = Base.classes.user
 
 
 
@@ -55,6 +57,8 @@ def api_get_users_help():
 			'ordering_allowed' :		ordering_fields,
 			'ordering_default' :		ordering_default
 		}
+
+
 	}
 
 
@@ -68,25 +72,19 @@ def get_users():
 	'''
 
 	# 1- Requested fields
-	sql_select, fields = fmk_get_fields_to_sql(f_default=fields_default, f_allowed=fields_allowed, f_type=str)
+	sql_select = fmk_get_fields_to_sql(f_default=fields_default, f_allowed=fields_allowed, f_type=str)
 	
-
 	# 2- Filter ?
 	sql_where = ""
-
 
 	# 3- Ordering results
 	sql_ordering = fmk_get_ordering_to_sql(o_default=ordering_default, o_allowed=ordering_fields)
 
-
 	# 4- Pagination
 	sql_limit = fmk_get_pagination_to_sql(p_default='0-' + str(REST_RANGE_DEFAULT))
 
-
-
-	# 6- Result
-	return 'sql : ' + sql_select + " FROM \"user\" " + sql_where + sql_ordering + sql_limit
-
+	# 6- Retrieve data from SQL
+	return fmk_rest_success(sql_select + " FROM \"user\" " + sql_where + sql_ordering + sql_limit)
 
 
 
@@ -94,7 +92,33 @@ def get_users():
 
 @app.route('/users/<user_id>')
 def get_user(user_id):
-	return jsonify({"results": User.objects.get(pk=user_id).export_data()})
+	"""
+		Return the user with the given id if exists. Otherwise return an error
+	"""
+	result = db_engine.execute("SELECT * FROM \"user\" WHERE id=%s" % user_id).first()
+
+	if result is None:
+		return fmk_rest_error(ERRC_00001, "00001", )
+	return fmk_rest_success(fmk_row2dict(result))
+
+
+
+
+@app.route('/users/me')
+def get_user_me():
+	"""
+		Return the currently logged in user
+	"""
+
+	me_id = 1; # TODO : retrieve it from session data
+	result = db_engine.execute("SELECT * FROM \"user\" WHERE id=%s" % me_id).first()
+
+	if result is None:
+		return fmk_rest_error(ERRC_00001, "00001", )
+	return fmk_rest_success(fmk_row2dict(result))
+
+
+
 
 @app.route('/users/', methods=['POST'])
 def new_user():

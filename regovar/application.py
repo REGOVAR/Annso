@@ -69,7 +69,7 @@ db_session = Session(db_engine)
 
 
 # Manage user session
-Session(app)
+session = Session(app)
 
 
 
