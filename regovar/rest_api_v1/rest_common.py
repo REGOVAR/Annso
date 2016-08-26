@@ -13,7 +13,11 @@ from regovar.common import *
 
 
 
-
+def fmk_check_session():
+	'''
+		Check that the current session is valid and the user well identified
+	'''
+	pass
 
 
 
@@ -107,6 +111,7 @@ def fmk_get_query_multiset_parameter(f_name:str, f_default:str, f_allowed:object
 	result = []
 	if f_allowed != "*":
 		for entry in fields_t:
+			entry = entry.strip()
 			if entry in f_allowed:
 				result.append(entry)
 	else:
@@ -124,11 +129,11 @@ def fmk_get_fields_to_sql(f_default:str, f_allowed:object="*", f_type:object=obj
 		:param f_default:	The list of default value that shall be used if nothing is found in the query string
 		:param f_allowed:	The list of allowed value
 		:param f_type:		The type of the value in the field (can be : int, str, object...)
-		:return: 			The sql raw string
+		:return: 			The sql raw string and selected fields in an array
 	"""
 
 	fields = fmk_get_query_multiset_parameter('fields', f_default, f_allowed, f_type)
-	return "SELECT " + ', '.join(fields)
+	return "SELECT " + ', '.join(fields), fields
 
 
 
@@ -144,7 +149,7 @@ def fmk_get_ordering_to_sql(o_default:str, o_allowed:object="*", f_type:object=o
 		:return: 			The sql raw string
 	"""
 
-	asc  = fmk_get_query_multiset_parameter('order', f_default=['lastname', 'firstname'], f_allowed=o_allowed)
+	asc  = fmk_get_query_multiset_parameter('order', f_default=['lastname', 'firstname'], f_allowed=o_allowed, f_type=str)
 	desc = fmk_get_query_multiset_parameter('desc', f_default='', f_allowed=o_allowed, f_type=str)
 
 	sql_ordering = ""
@@ -208,6 +213,8 @@ def fmk_get_pagination_to_sql(p_default:str):
 # error code = "0"
 ERRC_00000 = "Sorry, an unhandled error occure :s ... \nThanks to ask an admin to check what appened.\nDont hesitate to report this error to the dev@regovar.org team in order to fix it."
 ERRC_00001 = "Requested data doesn't exists"
+ERRC_00002 = "Wrong provided data"
+ERRC_00003 = "Missing provided data"
 
 
 

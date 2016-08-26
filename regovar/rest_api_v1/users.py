@@ -1,5 +1,10 @@
 #!env/python3
 # coding: utf-8
+import sys
+from sqlalchemy.orm import Session
+from werkzeug.security import generate_password_hash, check_password_hash
+
+
 from regovar.config import *
 from regovar.common import *
 from regovar.application import app
@@ -44,6 +49,24 @@ User = Base.classes.user
 
 
 
+
+
+
+
+
+# generate_password_hash(password)
+# check_password_hash(pw_hash, password)
+
+
+
+
+
+
+
+
+
+
+
 @app.route('/users/help')
 def api_get_users_help():
 	return fmk_rest_success({
@@ -66,11 +89,16 @@ def api_get_users_help():
 @app.route('/users/')
 def get_users():
 	''' 
-		Return list of user (to use with filter and pagination attributes) 
+		Return list of user
+		Customisation allowed via following attributes :
+		 - fields
+		 - filter
+		 - order
+		 - range
 	'''
 
 	# 1- Requested fields
-	sql_select = fmk_get_fields_to_sql(f_default=fields_default, f_allowed=fields_allowed, f_type=str)
+	sql_select, fields = fmk_get_fields_to_sql(f_default=fields_default, f_allowed=fields_allowed, f_type=str)
 	
 	# 2- Filter ?
 	sql_where = ""
@@ -82,7 +110,15 @@ def get_users():
 	sql_limit = fmk_get_pagination_to_sql(p_default='0-' + str(REST_RANGE_DEFAULT))
 
 	# 6- Retrieve data from SQL
-	return fmk_rest_success(sql_select + " FROM \"user\" " + sql_where + sql_ordering + sql_limit)
+	sql = sql_select + " FROM \"user\" " + sql_where + sql_ordering + sql_limit
+	result = db_engine.execute(sql)
+	order = 0
+	if (result):
+		d = {}
+		for row in result:
+			d[order] = fmk_row2dict(row)
+			order += 1
+	return fmk_rest_success(d)
 
 
 
@@ -91,7 +127,9 @@ def get_users():
 @app.route('/users/<user_id>')
 def get_user(user_id):
 	"""
-		Return the user with the given id if exists. Otherwise return an error
+		Return the user with the given id if exists. Otherwise return an error.
+		Customisation allowed via following attributes :
+		 - fields
 	"""
 	result = db_engine.execute("SELECT * FROM \"user\" WHERE id=%s" % user_id).first()
 
@@ -122,9 +160,58 @@ def get_user_me():
 
 @app.route('/users/', methods=['POST'])
 def new_user():
-	return '/users/<user_id>'
+	# Retrieve POST data
+	data = dict(request.form)
 
+	# TODO check that post data exists
+	if data is None :
+		err("rest_api_v1.users.new_user() : no POST data found")
+		return fmk_rest_error(ERRC_00003, "00003")
 
+	email = data["email"][0]
+	password = data["password"][0]
+
+	if not email:
+		err("rest_api_v1.users.new_user() : provided 'email' data is empty")
+		return fmk_rest_error(ERRC_00003 + " : email", "00003")
+	if not password:
+		err("rest_api_v1.users.new_user() : provided 'password' data is empty")
+		return fmk_rest_error(ERRC_00003 + " : password", "00003")
+
+	print ("@:" + email + ":" + password)
+	# Create new user
+	user = None
+	
+	print(data)
+
+	try:
+		db_session = Session(db_engine)
+
+		user = User()
+		user.password		= password
+		user.email 			= email
+		user.firstname 		= data.get('firstname', 	[None])[0]
+		user.lastname 		= data.get('lastname', 		[None])[0]
+		user.function 		= data.get('function', 		[None])[0]
+		user.location 		= data.get('location', 		[None])[0]
+		user.last_activity	= data.get('last_activity', [None])[0]
+		user.settings 		= data.get('settings', 		[None])[0]
+
+		db_session.add(user)
+		db_session.commit()
+	except:
+		user = None
+		err("rest_api_v1.users.new_user() : Failed to create a user with provided data : " + str(data))
+		return fmk_rest_error(ERRC_00002, "00002")
+		
+
+	return fmk_rest_success({"id":user.id})
+
+	
+
+	# Register in database
+
+	# Return id of the new user
 
 
 

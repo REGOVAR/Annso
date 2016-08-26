@@ -4,8 +4,9 @@ import os
 
 # Website config
 DEBUG                     = True
-SESSION_TYPE			  ="mongodb"
-VERSION                   ="1.0"
+SESSION_TYPE			  = "mongodb"
+VERSION                   = "1.0"
+SECRET_KEY				  = "regovar"
 
 # Database parameters
 DB_HOST                   = "localhost"
