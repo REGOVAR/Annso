@@ -178,17 +178,13 @@ def new_user():
 		err("rest_api_v1.users.new_user() : provided 'password' data is empty")
 		return fmk_rest_error(ERRC_00003 + " : password", "00003")
 
-	print ("@:" + email + ":" + password)
 	# Create new user
 	user = None
-	
-	print(data)
-
 	try:
 		db_session = Session(db_engine)
 
 		user = User()
-		user.password		= password
+		user.password		= generate_password_hash(password)
 		user.email 			= email
 		user.firstname 		= data.get('firstname', 	[None])[0]
 		user.lastname 		= data.get('lastname', 		[None])[0]
@@ -197,27 +193,30 @@ def new_user():
 		user.last_activity	= data.get('last_activity', [None])[0]
 		user.settings 		= data.get('settings', 		[None])[0]
 
+		# Register in database
 		db_session.add(user)
 		db_session.commit()
 	except:
 		user = None
+		data['password'] = ['****']
 		err("rest_api_v1.users.new_user() : Failed to create a user with provided data : " + str(data))
 		return fmk_rest_error(ERRC_00002, "00002")
 		
-
+	# Return id of the new user
 	return fmk_rest_success({"id":user.id})
 
 	
 
-	# Register in database
-
-	# Return id of the new user
+	
 
 
 
 @app.route('/users/<user_id>', methods=['PUT'])
 def edit_user(user_id):
 	return '/users/<user_id>'
+
+
+
 
 
 
