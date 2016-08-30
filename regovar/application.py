@@ -18,7 +18,6 @@ import logging
 
 # Specifi packages
 from flask import Flask, session
-from flask_session import Session
 from sqlalchemy.ext.automap import automap_base
 from sqlalchemy.orm import Session
 from sqlalchemy import create_engine
@@ -58,7 +57,7 @@ Base = automap_base()
 db_engine = create_engine("postgresql://" + DB_USER + ":" + DB_PWD + "@" + DB_HOST + ":" + str(DB_PORT) + "/" + DB_NAME)
 #engine = create_engine("postgresql://regovar:regovar@localhost:5432/regovar")
 Base.prepare(db_engine, reflect=True)
-
+Base.metadata.create_all(db_engine)
 db_session = Session(db_engine)
 
 

@@ -22,6 +22,7 @@ ALTER TABLE public.user_id_seq OWNER TO regovar;
 CREATE TABLE public."user"
 (
 	id integer NOT NULL DEFAULT nextval('user_id_seq'::regclass),
+	password character varying(255) COLLATE pg_catalog."C.UTF-8",
 	lastname character varying(255) COLLATE pg_catalog."C.UTF-8",
 	firstname character varying(255) COLLATE pg_catalog."C.UTF-8",
 	email character varying(255) COLLATE pg_catalog."C.UTF-8" NOT NULL,

@@ -13,6 +13,9 @@ from regovar.common import *
 
 
 
+
+
+
 def fmk_check_session():
 	'''
 		Check that the current session is valid and the user well identified
@@ -215,6 +218,8 @@ ERRC_00000 = "Sorry, an unhandled error occure :s ... \nThanks to ask an admin t
 ERRC_00001 = "Requested data doesn't exists"
 ERRC_00002 = "Wrong provided data"
 ERRC_00003 = "Missing provided data"
+ERRC_00004 = "You are not authenticated. Please log in."
+
 
 
 
