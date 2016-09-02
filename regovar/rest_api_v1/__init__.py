@@ -5,7 +5,7 @@ from .rest_common import *
 
 
 from regovar.rest_api_v1 import users
-# from regovar.rest_api_v1 import projects
+from regovar.rest_api_v1 import projects
 # from regovar.rest_api_v1 import analyses
 # from regovar.rest_api_v1 import templates
 # from regovar.rest_api_v1 import selections

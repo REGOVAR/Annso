@@ -1,5 +1,6 @@
 #!env/python3
 # coding: utf-8
+import psutil
 
 from regovar.config import *
 from regovar.common import *
@@ -38,3 +39,17 @@ def api_get_config():
 
 	return jsonify(result)
  
+
+
+@app.route('/welcom/')
+def api_get_welcom():
+	result = {
+		"cpu_count" : 	psutil.cpu_count(),
+		"ram" :		 	str(psutil.virtual_memory()),
+		"swap" :		str(psutil.swap_memory()),
+		"disk" :		str(psutil.disk_usage('/'))
+		"job" :			"TODO : dic of the 10 last jobs and their status"
+		"me" :			"TODO : is the user authenticated / know in Database / logged in "
+
+	}
+	return fmk_rest_success(result)
