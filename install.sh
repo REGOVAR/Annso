@@ -1,4 +1,10 @@
 
+sudo apt install postgresql postgresql-contrib
+sudo -u postgres createuser --interactive # username:annso superuser y
+sudo -u postgres createdb annso
+
+
+
 
 apt install nginx uwsgi
 mkdir /regovar
