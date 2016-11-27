@@ -1,0 +1,805 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Pirus</title>
+
+
+    <!-- Base -->
+    <script type="text/javascript" src="https://code.jquery.com/jquery-3.1.0.min.js"></script>
+    <script type="text/javascript" src="https://code.jquery.com/jquery-migrate-3.0.0.js"></script>
+    <!-- Latest compiled and minified CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">
+    <script type="text/javascript" src="/assets/jquery.tablesorter.min.js"></script>
+    <!-- Latest compiled and minified JavaScript -->
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+
+
+    <!-- Form generator -->
+    <link rel="stylesheet" href='/assets/brutusin/css/brutusin-json-forms.min.css'/>
+    <script src="/assets/brutusin/js/brutusin-json-forms.min.js"></script>
+
+    <!-- Pirus specific -->
+    <link rel="stylesheet" href="/assets/pirus.css"/>
+    <link rel="stylesheet" href="/assets/font-awesome-4.6.3/css/font-awesome.min.css"/>
+</head>
+<body>
+    <nav class="navbar navbar-default navbar-fixed-top navbar-inverse">
+        <div class="container">
+            <div class="navbar-header">
+                <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+                    <span class="sr-only">Toggle navigation</span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+            </div>
+            <div id="navbar" class="navbar-collapse collapse" aria-expanded="false" style="height: 1px;">
+                <ul class="nav navbar-nav">
+                    <li><a data-toggle="tab" href="#presentation"><i class="fa fa-eye" aria-hidden="true"></i> Presentation</a></li>
+                    <li class="active"><a data-toggle="tab" href="#demo"><i class="fa fa-desktop" aria-hidden="true"></i> Demo</a></li>
+                    <li><a data-toggle="tab" href="#api"><i class="fa fa-code" aria-hidden="true"></i> API</a></li>
+                    <li><a href="http://pirus.readthedocs.io/en/latest/?badge=latest" target="_blanck"><i class="fa fa-question" aria-hidden="true"></i> Help</a></li>
+                </ul>
+            </div><!--/.nav-collapse -->
+        </div>
+    </nav>
+
+    <div class="container" role="main">
+        <h1 class="content-subhead hidden" style="margin-top:70px"><i class="fa fa-retweet" aria-hidden="true"></i> WS [ <span id="message"></span> ]</h1>
+        <div class="tab-content" style="margin-top:70px">
+
+            <!--              -->
+            <!-- PRESENTATION -->
+            <!--              -->
+            <div id="presentation" class="tab-pane fade">
+                <!--
+                <h1 class="content-subhead"><i class="fa fa-user" aria-hidden="true"></i> Online</h1>
+                <ul id="userList"></ul>
+                -->
+                <div style="width:700px; margin:auto;">
+                    <img src="/assets/img/resume.jpg" width="700px" style="margin-bottom:20px"/>
+                    <h1>Pirus ( PIpeline RUnner Service)</h1>
+                    <p><b>Pirus</b> is a tool to manage installation and execution of informatic pipelines.
+                        <ul><li>Stand alone project</li>
+                            <li>Sub project of Regovar</li>
+                            <li>Pipeline</li>
+                            <li>Run</li>
+                            <li>Inputs -> Outputs</li>
+                            <li>Push notifications</li>
+                            <li>Monitoring</li>
+                        </ul>
+                    </p>
+                    <h1>Goals of Pirus</h1>
+                    <p>Pirus aimed at performing computing tasks taking as input files to produce results in the form of one or more files. First devised in order to perform bioinformatic pipelines as part of research and or medical diagnostics, Pirus is for both computer scientists developing these pipelines, as system administrators to ensure the computer server maintenance, that to end users.</p>
+                    <p style="display: block; margin:auto; margin-top:30px; font-style:italic; color:#999; font-size:20px;">Each of them have different needs</p>
+                    <img src="https://raw.githubusercontent.com/REGOVAR/Pirus/master/docs/img/0032.1.png" width="700px" style="margin-bottom:50px;"/>
+                    <div class="row">
+                        <div class="col-md-4">
+                            <b>Sys administrator</b>
+                            <ul><li>No way they install anything on the serverw</li>
+                                <li>I don’t want to struggle with theirs weirds dependancies</li>
+                                <li>Deployement shall be easy</li>
+                            </ul>
+                        </div>
+                        <div class="col-md-4">
+                            <b>Bio informaticien</b>
+                            <ul><li>I want to do all I want</li>
+                                <li>I want to use all softwares I wants (and I choose the version)</li>
+                                <li>No time to spent on a endusers graphical interface</li>
+                            </ul>
+                        </div>
+                        <div class="col-md-4">
+                            <b>Clinician</b>
+                            <ul><li>I don’t want to see any command line</li>
+                                <li>I just want to click a button to get my results</li>
+                                <li>I’m interruptable, I do many things at the same time, I don’t want to be stuck when waiting my results</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <p style="display: block; margin:auto; margin-top:30px; font-style:italic; color:#999; font-size:20px;">Yes ! The solution exists ! Pirus !</p>
+                    <img src="https://raw.githubusercontent.com/REGOVAR/Pirus/master/docs/img/0032.2.png" width="700px" style="margin-bottom:50px;"/>
+                    <p>
+                        <b>Features</b>
+                        <ul><li>Deployement with pip install [TODO]</li>
+                            <li>All in one product (server application, client web interface)</li>
+                            <li>One simple config file</li>
+                            <li>No exotics depencies, no weird customizations</li>
+                            <li>Virtual environment for pipeline execution (LXD container)</li>
+                            <li>API REST</li>
+                            <li>Easy to create a custom pipeline (few technical constraints)</li>
+                            <li>Resumable upload for big files</li>
+                            <li>Possibility to expose a simple interface to setup a pipeline (according to a unique json file)</li>
+
+                            <li>Push notification for Run progress</li>
+                            <li>Mail notification for Run status changed (when finished or when an error occured by example) [TODO]</li>
+                            <li>Run can be paused, resumed and canceled</li>
+                        </ul>
+                    </p>
+                </div>
+            </div>
+
+
+            <!--      -->
+            <!-- DEMO -->
+            <!--      -->
+            <div id="demo" class="tab-pane fade in active" >
+
+                <div id="tus_support_alert" class="alert alert-warining hidden">
+                    <b>Warning!</b> Your browser does not seem to support the features necessary to run tus-js-client.
+                </div>
+
+                <div class="panel panel-default" style="box-shadow: 0 0 10px #ccc; border: 1px solid #ccc;">
+                    <div class="panel-heading" style="position:relative;">
+                        <img src="/assets/img/logo.png" width="100px" style="position:absolute; top:-10px; left:-100px;" /> 
+                        <div class="row">
+                            <div class="col-md-8">
+                                <div class="btn-group" role="group">
+                                    <a class="btn btn-default" href="#modal_new_file" title="New file" data-toggle="modal"  href="#modal_new_file"><i class="fa fa-file-o" aria-hidden="true"></i></a>
+                                    <a class="btn btn-default" href="#modal_new_pipeline" title="New Pipeline" data-toggle="modal"  href="#modal_new_pipeline"><i class="fa fa-puzzle-piece" aria-hidden="true"></i></a>
+                                    <div class="btn-group">
+                                        <button type="button" class="btn btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" title="New run">
+                                            <i class="fa fa-play" aria-hidden="true"></i> New run<!--<span class="caret"></span>-->
+                                        </button>
+                                        {% if pipes|length ==0 %}
+                                        <strong>Warning!</strong> You need to install pipeline first.
+                                        {% else %}
+                                        <ul class="dropdown-menu" role="menu" aria-labelledby="dLabel">
+                                            {% for p in pipes %}
+                                            {% if p["status"] not in ["UPLOADING", "PAUSE"] %}
+                                            <li><a href="#modal_new_run" onclick="javascript:init_run('{{p["id"]}}');" title="New run with Hugodims" data-toggle="modal">
+                                                <img src="{{ p["icon_url"] }}" style="height:20px; width:20px; vertical-align:middle;"/> &nbsp; {{ p["name"] }} <i>({{ p["version"] }})</i>
+                                            </a></li>
+                                            {% endif %}
+                                            {% endfor %}
+                                        </ul>
+                                        {% endif %}
+                                    </div>
+
+                                </div>
+                                <form class="form-inline" style="display:inline-block;">
+                                    <div class="input-group">
+                                        <span class="input-group-addon"><i class="fa fa-search" aria-hidden="true"></i></span>
+                                        <input id="browser_filter_input" type="text" class="form-control" placeholder="Filter" aria-describedby="sizing-addon1">
+                                    </div>
+                                </form>
+                            </div>
+                            <div class="col-md-4" style="text-align:right;">
+                                <div class="btn-group">
+                                    <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                        <i class="fa fa-cog" aria-hidden="true"></i> <span class="caret"></span>
+                                    </button>
+                                    <ul class="dropdown-menu">
+                                        <li><a href="#">Manage pipelines</a></li>
+                                        <li><a href="#">Pirus settings</a></li>
+                                        <li><a href="#">See pirus coockie</a></li>
+                                        <li role="separator" class="divider"></li>
+                                        <li><a href="#">About</a></li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="panel-body" style="padding: 0;">
+                        <div class="row" style="margin:0;">
+                            <div id="browser_navpanel" class="col-md-3 browser-panel">
+
+                                <a class="btn section" style="display:block; text-align:left;" role="button" data-toggle="collapse" href="#browserNavSelectionPanel" aria-expanded="false" aria-controls="browserNavSelectionPanel">
+                                    <i class="fa fa-check-square-o" aria-hidden="true">&nbsp;</i> Selection 
+                                        <span style="float:right;">
+                                            <span id="selection_count" class="badge">0</span>&nbsp;<i class="fa fa-chevron-right" aria-hidden="true" style="width:20px; text-align:center;"></i>
+                                        </span>
+                                    </i>
+                                </a>
+                                <div id="browserNavSelectionPanel" class="collapse">
+                                    <ul>
+                                        <li class="empty_selection">No file selected</li>
+                                    </ul>
+                                </div>
+                                <hr/>
+
+                                <a class="btn section" style="display:block; text-align:left;" role="button" onclick="javascript:show_tab('browser_files')"><i class="fa fa-files-o" aria-hidden="true">&nbsp;</i> All Files</a>
+                                
+                                <a class="btn section" style="display:block; text-align:left;" role="button" data-toggle="collapse" href="#browser_navpanel_inprogress" aria-controls="browser_navpanel_inprogress">
+                                    <i class="fa fa-tasks" aria-hidden="true">&nbsp;</i> In progress 
+                                        <span style="float:right;">
+                                            <span id="inprogress_count" class="badge">{{ total_inprogress }}</span>&nbsp;<i class="fa fa-chevron-right" aria-hidden="true" style="width:20px; text-align:center;"></i>
+                                        </span>
+                                    </i>
+                                </a>
+                                <div id="browser_navpanel_inprogress">
+                                    <div>
+                                        <ul>
+                                            {% for f in files_inprogress %}
+                                            <li id="browser_navpanel_inprogress_file_{{f["id"]}}">
+                                                <a onclick="javascript:show_tab('browser_file','{{f["id"]}}')" href="#">
+                                                    <i class="fa fa-file {% if f["status"] in ["PAUSE"] %}text-warning{% elif f["status"] in ["UPLOADING"] %}text-primary{% else %}text-danger{% endif %}" aria-hidden="true"></i>
+                                                    {{f["name"]}} <span>{{ f["progress"] }}%</span></a>
+                                            </li>
+                                            {% endfor %}
+                                            {% for r in runs_inprogress %}
+                                            <li id="browser_navpanel_inprogress_run_{{r["id"]}}">
+                                                <a onclick="javascript:show_tab('browser_run','{{r["id"]}}')" href="#">
+                                                    <i class="fa fa-tasks {% if r["status"] in ["PAUSE", "WAITING"] %}text-warning{% elif r["status"] in ["RUNNING", "INITIALIZING", "FINISHING"] %}text-primary{% else %}text-danger{% endif %}" aria-hidden="true"></i>
+                                                    {{r["name"]}} <span>{{ r["%"] }}%</span></a>
+                                            </li>
+                                            {% endfor %}
+                                        </ul>
+                                    </div>
+                                </div>
+
+                                <hr/>
+
+                                {% for p in pipes %}
+                                <a class="btn section" style="display:block; text-align:left;" role="button" data-toggle="collapse" href="#browser_navpanel_pipe_{{p["id"]}}" aria-expanded="false" aria-controls="browser_navpanel_pipe_{{p["id"]}}">
+                                    <i class="fa fa-puzzle-piece" aria-hidden="true">&nbsp;</i> Pipeline {{p["name"]}}
+                                        <span style="float:right;"><i class="fa fa-chevron-right" aria-hidden="true" style="width:20px; text-align:center;"></i></span>
+                                    </i>
+                                </a>
+                                <div id="browser_navpanel_pipe_{{p["id"]}}" class="collapse">
+                                    <div>
+                                        <ul>
+                                            {% for r in p["runs"] %}
+                                            {% if r["status"] in ["ERROR", "DONE", "CANCELED"] %}
+                                            <li><a onclick="javascript:show_tab('browser_run','{{r["id"]}}')" href="#">
+                                                <i class="fa fa-tasks {% if r["status"] in ["ERROR", "CANCELED"] %}text-danger{% endif %}" aria-hidden="true"></i> 
+                                                 {{r["name"]}}</a></li>
+                                            {% endif %}
+                                            {% endfor %}
+                                        </ul>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+
+                            <div id="browser_content" class="col-md-9" style="height:500px; padding-left:0; padding-right:0; overflow-y: auto;">
+                                <!--            -->
+                                <!-- FILES LIST -->
+                                <!--            -->
+                                <div id="browser_files">
+                                    <table id="browser_files_table" class="table table-striped table-bordered" cellspacing="0" width="100%" style="margin:0">
+                                        <thead>
+                                            <tr>
+                                                <th></th>
+                                                <th>Name</th>
+                                                <th>Size</th>
+                                                <th>Creation</th>
+                                                <th class="collapse">Comments</th>
+                                                <th class="collapse">Tags</th>
+                                                <th class="collapse">Id</th>
+                                                <th class="collapse">status</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for f in files_all %}
+                                            <tr id="fileEntry-{{ f["id"] }}" onmouseover="javascript:display_status_bar('{{ f["id"] }}')" onclick="javascript:select_file('{{ f["id"] }}')" 
+                                                style="cursor: pointer; {% if f["status"] == "ERROR" %}class="color-danger"{% endif %}">
+                                                <td><input type="checkbox" 
+                                                        value="{{ f["id"] }}" 
+                                                        name="{% if f["source"]["type"] == "output" %}{{ f["source"]["run_name"] }} > {% endif %}{{ f["name"] }}"/>
+                                                </td>
+                                                <td>{% if f["source"]["type"] == "output" %}
+                                                    {{ f["source"]["run_name"] }} <i class="fa fa-chevron-right" aria-hidden="true"></i> 
+                                                    {% endif %}
+                                                    {{ f["name"] }} 
+                                                    {% if f["comments"] %}
+                                                    <a href="#" data-toggle="tooltip" data-placement="right" title="{{f["comments"]}}"><i class="fa fa-info-circle" aria-hidden="true"></i></a>
+                                                    {% endif %}
+                                                </td>
+                                                <td>
+                                                    {% if f["status"] == "ERROR" %}
+                                                    <i class="fa fa-times text-danger" aria-hidden="true" style="font-weight:bold;"></i> 
+                                                    {% elif f["status"] == "PAUSE" %}
+                                                    <i class="fa fa-pause-circle-o text-warning" aria-hidden="true" style="font-weight:bold;"></i> 
+                                                    {% elif f["status"] in ["UPLOADING"] %}
+                                                    <i class="fa fa-arrow-circle-o-down text-primary" aria-hidden="true" style="font-weight:bold;"></i> 
+                                                    {% else %}
+                                                    <i class="fa fa-check text-success" aria-hidden="true" style="font-weight:bold;"></i> 
+                                                    {% endif %}
+                                                    {{ f["size"] }}
+                                                </td>
+                                                <td>{{ f["create_date"] }}</td>
+                                                <td class="collapse">{{ f["comments"] }}</td>
+                                                <td class="collapse">{% for t in f["tags"] %}{{t}}{% endfor %}</td>
+                                                <td class="collapse">{{ f["id"]}}</td>
+                                                <td class="collapse">{{ f["status"]}}</td>
+                                            </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+
+
+                                <!--           -->
+                                <!-- RUN PANEL -->
+                                <!--           -->
+                                <div id="browser_run" class="collapse" >
+                                    <div id="browser_run_monitoring_header" class="">
+                                        <div id="browser_run_monitoring_progress" style="right:50%">&nbsp;
+                                        </div>
+
+                                        <div style="position:absolute; top:0; bottom:0; left:0; right:0">
+                                            <button id="browser_run_monitoring_refresh" type="button" class="btn btn-primary" style="display; block; float:right; margin-top: 10px; margin-right:10px" ><i class="fa fa-refresh" aria-hidden="true"></i> Refresh</button>
+                                            <button id="browser_run_monitoring_delete" type="button" class="btn btn-danger" style="display; block; float:right; margin-top: 10px; margin-right:10px"><i class="fa fa-trash" aria-hidden="true"></i> Delete</button>
+                                        
+                                            <p id="browser_run_icon" style="float: left; display: block; font-size: 5em; margin: 10px; margin-top: 0px;"></p>
+                                            <h3 id="browser_run_name" style="margin-left: 20px;"></h3>
+                                            <div  style="margin-left: 58px; color:#999; margin-top:10px;">
+                                                <p id="browser_run_details" style="display:block; float: left;"></p>
+                                                <p id="browser_run_status" style="display:block; float: right; margin-right: 10px; font-size: 20px; font-weight: bold;"></p>
+                                            </div>
+                                        </div> 
+                                        
+                                    </div>
+                                    <nav class="navbar navbar-default" style="margin-bottom: 0;">
+                                        <div class="navbar-collapse" style="height: 1px;">
+                                            <ul class="nav navbar-nav">
+                                                <li>
+                                                    <a id="browser_run_playpause" class="btn btn-default" title="Play/Pause" style="width: 40px;padding:5px!important;margin: 9px;margin-right: 0;">
+                                                        
+                                                    </a>
+                                                </li>
+                                                <li >
+                                                    <a id="browser_run_stop" class="btn btn-default" title="Cancel the run" style="width: 40px;padding:5px!important;margin: 9px;margin-right: 50px;" onclick="javascript:run_cmd('stop');">
+                                                        <i class="fa fa-stop" aria-hidden="true"></i>
+                                                    </a>
+                                                </li>
+                                                <li class="active"><a data-toggle="tab" href="#monitoring_tab_inputs"><i class="fa fa-files-o" aria-hidden="true"></i> Inputs</a></li>
+                                                <li><a data-toggle="tab" href="#monitoring_tab_outputs"><i class="fa fa-files-o" aria-hidden="true"></i> Ouputs</a></li>
+                                                <li><a data-toggle="tab" href="#monitoring_tab_vm"><i class="fa fa-tachometer" aria-hidden="true"></i> Status</a></li>
+                                                <li><a data-toggle="tab" href="#monitoring_tab_stdout"><i class="fa fa-desktop" aria-hidden="true"></i> Logs</a></li>
+                                                <li><a data-toggle="tab" href="#monitoring_tab_stderr"><i class="fa fa-desktop" aria-hidden="true"></i> Errors</a></li>
+                                            </ul>
+                                        </div>
+                                    </nav>
+                                    <div class="tab-content">
+                                        <div id="monitoring_tab_inputs" class="tab-pane fade in active" style="padding: 20px;">
+
+                                        </div>
+                                        <div id="monitoring_tab_outputs" class="tab-pane fade" style="padding: 20px;">
+                                        </div>
+                                        <div id="monitoring_tab_vm" class="tab-pane fade" style="padding: 20px;">
+                                            <p id="browser_run_monitoring_vm"></p>
+                                        </div>
+                                        <div id="monitoring_tab_stdout" class="tab-pane fade">
+                                            <pre id="browser_run_monitoring_stdout"></pre>
+                                        </div>
+                                        <div id="monitoring_tab_stderr" class="tab-pane fade">
+                                            <pre id="browser_run_monitoring_stderr"></pre>
+                                        </div>
+                                    </div>
+                                </div>
+
+
+
+                                <!--            -->
+                                <!-- FILE PANEL -->
+                                <!--            -->
+                                <div id="browser_file" class="collapse" >
+                                    <div id="browser_file_header" class="">
+                                        <div id="browser_file_progress" style="right:50%">&nbsp;
+                                        </div>
+
+                                        <div style="position:absolute; top:0; bottom:0; left:0; right:0">
+                                            <button id="browser_file_delete" type="button" class="btn btn-danger" style="display; block; float:right; margin-top: 10px; margin-right:10px" ><i class="fa fa-trash" aria-hidden="true"></i> Delete</button>
+                                        
+                                            <p id="browser_file_icon" style="float: left; display: block; font-size: 5em; margin: 10px; margin-top: 0px;"></p>
+                                            <h3 id="browser_file_name" style="margin-left: 20px;"></h3>
+                                            <div  style="margin-left: 58px; color:#999; margin-top:10px;">
+                                                <p id="browser_file_details" style="display:block; float: left;"></p>
+                                                <p id="browser_file_status" style="display:block; float: right; margin-right: 10px; font-size: 20px; font-weight: bold;"></p>
+                                            </div>
+                                        </div> 
+                                        
+                                    </div>
+                                    <nav class="navbar navbar-default" style="margin-bottom: 0;">
+                                        <div class="navbar-collapse" style="height: 1px;">
+                                            <ul class="nav navbar-nav">
+                                                <li class="active"><a data-toggle="tab" href="#file_tab_edit"><i class="fa fa-pencil" aria-hidden="true"></i> Edit</a></li>
+                                                <li><a data-toggle="tab" href="#file_tab_infos"><i class="fa fa-list" aria-hidden="true"></i> Infos</a></li>
+                                                <li><a data-toggle="tab" href="#file_tab_preview"><i class="fa fa-eye" aria-hidden="true"></i> Preview</a></li>
+                                            </ul>
+                                        </div>
+                                    </nav>
+                                    <div class="tab-content">
+                                        <div id="file_tab_edit" class="tab-pane fade in active" style="padding: 20px;">
+                                            <form class="form-horizontal">
+                                                <div class="form-group">
+                                                    <label for="file_tab_edit_name" class="col-sm-2 control-label">Name</label>
+                                                    <div class="col-sm-10">
+                                                        <input type="text" class="form-control" id="file_tab_edit_name" placeholder="File name with extension">
+                                                    </div>
+                                                </div>
+                                                <div class="form-group">
+                                                    <label for="file_tab_edit_type" class="col-sm-2 control-label">Type</label>
+                                                    <div class="col-sm-10">
+                                                        <input type="text" class="form-control" id="file_tab_edit_type" placeholder="File type without the first point">
+                                                    </div>
+                                                </div>
+                                                <div class="form-group">
+                                                    <label for="file_tab_edit_comments" class="col-sm-2 control-label">Comments</label>
+                                                    <div class="col-sm-10">
+                                                        <input type="text" class="form-control" id="file_tab_edit_comments" placeholder="Free comments about the file">
+                                                    </div>
+                                                </div>
+                                                <div class="form-group">
+                                                    <label for="file_tab_edit_tags" class="col-sm-2 control-label">Tags</label>
+                                                    <div class="col-sm-10">
+                                                        <input type="text" class="form-control" id="file_tab_edit_tags" placeholder="Tags comma separated">
+                                                    </div>
+                                                </div>
+
+                                                <div class="form-group">
+                                                    <div class="col-sm-offset-2 col-sm-10">
+                                                        <button class="btn btn-default">Reset</button>
+
+                                                        <button type="submit" class="btn btn-success">Save</button>
+                                                    </div>
+                                                </div>
+                                            </form>
+                                        </div>
+
+                                        <div id="file_tab_infos" class="tab-pane fade" style="padding: 20px;">
+                                        </div>
+
+                                        <div id="file_tab_preview" class="tab-pane fade" style="padding: 20px;">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div id="demo_footer" class="panel-footer"></div>
+                    </div>
+                </div>
+
+
+                <ul id="context_menu" class="dropdown-menu" role="menu" style="display:none" >
+                    <li><a id="context_menu_info" tabindex="-1" href="#"><i class="fa fa-info-circle" aria-hidden="true"></i> Informations</a></li>
+                    <li><a id="context_menu_dl" tabindex="-1" href="#"><i class="fa fa-cloud-download" aria-hidden="true"></i> Download</a></li>
+                </ul>
+
+
+
+
+
+
+                <!--     -->
+                <!-- API -->
+                <!--     -->
+                <div id="api" class="tab-pane fade">
+                    <h1> Comming soon</h1>
+                    <ul>
+                        <li><a href="https://github.com/REGOVAR/Pirus/blob/master/examples/pipelines/PirusBasic/readme.md">Pipeline creation</a></li>
+                        <li><a href="https://github.com/REGOVAR/Pirus/tree/master/docs">Doc</a></li>
+                        <li><a href="https://annuel.framapad.org/p/pirusAPI">Spec in progress</a></li>
+                    </ul>
+                </div>
+
+
+
+
+
+                <!--                           -->
+                <!-- MODAL POPUP - File Upload -->
+                <!--                           -->
+                <div id="modal_new_file" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+                    <div class="modal-dialog" role="document">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                                <h4 class="modal-title"><i class="fa fa-folder-open-o" aria-hidden="true"></i> Upload a file on Pirus</h4>
+                            </div>
+                            <div class="modal-body">
+                                <input type="hidden" id="modal_new_file_tus_endpoint" name="modal_new_file_tus_endpoint" value="http://{{ hostname }}/file/upload">
+                                <input type="hidden" id="modal_new_file_tus_chunksize" name="modal_new_file_tus_chunksize" value="256000">
+                                <input type="file" id="modal_new_file_tus_localinput">
+                                <p id="modal_new_file_progress" style="margin-top:20px; height:50px;"></p>
+
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+
+
+
+                <!--                               -->
+                <!-- MODAL POPUP - Pipeline upload -->
+                <!--                               -->
+                <div id="modal_new_pipeline" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+                    <div class="modal-dialog" role="document">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                                <h4 class="modal-title"><i class="fa fa-folder-open-o" aria-hidden="true"></i> Install a pipeline on Pirus</h4>
+                            </div>
+                            <div class="modal-body">
+                                <input type="hidden" id="modal_new_pipeline_tus_endpoint" name="modal_new_pipeline_tus_endpoint" value="http://{{ hostname }}/pipeline/upload">
+                                <input type="hidden" id="modal_new_pipeline_tus_chunksize" name="modal_new_pipeline_tus_chunksize" value="256000">
+                                <input type="file" id="modal_new_pipeline_tus_localinput">
+
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+
+
+
+                <!--                        -->
+                <!-- MODAL POPUP - New Run  -->
+                <!--                        -->
+                <div id="modal_new_run" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+                    <div class="modal-dialog" role="document">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                                <h4 class="modal-title"><i class="fa fa-play" aria-hidden="true"></i> New <span id="newRunPipeName" class="text-primary"></span> run</h4>
+                            </div>
+
+                            <div class="tab-content" style="margin:0 10px;">
+                                <div id="runConfigInputsTab" class="tab-pane fade in active">
+                                    <div class="runConfigHeader">
+                                        <p class="current"><span>1</span><br/><i class="fa fa-files-o" aria-hidden="true"></i> Inputs</p>
+                                        <p class="sp"> • • • • </p>
+                                        <p class=""><span>2</span><br/><i class="fa fa-cog" aria-hidden="true"></i> Configure</p>
+                                        <p class="sp"> • • • • </p>
+                                        <p class=""><span>3</span><br/><i class="fa fa-check" aria-hidden="true"></i> Confirm</p>
+                                    </div>
+
+                                    <div class="runConfigTabDescription">Below the list of input files selected for the run</div>
+                                    <table id="inputFilesList" class="table table-striped table-bordered" cellspacing="0" width="100%">
+                                        <thead>
+                                            <tr>
+                                                <th>Name</th>
+                                                <th>Size</th>
+                                                <th>Creation</th>
+                                            </tr>
+                                        </thead>
+
+                                        <tbody>
+         
+                                        </tbody>
+                                    </table>
+                                    <p style="margin-top: 20px; text-align:right;"> 
+                                        <button type="button" class="btn btn-primary" data-toggle="tab" href="#runConfigFormTab" onclick="javascript:run_config_step_2();">Next &nbsp;<i class="fa fa-chevron-right" aria-hidden="true"></i></button>
+                                    </p>
+                                </div>
+                                <div id="runConfigFormTab" class="tab-pane fade">
+                                    <div class="runConfigHeader">
+                                        <p class="ok"><span>1</span><br/><i class="fa fa-files-o" aria-hidden="true"></i> Inputs</p>
+                                        <p class="sp ok"> ——————— </p>
+                                        <p class="current"><span>2</span><br/><i class="fa fa-cog" aria-hidden="true"></i> Configure</p>
+                                        <p class="sp"> • • • • </p>
+                                        <p class="next"><span>3</span><br/><i class="fa fa-check" aria-hidden="true"></i> Confirm</p>
+                                    </div>
+                                    <div class="runConfigTabDescription">Configure the run</div>
+                                    <div id="runConfigContainer"></div>
+                                    <p style="margin-top: 20px; text-align:right;"> 
+                                        <button type="button" class="btn btn-primary" data-toggle="tab" href="#runConfigInputsTab"><i class="fa fa-chevron-left" aria-hidden="true"></i>&nbsp; Previous</button> &nbsp; 
+                                        <button type="button" class="btn btn-primary" data-toggle="tab" href="#runConfigConfirmTab" onclick="javascript:run_config_step_3();">Next &nbsp;<i class="fa fa-chevron-right" aria-hidden="true"></i></button>
+                                    </p>
+                                </div>
+                                <div id="runConfigConfirmTab" class="tab-pane fade">
+                                    <div class="runConfigHeader">
+                                        <p class="ok"><span>1</span><br/><i class="fa fa-files-o" aria-hidden="true"></i> Inputs</p>
+                                        <p class="sp ok"> ——————— </p>
+                                        <p class="ok"><span>2</span><br/><i class="fa fa-cog" aria-hidden="true"></i> Configure</p>
+                                        <p class="sp ok"> ——————— </p>
+                                        <p class="current"><span>3</span><br/><i class="fa fa-check" aria-hidden="true"></i> Confirm</p>
+                                    </div>
+                                    <div class="runConfigTabDescription"> The run is ready to start !</i></div>
+                                    <div id="runConfirmContainer">
+                                        <dl>
+                                            <dt>Inputs </dt>
+                                            <ll>file1</ll>
+                                            <ll>file2</ll>
+                                            <ll>file3</ll>
+
+                                            <dt>Parameters</dt>
+                                            <ll>Param1 : val 1</ll>
+                                            <ll>Param2 : val 2</ll>
+                                            <ll>Param3 : val 3</ll>
+                                        </dl>
+                                    </div>
+                                    <p style="margin-top: 20px; text-align:center;"> 
+                                        <button type="button" class="btn btn-primary" data-toggle="tab" href="#runConfigFormTab"><i class="fa fa-chevron-left" aria-hidden="true"></i>&nbsp; Previous</button>  &nbsp; 
+                                        <button id="runConfirmButton" type="button" class="btn btn-success" onclick="javascript:run_config_step_4();"><i class="fa fa-check" aria-hidden="true"></i>&nbsp; Run !</button>
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <script src="/assets/pirus.js"></script>
+    <script src="/assets/tus.js"></script>
+    <script src="/assets/tus_client.js"></script>
+    <script>
+        var rootURL = "http://{{ hostname }}";
+
+        var ws = new WebSocket('ws://{{ hostname }}/ws');
+        var $message = $('#message');
+
+
+
+        function pirus_delete(type, id)
+        {
+            $.ajax(
+            {
+                url: "{0}/{1}/{2}".format(rootURL, type, id),
+                type: "DELETE"
+            }).fail(function()
+            {
+                alert( "Unexpected error when trying to delete this " + type );
+            }).done(function(txt) 
+            {
+                location.reload();
+            })
+        }
+        
+
+
+        $(document).ready(function()
+        {
+            update_datagrid();
+
+            $("#browser_files_table td").contextMenu({
+                menuSelector: "#context_menu",
+                menuSelected: function (invokedOn, selectedMenu) 
+                {
+                    var action = selectedMenu[0].getAttribute("id");
+                    var id = invokedOn[0].parentElement.children[6].innerHTML;
+                    if (action == "context_menu_info") show_tab("browser_file", id);
+                    else if (action == "context_menu_dl") alert("TODO : download the file " + id);
+                }
+            });
+
+            $("#browser_files_table").tablesorter(); 
+
+        });
+
+
+
+        function update_datagrid()
+        {
+            $('[data-toggle="tooltip"]').tooltip(); 
+        }
+
+        
+
+
+
+        /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+        /* Context menu
+        /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+        (function ($, window) 
+        {
+            $.fn.contextMenu = function (settings) 
+            {
+                return this.each(function () 
+                {
+
+                    // Open context menu
+                    $(this).on("contextmenu", function (e) 
+                    {
+                        // return native menu if pressing control
+                        if (e.ctrlKey) return;
+                        
+                        //open menu
+                        var $menu = $(settings.menuSelector)
+                        .data("invokedOn", $(e.target))
+                        .show()
+                        .css({
+                            position: "absolute",
+                            left: getMenuPosition(e.clientX, 'width', 'scrollLeft'),
+                            top: getMenuPosition(e.clientY, 'height', 'scrollTop')
+                        })
+                        .off('click')
+                        .on('click', 'a', function (e) {
+                            $menu.hide();
+                            var $invokedOn = $menu.data("invokedOn");
+                            var $selectedMenu = $(e.target);
+
+                            settings.menuSelected.call(this, $invokedOn, $selectedMenu);
+                        });
+                        
+                        return false;
+                    });
+
+                    //make sure menu closes on any click
+                    $('body').click(function () 
+                    {
+                        $(settings.menuSelector).hide();
+                    });
+                });
+
+                function getMenuPosition(mouse, direction, scrollDir) 
+                {
+                    var win = $(window)[direction](),
+                    scroll = $(window)[scrollDir](),
+                    menu = $(settings.menuSelector)[direction](),
+                    position = mouse + scroll;
+
+                    // opening menu would pass the side of the page
+                    if (mouse + menu > win && menu < mouse) 
+                        position -= menu;
+                    
+                    return position;
+                }
+            };
+        })(jQuery, window);
+
+
+
+
+
+
+
+
+
+
+        /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+        /* WEBSOCKETS SESSION
+        /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+        ws.onopen = function()
+        {
+            $message.attr("class", 'label label-success');
+            $message.text('open');
+
+            ws.send('{"action" : "authent", "data" : "Chrome"}')
+        };
+        ws.onmessage = function(ev)
+        {
+            $message.attr("class", 'label label-info');
+            var json = JSON.parse(ev.data);
+
+
+            dt = new Date()
+            $message.html(dt.toLocaleTimeString() + ' ' + json["action"] + ' : ' + json["data"]);
+
+            switch(json["action"])
+            {
+                case 'online_user':
+                    var uTxt = ""
+                    $.each(json["data"], function (idx, val)
+                    {
+                        uTxt += "<li>" + val + "</li>"
+                    })
+                    $('#userList').html(uTxt)
+                    break;
+
+                case 'run_changed':
+                    ws_run_changed(json["data"])
+                    break;
+                case 'file_changed':
+                    ws_file_changed(json["data"])
+                    break;
+            }
+        };
+        ws.onclose = function(ev)
+        {
+            $message.attr("class", 'label label-important');
+            $message.text('closed');
+        };
+        ws.onerror = function(ev)
+        {
+            $message.attr("class", 'label label-warning');
+            $message.text('error occurred');
+        };
+        </script>
+</body>
+</html> 

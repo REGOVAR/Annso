@@ -5,7 +5,7 @@ test:
 	python tests.py
 
 app:
-	python application.py
+	python annso_server.py
 
 
 .PHONY: init test app
