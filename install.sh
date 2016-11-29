@@ -4,6 +4,10 @@ sudo -u postgres createuser --interactive # username:annso superuser y
 sudo -u postgres createdb annso
 
 
+sudo apt-get install libmagickwand-dev --fix-missing # for python wand (report generation)
+
+
+
 
 
 apt install nginx uwsgi
