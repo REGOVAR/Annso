@@ -1,6 +1,6 @@
 
 sudo apt install postgresql postgresql-contrib
-sudo apt install postgresql-server-dev-9.5
+sudo apt install postgresql-server-dev-9.5 # need for `pip install psycopg2` 
 sudo -u postgres createuser --interactive # username:annso superuser y
 sudo -u postgres createdb annso
 
