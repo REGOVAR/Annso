@@ -1,0 +1,9 @@
+aiohttp==1.0.2
+aiohttp-jinja2==0.8.0
+celery==3.1.24
+Jinja2==2.8
+mongoengine==0.10.6
+pylxd==2.1.1
+ipdb==0.10.1
+pyYAML==3.12
+requests==2.11.1

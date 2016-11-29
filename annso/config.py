@@ -2,39 +2,37 @@
 # coding: utf-8 
 import os
 
-# Website config
-DEBUG                     = True
-SESSION_TYPE			  = "mongodb"
-VERSION                   = "1.0"
-SECRET_KEY				  = "regovar"
 
-# Database parameters
-DB_HOST                   = "localhost"
-DB_PORT                   = 5432
-DB_USER                   = "regovar"
-DB_PWD                    = "regovar"
-DB_NAME                   = "regovar"
+DEBUG          = True
 
-# Folders
-BASEDIR                   = os.path.abspath(os.path.dirname(__file__))
-LOGDIR                    = os.path.join(BASEDIR, '../logs')
 
-# Regovar files repository
-REP_VCF                   = os.path.join(BASEDIR, '../files/vcf')
-REP_BAM                   = os.path.join(BASEDIR, '../files/bam')
-REP_INPUT                 = os.path.join(BASEDIR, '../files/user_input/')
-UPLOAD_ALLOWED_EXTENSIONS = set(["vcf","gvcf","gz","bam"])
+# HOST
+HOST           = "dev1.absolumentg.fr"
+PORT           = "8080"
+VERSION        = "v1"
+HOSTNAME       = HOST + ":" + PORT + "/" + VERSION
+
+
+RANGE_DEFAULT = 20
+RANGE_MAX     = 1000
+
+# DB
+DATABASE_HOST = "localhost"
+DATABASE_PORT = "5432"
+DATABASE_USER = "regovar"
+DATABASE_PWD  = "regovar"
+DATABASE_NAME = "regovar"
 
 
 
+# FILESYSTEM
+FILES_DIR     = "/tmp/pirus_" + VERSION + "/files"
+TEMP_DIR      = "/tmp/pirus_" + VERSION + "/downloads"
 
-# Regovar REST API parameters
-REST_DOMAIN               = "http://127.0.0.1:5000/api"
-REST_VERSION              = "1"
-REST_RANGE_MAX            = 1000
-REST_RANGE_DEFAULT        = 50
 
-# root urls shortcuts
-REST_ROOT_URL             = REST_DOMAIN + "/v" + REST_VERSION + "/"
-WWW_ROOT_URL              = "http://127.0.0.1:5000/www/"
-ERROR_ROOT_URL            = "http://127.0.0.1:5000/www/error/"
+# AUTOCOMPUTED VALUES
+ANNSO_DIR      = os.path.dirname(os.path.abspath(__file__))
+TEMPLATE_DIR   = os.path.join(ANNSO_DIR, "api_rest/templates/")
+ERROR_ROOT_URL = "api.pirus.org/errorcode/"
+
+
