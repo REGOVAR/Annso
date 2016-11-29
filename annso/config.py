@@ -19,9 +19,9 @@ RANGE_MAX     = 1000
 # DB
 DATABASE_HOST = "localhost"
 DATABASE_PORT = "5432"
-DATABASE_USER = "regovar"
-DATABASE_PWD  = "regovar"
-DATABASE_NAME = "regovar"
+DATABASE_USER = "annso"
+DATABASE_PWD  = "annso"
+DATABASE_NAME = "annso"
 
 
 

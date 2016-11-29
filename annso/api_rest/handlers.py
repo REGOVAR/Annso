@@ -170,7 +170,13 @@ class WebsiteHandler:
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
 
 
+class ReportHandler:
 
+    async def get_omim_data(self, request):
+        try:
+            return rest_success(annso.report.get_omim_data(gene_name))
+        except Exception as err:
+            return rest_error("Unexpected error occured when trying to retrieve OMOM information for the gene : " + str(gene_name) + ". " + str(err))
 
 
 

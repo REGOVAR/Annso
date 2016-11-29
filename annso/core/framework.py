@@ -6,6 +6,7 @@ import datetime
 import logging
 import uuid
 import hashlib
+import sqlalchemy
 
 from config import *
 
@@ -36,6 +37,53 @@ def humansize(nbytes):
 
 
 
+
+
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
+# PGSQL TOOLS
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
+def connect(user, password, db, host, port):
+    '''Returns a connection and a metadata object'''
+    url = 'postgresql://{}:{}@{}:{}/{}'
+    url = url.format(user, password, host, port, db)
+    con = sqlalchemy.create_engine(url, client_encoding='utf8')
+    meta = sqlalchemy.MetaData(bind=con)
+    return con, meta
+
+
+def get_or_create(session, model, defaults=None, **kwargs):
+    if defaults is None:
+        defaults = {}
+    try:
+        query = session.query(model).filter_by(**kwargs)
+
+        instance = query.first()
+
+        if instance:
+            return instance, False
+        else:
+            session.begin(nested=True)
+            try:
+                params = dict((k, v) for k, v in kwargs.items() if not isinstance(v, ClauseElement))
+                params.update(defaults)
+                instance = model(**params)
+
+                session.add(instance)
+                session.commit()
+
+                return instance, True
+            except IntegrityError as e:
+                session.rollback()
+                instance = query.one()
+
+                return instance, False
+    except Exception as e:
+        raise e
+
+
+
+
+
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
 # LOGS MANAGEMENT
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
@@ -56,7 +104,21 @@ def setup_logger(logger_name, log_file, level=logging.INFO):
     l.addHandler(streamHandler)
 
 
+def log(msg):
+    global plog
+    plog.info(msg)
+    print(msg)
 
+def war(msg):
+    global plog
+    plog.warning(msg)
+    print(msg)
+
+
+def err(msg):
+    global plog
+    plog.error(msg)
+    print(msg)
 
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
@@ -90,6 +152,34 @@ class PirusException(Exception):
 
 
 
+
+
+
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
+# TIMER
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
+class Timer(object):
+    def __init__(self, verbose=False):
+        self.verbose = verbose
+
+    def __enter__(self):
+        self.start = time.time()
+        return self
+
+    def __exit__(self, *args):
+        self.end = time.time()
+        self.secs = self.end - self.start
+        self.msecs = self.secs * 1000  # millisecs
+        if self.verbose:
+            print (self.msecs, ' ms')
+            
+    def __str__(self):
+        return str(self.msecs) + ' ms'
+
+    def total_ms():
+        return self.msecs
+    def total_s():
+        return self.secs
 
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
