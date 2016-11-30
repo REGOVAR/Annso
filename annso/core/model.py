@@ -28,11 +28,12 @@ from core.framework import *
 
 
 # Connect and map the engine to the database
-# Base = automap_base()
-# db_engine = create_engine("postgresql://{0}:{1}@{2}:{3}/{4}".format(DATABASE_USER, DATABASE_PWD, DATABASE_HOST,  DATABASE_PORT, DB_NAME)
-# Base.prepare(db_engine, reflect=True)
-# Base.metadata.create_all(db_engine)
-# db_session = Session(db_engine)
+Base = automap_base()
+#db_engine = create_engine("postgresql://{0}:{1}@{2}:{3}/{4}".format(DATABASE_USER, DATABASE_PWD, DATABASE_HOST,  DATABASE_PORT, DATABASE_NAME))
+db_engine = create_engine("postgresql://annso:annso@localhost/annso")
+Base.prepare(db_engine, reflect=True)
+Base.metadata.create_all(db_engine)
+db_session = Session(db_engine)
 
 
 
@@ -41,93 +42,20 @@ from core.framework import *
 
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
-# MODEL DEFINITION
+# MODEL DEFINITION - Build from the database (see sql scripts used to generate the database)
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
 
+User = Base.classes.user
+Project = Base.classes.project
+Sample = Base.classes.sample
+Variant = Base.classes.variant_hg19
+SampleVariant = Base.classes.sample_variant_hg19
+Analysis = Base.classes.analysis
+Selection = Base.classes.selection
+Template = Base.classes.template
+Subject = Base.classes.subject
+File = Base.classes.file
 
-class Analysis():
-    id =                  23
-    name =                "Analysis n°1"
-    owner_id =            1234
-    project_id =          56
-    comments =            ""
-    template_id =         1
-    template_settings =   ""
-    creation_date =       "2016-08-01"
-    update_date =         "2016-08-17"
-    status =              "ready"
-    
-    def __str__(self):
-        return "Analysis"
-
-
-
-
-
-
-
-
-class Template():
-    id =                  2
-    name =                "HugoDims"
-    author_id =           1234
-    description =         "Pipe for Hugo"
-    version =             "V1.5"
-    creation_date =       "2015-06-01"
-    update_date =         "2016-04-12"
-    parent_id =           1
-    status =              "validated"
-    configuration =       ""
-
-    def __str__(self):
-        return "Template"
-
-
-
-
-
-
-class Selection():
-    id =                  56432   
-    analysis_id =         23
-    name =                "Child DeNovo"
-    order =               5
-    comments =            "Selection of de novo variant of the child"
-    query =               { "filters" : [{ "key" : "value"}] }
-
-    def __str__(self):
-        return "Selection"
-
-
-
-
-
-
-
-
-
-class Sample():
-    id =                  123456789
-    name =                "Sample n°1"
-
-    def __str__(self):
-        return "Sample"
-
-
-
-
-
-class Variant():
-    id =                  123456789
-    bin =                 156
-    chr =                 2
-    pos =                 54678231
-    ref =                 "A"
-    alt =                 ""
-    annotations =         { }
-
-    def __str__(self):
-        return "Variant"
 
 
 

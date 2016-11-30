@@ -145,7 +145,15 @@ class WebsiteHandler:
 
     @aiohttp_jinja2.template('home.html')
     def home(self, request):
-        data = {}
+
+        result = []
+        sample_id = 0
+        for r in db_engine.execute("SELECT s.name, sv.* FROM sample_variant_hg19 sv INNER JOIN sample s ON s.id = sv.sample_id"):
+            result.append((r[1], r[0], r[3], r[4], r[5], r[6]))
+
+        data = {
+            "variants" : result
+        }
         return data
 
 

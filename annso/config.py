@@ -20,7 +20,7 @@ RANGE_MAX     = 1000
 DATABASE_HOST = "localhost"
 DATABASE_PORT = "5432"
 DATABASE_USER = "annso"
-DATABASE_PWD  = "annso"
+DATABASE_PWD  = "ansso"
 DATABASE_NAME = "annso"
 
 

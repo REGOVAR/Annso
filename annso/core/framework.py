@@ -8,6 +8,9 @@ import uuid
 import hashlib
 import sqlalchemy
 
+from sqlalchemy.sql.expression import ClauseElement
+from sqlalchemy.exc import IntegrityError
+
 from config import *
 
 

@@ -22,7 +22,7 @@
     <script src="/assets/brutusin/js/brutusin-json-forms.min.js"></script>
 
     <!-- Pirus specific -->
-    <link rel="stylesheet" href="/assets/pirus.css"/>
+    <link rel="stylesheet" href="/assets/annso.css"/>
     <link rel="stylesheet" href="/assets/font-awesome-4.6.3/css/font-awesome.min.css"/>
 </head>
 <body>
@@ -200,48 +200,22 @@
                                         <thead>
                                             <tr>
                                                 <th></th>
-                                                <th>Name</th>
-                                                <th>Size</th>
-                                                <th>Creation</th>
-                                                <th class="collapse">Comments</th>
-                                                <th class="collapse">Tags</th>
-                                                <th class="collapse">Id</th>
-                                                <th class="collapse">status</th>
+                                                <th>Sample</th>
+                                                <th>chr</th>
+                                                <th>pos</th>
+                                                <th>ref</th>
+                                                <th>alt</th>
                                             </tr>
                                         </thead>
                                         <tbody>
-                                            {% for f in files_all %}
-                                            <tr id="fileEntry-{{ f["id"] }}" onmouseover="javascript:display_status_bar('{{ f["id"] }}')" onclick="javascript:select_file('{{ f["id"] }}')" 
-                                                style="cursor: pointer; {% if f["status"] == "ERROR" %}class="color-danger"{% endif %}">
-                                                <td><input type="checkbox" 
-                                                        value="{{ f["id"] }}" 
-                                                        name="{% if f["source"]["type"] == "output" %}{{ f["source"]["run_name"] }} > {% endif %}{{ f["name"] }}"/>
-                                                </td>
-                                                <td>{% if f["source"]["type"] == "output" %}
-                                                    {{ f["source"]["run_name"] }} <i class="fa fa-chevron-right" aria-hidden="true"></i> 
-                                                    {% endif %}
-                                                    {{ f["name"] }} 
-                                                    {% if f["comments"] %}
-                                                    <a href="#" data-toggle="tooltip" data-placement="right" title="{{f["comments"]}}"><i class="fa fa-info-circle" aria-hidden="true"></i></a>
-                                                    {% endif %}
-                                                </td>
-                                                <td>
-                                                    {% if f["status"] == "ERROR" %}
-                                                    <i class="fa fa-times text-danger" aria-hidden="true" style="font-weight:bold;"></i> 
-                                                    {% elif f["status"] == "PAUSE" %}
-                                                    <i class="fa fa-pause-circle-o text-warning" aria-hidden="true" style="font-weight:bold;"></i> 
-                                                    {% elif f["status"] in ["UPLOADING"] %}
-                                                    <i class="fa fa-arrow-circle-o-down text-primary" aria-hidden="true" style="font-weight:bold;"></i> 
-                                                    {% else %}
-                                                    <i class="fa fa-check text-success" aria-hidden="true" style="font-weight:bold;"></i> 
-                                                    {% endif %}
-                                                    {{ f["size"] }}
-                                                </td>
-                                                <td>{{ f["create_date"] }}</td>
-                                                <td class="collapse">{{ f["comments"] }}</td>
-                                                <td class="collapse">{% for t in f["tags"] %}{{t}}{% endfor %}</td>
-                                                <td class="collapse">{{ f["id"]}}</td>
-                                                <td class="collapse">{{ f["status"]}}</td>
+                                            {% for r in variants %}
+                                            <tr id="fileEntry-{{ r[0] }}" style="cursor: pointer;">
+                                                <td><input type="checkbox" value="{{ r[0] }}"/></td>
+                                                <td>{{ r[1] }} </td>
+                                                <td>{{ r[2] }} </td>
+                                                <td>{{ r[3] }} </td>
+                                                <td>{{ r[4] }} </td>
+                                                <td>{{ r[5] }} </td>
                                             </tr>
                                             {% endfor %}
                                         </tbody>
@@ -561,7 +535,7 @@
     </div>
 
 
-    <script src="/assets/pirus.js"></script>
+    <script src="/assets/annso.js"></script>
     <script src="/assets/tus.js"></script>
     <script src="/assets/tus_client.js"></script>
     <script>
