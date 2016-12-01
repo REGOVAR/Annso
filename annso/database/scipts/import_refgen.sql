@@ -86,7 +86,11 @@ CREATE INDEX refgene_hg19_txrange_idx
 UPDATE public.refgene_hg19 SET txrange=int8range(txstart, txend);
 
 
-UPDATE public.refgene_hg19 SET variant_ids=array_agg(v.id)
-FROM public.variant_hg19 v
-LEFT JOIN public.refgene_hg19 rg ON rg.txrange @> int8(v.pos)
-GROUP BY v.id
+UPDATE public.refgene_hg19 SET variant_ids=ids
+FROM (
+    SELECT rg.id as rid, array_agg(v.id) as ids
+    FROM public.variant_hg19 v
+    LEFT JOIN public.refgene_hg19 rg ON rg.txrange @> int8(v.pos)
+    GROUP BY rg.id
+) as SR
+WHERE id=rid
