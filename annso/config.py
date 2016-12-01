@@ -28,7 +28,7 @@ DATABASE_NAME = "annso"
 # FILESYSTEM
 FILES_DIR     = "/tmp/pirus_" + VERSION + "/files"
 TEMP_DIR      = "/tmp/pirus_" + VERSION + "/downloads"
-
+CACHE_DIR     = "/tmp/annso_" + VERSION + "/cache"
 
 # AUTOCOMPUTED VALUES
 ANNSO_DIR      = os.path.dirname(os.path.abspath(__file__))

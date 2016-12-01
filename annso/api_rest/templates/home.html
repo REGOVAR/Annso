@@ -70,48 +70,47 @@
 
                 <div class="panel panel-default" style="box-shadow: 0 0 10px #ccc; border: 1px solid #ccc;">
                     <div class="panel-heading" style="position:relative;">
-                        <img src="/assets/img/logo.png" width="100px" style="position:absolute; top:-10px; left:-100px;" /> 
+                        <!-- <img src="/assets/img/logo.png" width="100px" style="position:absolute; top:-10px; left:-100px;" />  -->
                         <div class="row">
                             <div class="col-md-8">
                                 <div class="btn-group" role="group">
-                                    <a class="btn btn-default" href="#modal_new_file" title="New file" data-toggle="modal"  href="#modal_new_file"><i class="fa fa-file-o" aria-hidden="true"></i></a>
-                                    <a class="btn btn-default" href="#modal_new_pipeline" title="New Pipeline" data-toggle="modal"  href="#modal_new_pipeline"><i class="fa fa-puzzle-piece" aria-hidden="true"></i></a>
+                                    <a class="btn btn-default" href="#modal_import" title="Import data" data-toggle="modal"  href="#modal_import"><i class="fa fa-download" aria-hidden="true"></i></a>
+                                    <a class="btn btn-default" href="#modal_export" title="Export data" data-toggle="modal"  href="#modal_export"><i class="fa fa-share-square-o" aria-hidden="true"></i></a>
+                                    <a class="btn btn-default" href="#modal_report" title="Generate report" data-toggle="modal"  href="#modal_report"><i class="fa fa-print" aria-hidden="true"></i></a>
+                                    <a class="btn btn-default" href="#modal_new_project" title="New project" data-toggle="modal"  href="#modal_new_project"><i class="fa fa-folder-open" aria-hidden="true"></i></a>
+
                                     <div class="btn-group">
-                                        <button type="button" class="btn btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" title="New run">
-                                            <i class="fa fa-play" aria-hidden="true"></i> New run<!--<span class="caret"></span>-->
+                                        <button type="button" class="btn btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" title="Start new analysis">
+                                            <i class="fa fa-filter" aria-hidden="true"></i> Analysis<!--<span class="caret"></span>-->
                                         </button>
-                                        {% if pipes|length ==0 %}
-                                        <strong>Warning!</strong> You need to install pipeline first.
-                                        {% else %}
                                         <ul class="dropdown-menu" role="menu" aria-labelledby="dLabel">
-                                            {% for p in pipes %}
-                                            {% if p["status"] not in ["UPLOADING", "PAUSE"] %}
-                                            <li><a href="#modal_new_run" onclick="javascript:init_run('{{p["id"]}}');" title="New run with Hugodims" data-toggle="modal">
-                                                <img src="{{ p["icon_url"] }}" style="height:20px; width:20px; vertical-align:middle;"/> &nbsp; {{ p["name"] }} <i>({{ p["version"] }})</i>
-                                            </a></li>
-                                            {% endif %}
-                                            {% endfor %}
+                                            <li><a href="#">From scratch</a></li>
+                                            <li><a href="#">Hugodims</a></li>
+                                            <li><a href="#">Niourk</a></li>
                                         </ul>
-                                        {% endif %}
                                     </div>
 
                                 </div>
+                                &nbsp;
                                 <form class="form-inline" style="display:inline-block;">
                                     <div class="input-group">
                                         <span class="input-group-addon"><i class="fa fa-search" aria-hidden="true"></i></span>
-                                        <input id="browser_filter_input" type="text" class="form-control" placeholder="Filter" aria-describedby="sizing-addon1">
+                                        <input id="browser_filter_input" type="text" class="form-control" placeholder="Quick filter" aria-describedby="sizing-addon1">
                                     </div>
                                 </form>
                             </div>
                             <div class="col-md-4" style="text-align:right;">
                                 <div class="btn-group">
-                                    <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                    <button type="button" class="btn btn-default" title="Browse databases">
+                                        <i class="fa fa-database" aria-hidden="true"></i>
+                                    </button>
+                                    <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" title="Configure Annso">
                                         <i class="fa fa-cog" aria-hidden="true"></i> <span class="caret"></span>
                                     </button>
                                     <ul class="dropdown-menu">
-                                        <li><a href="#">Manage pipelines</a></li>
-                                        <li><a href="#">Pirus settings</a></li>
-                                        <li><a href="#">See pirus coockie</a></li>
+                                        <li><a href="#">Manage analyses templates</a></li>
+                                        <li><a href="#">Annso settings</a></li>
+                                        <li><a href="#">See annso coockie</a></li>
                                         <li role="separator" class="divider"></li>
                                         <li><a href="#">About</a></li>
                                     </ul>
@@ -120,75 +119,130 @@
                         </div>
                     </div>
                     <div class="panel-body" style="padding: 0;">
+                        <div class="row panel-heading" style="margin:0; background-image: linear-gradient(to bottom,#f5f5f5 0,#e8e8e8 100%);">
+                            <i class="fa fa-folder-open" aria-hidden="true" style="width:20px; text-align:center;"></i> MyProject :  Analyse Toto
+                            <i class="fa fa-chevron-right" aria-hidden="true" style="width:20px; text-align:center;"></i> Samples selection 
+                            <i class="fa fa-chevron-right" aria-hidden="true" style="width:20px; text-align:center;"></i> Filter 1 
+                            <i class="fa fa-chevron-right" aria-hidden="true" style="width:20px; text-align:center;"></i> My Filter 2 
+                            <i class="fa fa-chevron-right" aria-hidden="true" style="width:20px; text-align:center;"></i> <b>Step 3</b> 
+                            <i class="fa fa-chevron-right" aria-hidden="true" style="width:20px; text-align:center;"></i> Filter 4
+                        </div>
                         <div class="row" style="margin:0;">
                             <div id="browser_navpanel" class="col-md-3 browser-panel">
 
-                                <a class="btn section" style="display:block; text-align:left;" role="button" data-toggle="collapse" href="#browserNavSelectionPanel" aria-expanded="false" aria-controls="browserNavSelectionPanel">
-                                    <i class="fa fa-check-square-o" aria-hidden="true">&nbsp;</i> Selection 
-                                        <span style="float:right;">
-                                            <span id="selection_count" class="badge">0</span>&nbsp;<i class="fa fa-chevron-right" aria-hidden="true" style="width:20px; text-align:center;"></i>
-                                        </span>
-                                    </i>
+                                <!--                  -->
+                                <!-- SAMPLE NAV PANEL --> 
+                                <!--                  -->
+                                <a class="btn section" style="display:block; text-align:left;" role="button" data-toggle="collapse" href="#browserNavSamplesPanel" aria-expanded="false" aria-controls="browserNavSamplesPanel">
+                                    <i class="fa fa-users" aria-hidden="true" style="width:20px; text-align:center;">&nbsp;</i> Samples 
+                                    <span style="float:right;">
+                                        <span id="selection_count" class="badge">3</span>&nbsp;<i class="fa fa-chevron-right" aria-hidden="true" style="width:20px; text-align:center;"></i>
+                                    </span>
                                 </a>
-                                <div id="browserNavSelectionPanel" class="collapse">
+                                <div id="browserNavSamplesPanel" class="collapse">
                                     <ul>
-                                        <li class="empty_selection">No file selected</li>
+                                        <li><a href="#"><input type="checkbox" checked/> 
+                                            Subject 1 <i class="fa fa-chevron-right" aria-hidden="true"></i> 
+                                            CGH0157 
+                                            <span style="float:right;"><i class="fa fa-info-circle" aria-hidden="true"></i></span>
+                                            </a>
+                                        </li>
+                                        <li><a href="#"><input type="checkbox" checked/> 
+                                            Subject 2 <i class="fa fa-chevron-right" aria-hidden="true"></i> 
+                                            CGH0413
+                                            <span style="float:right;"><i class="fa fa-info-circle" aria-hidden="true"></i></span>
+                                            </a>
+                                        </li>
+                                        <li><a href="#"><input type="checkbox" checked/> 
+                                            Subject 3 <i class="fa fa-chevron-right" aria-hidden="true"></i> 
+                                            CGH0542
+                                            <span style="float:right;"><i class="fa fa-info-circle" aria-hidden="true"></i></span>
+                                            </a>
+                                        </li>
                                     </ul>
                                 </div>
-                                <hr/>
 
-                                <a class="btn section" style="display:block; text-align:left;" role="button" onclick="javascript:show_tab('browser_files')"><i class="fa fa-files-o" aria-hidden="true">&nbsp;</i> All Files</a>
-                                
-                                <a class="btn section" style="display:block; text-align:left;" role="button" data-toggle="collapse" href="#browser_navpanel_inprogress" aria-controls="browser_navpanel_inprogress">
-                                    <i class="fa fa-tasks" aria-hidden="true">&nbsp;</i> In progress 
-                                        <span style="float:right;">
-                                            <span id="inprogress_count" class="badge">{{ total_inprogress }}</span>&nbsp;<i class="fa fa-chevron-right" aria-hidden="true" style="width:20px; text-align:center;"></i>
-                                        </span>
-                                    </i>
+
+
+                                <!--                  -->
+                                <!-- FIELDS NAV PANEL --> 
+                                <!--                  -->
+                                <a class="btn section" style="display:block; text-align:left;" role="button" data-toggle="collapse" href="#browserNavFieldsPanel" aria-expanded="false" aria-controls="browserNavFieldsPanel">
+                                    <i class="fa fa-info" aria-hidden="true" style="width:20px; text-align:center;">&nbsp;</i> Fields 
+                                    <span style="float:right;">
+                                        <span id="selection_count" class="badge">0</span>&nbsp;<i class="fa fa-chevron-right" aria-hidden="true" style="width:20px; text-align:center;"></i>
+                                    </span>
                                 </a>
-                                <div id="browser_navpanel_inprogress">
-                                    <div>
-                                        <ul>
-                                            {% for f in files_inprogress %}
-                                            <li id="browser_navpanel_inprogress_file_{{f["id"]}}">
-                                                <a onclick="javascript:show_tab('browser_file','{{f["id"]}}')" href="#">
-                                                    <i class="fa fa-file {% if f["status"] in ["PAUSE"] %}text-warning{% elif f["status"] in ["UPLOADING"] %}text-primary{% else %}text-danger{% endif %}" aria-hidden="true"></i>
-                                                    {{f["name"]}} <span>{{ f["progress"] }}%</span></a>
-                                            </li>
-                                            {% endfor %}
-                                            {% for r in runs_inprogress %}
-                                            <li id="browser_navpanel_inprogress_run_{{r["id"]}}">
-                                                <a onclick="javascript:show_tab('browser_run','{{r["id"]}}')" href="#">
-                                                    <i class="fa fa-tasks {% if r["status"] in ["PAUSE", "WAITING"] %}text-warning{% elif r["status"] in ["RUNNING", "INITIALIZING", "FINISHING"] %}text-primary{% else %}text-danger{% endif %}" aria-hidden="true"></i>
-                                                    {{r["name"]}} <span>{{ r["%"] }}%</span></a>
-                                            </li>
-                                            {% endfor %}
-                                        </ul>
-                                    </div>
+                                <div id="browserNavFieldsPanel" class="collapse">
+                                    <form class="form-inline form-navpanel">
+                                        <div class="input-group">
+                                            <span class="input-group-addon"><i class="fa fa-search" aria-hidden="true"></i></span>
+                                            <input id="bbrowserNavSamplesPanel_filter_input" type="text" class="form-control" placeholder="Filter sample" aria-describedby="sizing-addon1">
+                                        </div>
+                                    </form>
+                                    <ul>
+                                        <li><a href="#"><input type="checkbox"/> Annso</a>
+                                            <ul><li><a href="#" style="padding-left:60px"><input type="checkbox" checked/> Chrom</a></li>
+                                                <li><a href="#" style="padding-left:60px"><input type="checkbox" checked/> Pos</a></li>
+                                                <li><a href="#" style="padding-left:60px"><input type="checkbox" checked/> Ref</a></li>
+                                                <li><a href="#" style="padding-left:60px"><input type="checkbox" checked/> Alt</a></li>
+                                                <li><a href="#" style="padding-left:60px"><input type="checkbox"/> Bin</a></li>
+                                                <li><a href="#" style="padding-left:60px"><input type="checkbox" checked/> Sample</a></li>
+                                                <li><a href="#" style="padding-left:60px"><input type="checkbox"/> DP</a></li>
+                                                <li><a href="#" style="padding-left:60px"><input type="checkbox"/> GT</a></li>
+                                            </ul>
+                                        </li>
+                                        <li><a href="#"><input type="checkbox"/> RefGene</a>
+                                            <ul><li><a href="#" style="padding-left:60px"><input type="checkbox"/> Name</a></li>
+                                                <li><a href="#" style="padding-left:60px"><input type="checkbox"/> txt start</a></li>
+                                                <li><a href="#" style="padding-left:60px"><input type="checkbox"/> txt end</a></li>
+                                                <li><a href="#" style="padding-left:60px"><input type="checkbox"/> cds begin</a></li>
+                                                <li><a href="#" style="padding-left:60px"><input type="checkbox"/> cds end</a></li>
+                                                <li><a href="#" style="padding-left:60px"><input type="checkbox"/> exon count</a></li>
+                                                <li><a href="#" style="padding-left:60px"><input type="checkbox"/> exon start</a></li>
+                                                <li><a href="#" style="padding-left:60px"><input type="checkbox"/> exon end</a></li>
+                                                <li><a href="#" style="padding-left:60px"><input type="checkbox"/> score</a></li>
+                                                <li><a href="#" style="padding-left:60px"><input type="checkbox"/> name2</a></li>
+                                            </ul>
+                                        </li>
+                                    </ul>
                                 </div>
 
-                                <hr/>
 
-                                {% for p in pipes %}
-                                <a class="btn section" style="display:block; text-align:left;" role="button" data-toggle="collapse" href="#browser_navpanel_pipe_{{p["id"]}}" aria-expanded="false" aria-controls="browser_navpanel_pipe_{{p["id"]}}">
-                                    <i class="fa fa-puzzle-piece" aria-hidden="true">&nbsp;</i> Pipeline {{p["name"]}}
-                                        <span style="float:right;"><i class="fa fa-chevron-right" aria-hidden="true" style="width:20px; text-align:center;"></i></span>
-                                    </i>
+
+
+
+                                <!--                  -->
+                                <!-- FILTER NAV PANEL --> 
+                                <!--                  -->
+                                <hr/>
+                                <a class="btn section" style="display:block; text-align:left;" role="button">
+                                    <i class="fa fa-filter" aria-hidden="true" style="width:20px; text-align:center;">&nbsp;</i> Filter 
                                 </a>
-                                <div id="browser_navpanel_pipe_{{p["id"]}}" class="collapse">
-                                    <div>
-                                        <ul>
-                                            {% for r in p["runs"] %}
-                                            {% if r["status"] in ["ERROR", "DONE", "CANCELED"] %}
-                                            <li><a onclick="javascript:show_tab('browser_run','{{r["id"]}}')" href="#">
-                                                <i class="fa fa-tasks {% if r["status"] in ["ERROR", "CANCELED"] %}text-danger{% endif %}" aria-hidden="true"></i> 
-                                                 {{r["name"]}}</a></li>
-                                            {% endif %}
-                                            {% endfor %}
-                                        </ul>
-                                    </div>
+                                <div id="browserNavFilterPanel">
+                                    <form class="form-inline form-navpanel">
+
+                                        <div class="input-group">
+                                            <span class="input-group-addon" title="Name of the filter"><i class="fa fa-tag" aria-hidden="true"></i></span>
+                                            <input id="bbrowserNavSamplesPanel_filter_input" type="text" class="form-control" placeholder="Name of the filter" aria-describedby="sizing-addon1" value="Step 3" title="Name of the filter">
+                                        </div>
+
+                                        <div class="input-group">
+                                            <span class="input-group-addon"><i class="fa fa-search" aria-hidden="true"></i></span>
+                                            <input id="bbrowserNavSamplesPanel_filter_input" type="text" class="form-control" placeholder="Filter sample" aria-describedby="sizing-addon1">
+                                        </div>
+                                    </form>
+                                    <ul>
+                                        <li><input type="checkbox" checked/> SIFT > 13<i class="fa fa-info-circle" aria-hidden="true"></i></li>
+                                        <li><input type="checkbox" checked/> DP < 400<i class="fa fa-info-circle" aria-hidden="true"></i></li>
+                                        <li><input type="checkbox" checked/> Deletion<i class="fa fa-info-circle" aria-hidden="true"></i></li>
+                                    </ul>
+
+                                    <button type="button" class="btn btn-default" title="Create a selection for this filter and continue with a new filter">
+                                        <i class="fa fa-floppy-o" aria-hidden="true"></i> Save filter
+                                    </button>
                                 </div>
-                                {% endfor %}
+
                             </div>
 
                             <div id="browser_content" class="col-md-9" style="height:500px; padding-left:0; padding-right:0; overflow-y: auto;">
@@ -213,7 +267,7 @@
                                                 <td><input type="checkbox" value="{{ r[0] }}"/></td>
                                                 <td>{{ r[1] }} </td>
                                                 <td>{{ r[2] }} </td>
-                                                <td>{{ r[3] }} </td>
+                                                <td class="pos">{{ r[3] }} </td>
                                                 <td>{{ r[4] }} </td>
                                                 <td>{{ r[5] }} </td>
                                             </tr>
@@ -361,7 +415,7 @@
                                 </div>
                             </div>
                         </div>
-                        <div id="demo_footer" class="panel-footer"></div>
+                        <div id="demo_footer" class="panel-footer">{{variants|length}} variants</div>
                     </div>
                 </div>
 

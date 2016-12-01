@@ -1,4 +1,6 @@
 
+
+
 .browser-panel
 {
 
@@ -15,13 +17,10 @@
 
 .panel-footer
 {
-    display:none;
-    /*
     text-align: right!important;
     color: #999!important;
     font-style: italic!important;
     font-size: 10px!important;
-    */
 }
 
 
@@ -225,3 +224,19 @@ li.empty_selection
 
 
 
+
+
+.form-navpanel
+{
+    padding-left: 30px;
+}
+.form-navpanel .input-group-addon
+{
+    padding: 3px 12px;
+    font-size: 11px;
+}
+
+.form-navpanel  .form-control
+{
+    height: 20px;
+}

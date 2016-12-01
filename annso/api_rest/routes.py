@@ -33,3 +33,9 @@ app.on_shutdown.append(on_shutdown)
 app.router.add_route('GET',    "/v1/www",    website.home)
 app.router.add_route('GET',    "/v1/config", website.get_config)
 app.router.add_route('GET',    "/v1/db",     website.get_db)
+app.router.add_route('GET',    "/v1/ws",     websocket.get)
+
+
+# DEV/DEBUG - Routes that should be manages directly by NginX
+app.router.add_static('/assets', TEMPLATE_DIR)
+app.router.add_static('/cache', CACHE_DIR)

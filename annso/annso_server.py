@@ -13,6 +13,9 @@ from config import *
 # Some check before starting the web application
 if not os.path.exists(TEMPLATE_DIR):
     raise PirusException("ERROR : Templates directory doesn't exists : " + TEMPLATE_DIR)
+if not os.path.exists(CACHE_DIR):
+    raise PirusException("ERROR : Templates directory doesn't exists : " + CACHE_DIR)
+
 
 
   
