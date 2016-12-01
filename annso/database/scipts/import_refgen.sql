@@ -1,6 +1,9 @@
 --
 -- Structure
 --
+DROP TYPE IF EXISTS refgene_hg19_cdsstat CASCADE;
+CREATE TYPE refgene_hg19_cdsstat AS ENUM ('none','unk','incmpl','cmpl');
+
 DROP TABLE IF EXISTS public.refgene_hg19;
 CREATE TABLE public.refgene_hg19
 (
@@ -17,8 +20,8 @@ CREATE TABLE public.refgene_hg19
   exonends text NOT NULL,
   score bigint,
   name2 character varying(255) NOT NULL,
-  cdsstartstat cdsstat NOT NULL,
-  cdsendstat cdsstat NOT NULL,
+  cdsstartstat refgene_hg19_cdsstat NOT NULL,
+  cdsendstat refgene_hg19_cdsstat NOT NULL,
   exonframes text NOT NULL
 )
 WITH (
