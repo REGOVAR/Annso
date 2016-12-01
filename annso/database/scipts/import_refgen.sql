@@ -19,8 +19,7 @@ CREATE TABLE public.refgene_hg19
   name2 character varying(255) NOT NULL,
   cdsstartstat cdsstat NOT NULL,
   cdsendstat cdsstat NOT NULL,
-  exonframes text NOT NULL,
-  txrange int8range
+  exonframes text NOT NULL
 )
 WITH (
   OIDS=FALSE
@@ -38,7 +37,7 @@ ALTER TABLE public.refgene_hg19
 --
 -- Command to import data from csv
 --
-COPY refgene_hg19 FROM '/tmp/hg19_db/refGene.txt' DELIMITER ',' CSV;
+COPY refgene_hg19 FROM '/tmp/hg19_db/refGene.txt' DELIMITER E'\t' CSV;
 
 
 
@@ -55,9 +54,10 @@ CREATE SEQUENCE public.refgene_hg19_id_seq
   CACHE 1;
 ALTER TABLE public.refgene_hg19_id_seq
   OWNER TO annso;
-  
-ALTER TABLE public.refgene_hg19 ADD id integer NOT NULL DEFAULT nextval('refgene_hg19_id_seq'::regclass)
-ALTER TABLE public.refgene_hg19 ADD variant_ids integer[][]
+
+ALTER TABLE public.refgene_hg19 ADD txrange int8range;
+ALTER TABLE public.refgene_hg19 ADD id integer NOT NULL DEFAULT nextval('refgene_hg19_id_seq'::regclass);
+ALTER TABLE public.refgene_hg19 ADD variant_ids integer[][];
 
 
 --
@@ -80,6 +80,8 @@ CREATE INDEX refgene_hg19_txrange_idx
 --
 -- Compute/Set additional fields 
 --
+UPDATE public.refgene_hg19 SET txrange=int8range(txstart, txend);
+
 
 UPDATE public.refgene_hg19 SET variant_ids=array_agg(v.id)
 FROM public.variant_hg19 v
