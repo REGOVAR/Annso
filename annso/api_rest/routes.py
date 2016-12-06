@@ -19,6 +19,7 @@ aiohttp_jinja2.setup(app, loader=jinja2.FileSystemLoader(TEMPLATE_DIR))
 # Handlers instances
 websocket = WebsocketHandler()
 website = WebsiteHandler()
+dbHandler = AnnotationDBHandler()
 
 # Config server app
 app['websockets'] = []
@@ -32,8 +33,11 @@ app.on_shutdown.append(on_shutdown)
 # Routes
 app.router.add_route('GET',    "/v1/www",    website.home)
 app.router.add_route('GET',    "/v1/config", website.get_config)
-app.router.add_route('GET',    "/v1/db",     website.get_db)
 app.router.add_route('GET',    "/v1/ws",     websocket.get)
+
+
+app.router.add_route('GET',    "/v1/db",     dbHandler.get_db)
+app.router.add_route('GET',    "/v1/db/{db_name}",     dbHandler.get_db_details)
 
 
 # DEV/DEBUG - Routes that should be manages directly by NginX

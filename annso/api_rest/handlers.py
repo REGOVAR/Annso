@@ -191,7 +191,27 @@ class ReportHandler:
 
 
 
+class AnnotationDBHandler:
+    def get_db(self, request):
+        # Generic processing of the get query
+        fields, query, order, offset, limit = process_generic_get(request.query_string, pirus.files.public_fields())
+        # Get range meta data
+        range_data = {
+            "range_offset" : offset,
+            "range_limit"  : limit,
+            "range_total"  : pirus.files.total(),
+            "range_max"    : RANGE_MAX,
+        }
+        # Return result of the query for PirusFile 
+        return rest_success(pirus.files.get(fields, query, order, offset, limit, sub_level_loading), range_data)
 
+    def get_db_details(self, request):
+        # 1- Retrieve request parameters
+        db_name = request.match_info.get('db_name', None)
+        if db_name is None:
+            return rest_error("No database name provided")
+
+        return rest_success({"database" : db_name})
 
 
 
