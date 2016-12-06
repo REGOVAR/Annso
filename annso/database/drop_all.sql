@@ -26,6 +26,8 @@ DROP TABLE IF EXISTS public."analysis" CASCADE;
 DROP TABLE IF EXISTS public."template" CASCADE;
 DROP TABLE IF EXISTS public."project" CASCADE;
 DROP TABLE IF EXISTS public."user" CASCADE;
+DROP TABLE IF EXISTS public."annotation_fields" CASCADE;
+DROP TABLE IF EXISTS public."annotation_database" CASCADE;
 DROP TABLE IF EXISTS public."parameter" CASCADE;
 
 
@@ -39,6 +41,7 @@ DROP SEQUENCE IF EXISTS public."analysis_id_seq" CASCADE;
 DROP SEQUENCE IF EXISTS public."project_id_seq" CASCADE;
 DROP SEQUENCE IF EXISTS public."template_id_seq" CASCADE;
 DROP SEQUENCE IF EXISTS public."user_id_seq" CASCADE;
+DROP SEQUENCE IF EXISTS public."annotation_database_id_seq" CASCADE;
 
 
 DROP TYPE IF EXISTS tpl_status CASCADE;
@@ -46,3 +49,4 @@ DROP TYPE IF EXISTS analysis_status CASCADE;
 DROP TYPE IF EXISTS subject_relation_type CASCADE;
 DROP TYPE IF EXISTS regmut_pathos CASCADE;
 DROP TYPE IF EXISTS regmut_contrib CASCADE;
+DROP TYPE IF EXISTS field_type CASCADE;

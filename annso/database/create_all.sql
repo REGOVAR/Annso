@@ -12,6 +12,8 @@ CREATE TYPE analysis_status AS ENUM ('created', 'queued', 'importing', 'filterin
 CREATE TYPE subject_relation_type AS ENUM ('parent', 'unknow');
 CREATE TYPE regmut_pathos AS ENUM ('class1', 'class2', 'class3', 'class4a', 'class4b', 'class5');
 CREATE TYPE regmut_contrib AS ENUM ('none', 'uncertain', 'partial', 'full');
+CREATE TYPE field_primary_type AS ENUM ('int', 'string', 'date', 'time', 'datetime', 'bool', 'float', 'enum', 'json');
+CREATE TYPE field_secondary_type AS ENUM ('range', 'list');
 
 
 
@@ -118,7 +120,6 @@ CREATE TABLE public.analysis
     template_settings text COLLATE pg_catalog."C.UTF-8",
     creation_date timestamp without time zone,
     update_date timestamp without time zone,
-    is_archived boolean NOT NULL DEFAULT false,
     status analysis_status NOT NULL DEFAULT 'created'::analysis_status,
     CONSTRAINT analysis_pkey PRIMARY KEY (id),
     CONSTRAINT analysis_project_id_fkey FOREIGN KEY (project_id)
@@ -412,6 +413,53 @@ CREATE TABLE public.sample_variant_hg19
 )
 WITH ( OIDS=FALSE );
 ALTER TABLE public.variant_hg19 OWNER TO annso;
+
+
+
+
+
+
+CREATE SEQUENCE public.annotation_database_id_seq
+    INCREMENT 1
+    MINVALUE 1
+    MAXVALUE 9223372036854775807
+    START 1
+    CACHE 1;
+ALTER TABLE public.annotation_database_id_seq OWNER TO annso;
+CREATE TABLE public.annotation_database
+(
+    id integer NOT NULL DEFAULT nextval('annotation_database_id_seq'::regclass),
+    name character varying(255) COLLATE pg_catalog."C.UTF-8" NOT NULL,
+    description text,
+    reference character varying(20) COLLATE pg_catalog."C.UTF-8" ,
+    url character varying(255) COLLATE pg_catalog."C.UTF-8" ,
+    update_date timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT annotation_database_pkey PRIMARY KEY (id)
+)
+WITH ( OIDS=FALSE );
+ALTER TABLE public.annotation_database OWNER TO annso;
+
+
+
+
+
+CREATE TABLE public.annotation_fields
+(
+    database_id integer,
+    name character varying(255) COLLATE pg_catalog."C.UTF-8" NOT NULL,
+    description text,
+    type field_type,
+    unity character varying(20) COLLATE pg_catalog."C.UTF-8" ,
+    CONSTRAINT annotation_database_pkey PRIMARY KEY (database_id, name)
+)
+WITH ( OIDS=FALSE );
+ALTER TABLE public.annotation_fields OWNER TO annso;
+
+
+
+
+
+
 
 
 

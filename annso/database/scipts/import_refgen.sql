@@ -90,3 +90,9 @@ UPDATE public.refgene_hg19 SET variant_ids=array_agg(v.id)
 FROM public.variant_hg19 v
 LEFT JOIN public.refgene_hg19 rg ON rg.txrange @> int8(v.pos)
 GROUP BY v.id
+
+
+
+
+
+INSERT INTO 
