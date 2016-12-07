@@ -310,9 +310,11 @@ function add_new_activity_to_demo_browser(type, id)
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 /* Filter method
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
+var total_variants = 0;
+var qfilter_warning_warning_msg_tpl = "&nbsp;<i class=\"fa fa-warning\" aria-hidden=\"true\"></i> {0} / {1} variants displayed";
 $("#browser_filter_input").keyup(function () 
 { 
+    var total_row = 0;
     // Split the current value of searchInput
     var data = this.value.toUpperCase().split(" ");
     // Create a jquery object of the rows
@@ -320,19 +322,24 @@ $("#browser_filter_input").keyup(function ()
     if (this.value == "") 
     {
         jo.show();
+        $('#qfilter_warning').html("&nbsp;");
+        $('#qfilter_message').html("&nbsp;" + total_variants + " variants");
         return;
     }
     // hide all the rows
     jo.hide();
-
+    var displayed_row = 0;
+    total_variants = 0;
     //Recusively filter the jquery object to get results.
     jo.filter(function (i, v) 
     {
         var $t = $(this);
         for (var d = 0; d < data.length; ++d) 
         {
+            total_variants += 1;
             if ($t.text().toUpperCase().indexOf(data[d]) > -1) 
             {
+                displayed_row += 1;
                 return true;
             }
         }
@@ -340,6 +347,8 @@ $("#browser_filter_input").keyup(function ()
     })
     //show the rows that match.
     .show();
+    $('#qfilter_warning').html(qfilter_warning_warning_msg_tpl.format(displayed_row,total_variants));
+    $('#qfilter_message').html("&nbsp;");
 });
 
 

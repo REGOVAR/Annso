@@ -69,244 +69,278 @@
                 </div>
 
                 <div class="panel panel-default" style="box-shadow: 0 0 10px #ccc; border: 1px solid #ccc;">
-                    <div class="panel-heading" style="position:relative;">
+                    <div class="panel-heading" style="position:relative; padding:0">
                         <!-- <img src="/assets/img/logo.png" width="100px" style="position:absolute; top:-10px; left:-100px;" />  -->
                         <div class="row">
-                            <div class="col-md-8">
-                                <div class="btn-group" role="group">
-                                    <a class="btn btn-default" href="#modal_import" title="Import data" data-toggle="modal"  href="#modal_import"><i class="fa fa-download" aria-hidden="true"></i></a>
-                                    <a class="btn btn-default" href="#modal_export" title="Export data" data-toggle="modal"  href="#modal_export"><i class="fa fa-share-square-o" aria-hidden="true"></i></a>
-                                    <a class="btn btn-default" href="#modal_report" title="Generate report" data-toggle="modal"  href="#modal_report"><i class="fa fa-print" aria-hidden="true"></i></a>
-                                    <a class="btn btn-default" href="#modal_new_project" title="New project" data-toggle="modal"  href="#modal_new_project"><i class="fa fa-folder-open" aria-hidden="true"></i></a>
+                            <nav class="navbar navbar-default" style="margin: 0px 15px; background: inherit; box-shadow: none; -webkit-box-shadow:none; border:none">
+                                <div class="navbar-collapse collapse" aria-expanded="false" style="height: 1px; padding:0;">
+                                    
+                                    <div class="btn-group" style="float: left; margin: 9px 40px 0 9px;" role="group">
+                                        <a class="btn btn-default" href="#modal_new_project" title="New project" data-toggle="modal"  href="#modal_new_project"><i class="fa fa-folder-open" aria-hidden="true"></i></a>
 
-                                    <div class="btn-group">
-                                        <button type="button" class="btn btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" title="Start new analysis">
-                                            <i class="fa fa-filter" aria-hidden="true"></i> Analysis<!--<span class="caret"></span>-->
-                                        </button>
-                                        <ul class="dropdown-menu" role="menu" aria-labelledby="dLabel">
-                                            <li><a href="#">From scratch</a></li>
-                                            <li><a href="#">Hugodims</a></li>
-                                            <li><a href="#">Niourk</a></li>
-                                        </ul>
+                                        <div class="btn-group">
+                                            <button type="button" class="btn btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" title="Start new analysis">
+                                                <i class="fa fa-filter" aria-hidden="true"></i> Analysis<!--<span class="caret"></span>-->
+                                            </button>
+                                            <ul class="dropdown-menu" role="menu" aria-labelledby="dLabel">
+                                                <li><a href="#">From scratch</a></li>
+                                                <li><a href="#">Hugodims</a></li>
+                                                <li><a href="#">Niourk</a></li>
+                                            </ul>
+                                        </div>
                                     </div>
 
-                                </div>
-                                &nbsp;
-                                <form class="form-inline" style="display:inline-block;">
-                                    <div class="input-group">
-                                        <span class="input-group-addon"><i class="fa fa-search" aria-hidden="true"></i></span>
-                                        <input id="browser_filter_input" type="text" class="form-control" placeholder="Filter variants" aria-describedby="sizing-addon1">
-                                    </div>
-                                    <span class="text-danger" style="font-style:italic" >&nbsp;<i class="fa fa-warning" aria-hidden="true"></i> 40 / {{variants|length}} variants displayed</span>
-                                </form>
-                            </div>
-                            <div class="col-md-4" style="text-align:right;">
-                                <div class="btn-group">
-                                    <button type="button" class="btn btn-default" title="Browse databases">
-                                        <i class="fa fa-database" aria-hidden="true"></i>
-                                    </button>
-                                    <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" title="Configure Annso">
-                                        <i class="fa fa-cog" aria-hidden="true"></i> <span class="caret"></span>
-                                    </button>
-                                    <ul class="dropdown-menu">
-                                        <li><a href="#">Manage analyses templates</a></li>
-                                        <li><a href="#">Annso settings</a></li>
-                                        <li><a href="#">See annso coockie</a></li>
-                                        <li role="separator" class="divider"></li>
-                                        <li><a href="#">About</a></li>
+                                    <!--                   -->
+                                    <!-- ANALYSIS TAB MENU -->
+                                    <!--                   -->
+                                    <ul class="nav navbar-nav">
+                                        <li class="active"><a data-toggle="tab" href="#browserNavSamplesPanel"><i class="fa fa-user" style="width:20px; text-align:center;" aria-hidden="true"></i> Samples </a></li>
+                                        <li><a data-toggle="tab" href="#browserNavFiltersPanel"><i class="fa fa-filter" style="width:20px; text-align:center;" aria-hidden="true"></i> Filter</a></li>
+                                        <li><a data-toggle="tab" href="#browserNavSelectionPanel"><i class="fa fa-check-square-o" aria-hidden="true" style="width:20px; text-align:center;">&nbsp;</i> Selection</a></li>
                                     </ul>
+
+                                    <!--                     -->
+                                    <!-- FIELDS DISPLAY MENU -->
+                                    <!--                     -->
+                                    <div class="btn-group" style="float: right; margin: 9px 9px 0 9px;" role="group">
+                                        <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" title="Choose displayed information">
+                                            <i class="fa fa-info" aria-hidden="true"></i><span class="caret"></span>
+                                        </button>
+                                        <div class="dropdown-menu">
+                                            <form class="form-inline form-navpanel">
+                                                <div class="input-group">
+                                                    <span class="input-group-addon"><i class="fa fa-search" aria-hidden="true"></i></span>
+                                                    <input id="browserNavFieldsPanel_filter_input" type="text" class="form-control" placeholder="Filter sample" aria-describedby="sizing-addon1">
+                                                </div>
+                                            </form>
+                                            <ul>
+                                                <li><a href="#"><input type="checkbox"/> Annso</a>
+                                                    <ul><li><a href="#" style="padding-left:50px"><input type="checkbox" checked/> Chrom
+                                                                <span style="float:right;"><i class="fa fa-info-circle" aria-hidden="true"></i></span>
+                                                            </a></li>
+                                                        <li><a href="#" style="padding-left:50px"><input type="checkbox" checked/> Pos
+                                                                <span style="float:right;"><i class="fa fa-info-circle" aria-hidden="true"></i></span>
+                                                            </a></li>
+                                                        <li><a href="#" style="padding-left:50px"><input type="checkbox" checked/> Ref
+                                                                <span style="float:right;"><i class="fa fa-info-circle" aria-hidden="true"></i></span>
+                                                            </a></li>
+                                                        <li><a href="#" style="padding-left:50px"><input type="checkbox" checked/> Alt
+                                                                <span style="float:right;"><i class="fa fa-info-circle" aria-hidden="true"></i></span>
+                                                            </a></li>
+                                                        <li><a href="#" style="padding-left:50px"><input type="checkbox"/> Bin
+                                                                <span style="float:right;"><i class="fa fa-info-circle" aria-hidden="true"></i></span>
+                                                            </a></li>
+                                                        <li><a href="#" style="padding-left:50px"><input type="checkbox" checked/> Sample
+                                                                <span style="float:right;"><i class="fa fa-info-circle" aria-hidden="true"></i></span>
+                                                            </a></li>
+                                                        <li><a href="#" style="padding-left:50px"><input type="checkbox"/> DP
+                                                                <span style="float:right;"><i class="fa fa-info-circle" aria-hidden="true"></i></span>
+                                                            </a></li>
+                                                        <li><a href="#" style="padding-left:50px"><input type="checkbox"/> GT
+                                                                <span style="float:right;"><i class="fa fa-info-circle" aria-hidden="true"></i></span>
+                                                            </a></li>
+                                                    </ul>
+                                                </li>
+                                                <li><a href="#"><input type="checkbox"/> RefGene</a>
+                                                        <li><a href="#" style="padding-left:50px"><input type="checkbox"/> CDS
+                                                                <span style="float:right;"><i class="fa fa-info-circle" aria-hidden="true"></i></span>
+                                                            </a></li>
+                                                        <li><a href="#" style="padding-left:50px"><input type="checkbox"/> Exon count
+                                                                <span style="float:right;"><i class="fa fa-info-circle" aria-hidden="true"></i></span>
+                                                            </a></li>
+                                                        <li><a href="#" style="padding-left:50px"><input type="checkbox"/> Exon positions
+                                                                <span style="float:right;"><i class="fa fa-info-circle" aria-hidden="true"></i></span>
+                                                            </a></li>
+                                                    <ul><li><a href="#" style="padding-left:50px"><input type="checkbox"/> Name
+                                                                <span style="float:right;"><i class="fa fa-info-circle" aria-hidden="true"></i></span>
+                                                            </a></li>
+                                                        <li><a href="#" style="padding-left:50px"><input type="checkbox"/> Name2
+                                                                <span style="float:right;"><i class="fa fa-info-circle" aria-hidden="true"></i></span>
+                                                            </a></li>
+                                                        <li><a href="#" style="padding-left:50px"><input type="checkbox"/> Score
+                                                                <span style="float:right;"><i class="fa fa-info-circle" aria-hidden="true"></i></span>
+                                                            </a></li>
+                                                        <li><a href="#" style="padding-left:50px"><input type="checkbox"/> Tx
+                                                                <span style="float:right;"><i class="fa fa-info-circle" aria-hidden="true"></i></span>
+                                                            </a></li>
+                                                    </ul>
+                                                </li>
+                                            </ul>
+                                        </div>
+                                    </div>
+
+                                    <!--                      -->
+                                    <!-- QUICK VARIANT FILTER -->
+                                    <!--                      -->
+                                    <form class="form-inline" style="display:block; float: right; margin: 9px 9px 0 9px;">
+                                        <span id="qfilter_message" style="color:#999" style="font-style:italic"></span>
+                                        <span id="qfilter_warning" class="text-danger" style="font-style:italic"></span>
+                                        <div class="input-group">
+                                            <span class="input-group-addon"><i class="fa fa-search" aria-hidden="true"></i></span>
+                                            <input id="browser_filter_input" type="text" class="form-control" placeholder="Filter variants" aria-describedby="sizing-addon1">
+                                        </div>
+                                    </form>
                                 </div>
-                            </div>
+                            </nav>
+
+                        
                         </div>
                     </div>
                     <div class="panel-body" style="padding: 0;">
                         <div class="row" style="margin:0;">
-                            <div id="browser_navpanel" class="col-md-3 browser-panel">
-
+                            <div id="browser_navpanel" class="col-md-3 browser-panel tab-content">
+                                
                                 <!--                  -->
                                 <!-- SAMPLE NAV PANEL --> 
                                 <!--                  -->
-                                <a class="btn section" style="display:block; text-align:left;" role="button" data-toggle="collapse" href="#browserNavSamplesPanel" aria-expanded="false" aria-controls="browserNavSamplesPanel">
-                                    <i class="fa fa-cubes" aria-hidden="true"></i> Sélections 
-                                    <span style="float:right;">
-                                        <span id="selection_count" class="badge"></span>&nbsp;<i class="fa fa-chevron-right" aria-hidden="true" style="width:20px; text-align:center;"></i>
-                                    </span>
-                                </a>
-                                <div id="browserNavSamplesPanel" class="collapse">
-                                    <form class="form-inline form-navpanel">
-                                        <div class="input-group">
-                                            <span class="input-group-addon"><i class="fa fa-search" aria-hidden="true"></i></span>
-                                            <input id="browserNavSamplesPanel_filter_input" type="text" class="form-control" placeholder="Filter samples" aria-describedby="sizing-addon1">
-                                        </div>
-                                    </form>
-                                    <ul>
-                                        <li><a href="#" style="color:#999"><i class="fa fa-users" aria-hidden="true" style="width:20px; text-align:center;">&nbsp;</i> 
-                                            All variants
-                                            <span style="float:right;">350 <i class="fa fa-info-circle" aria-hidden="true"></i></span>
-                                            </a>
-                                        </li>
-                                        <li><a href="#" style="color:#999; padding-left: 50px;"><i class="fa fa-user" aria-hidden="true" style="width:20px; text-align:center;">&nbsp;</i> 
-                                            Dad
-                                            <span style="float:right;">116 <i class="fa fa-info-circle" aria-hidden="true" data-toggle="tooltip" title="Subject 1 CGH0157"></i></span>
-                                            </a>
-                                        </li>
-                                        <li><a href="#" style="color:#999; padding-left: 50px;"><i class="fa fa-user" aria-hidden="true" style="width:20px; text-align:center;">&nbsp;</i> 
-                                            Mom
-                                            <span style="float:right;">99 <i class="fa fa-info-circle" aria-hidden="true" data-toggle="tooltip" title="Subject 2 CGH0413"></i></span>
-                                            </a>
-                                        </li>
-                                        <li><a href="#" style="color:#999; padding-left: 50px;"><i class="fa fa-user" aria-hidden="true" style="width:20px; text-align:center;">&nbsp;</i>
-                                            Child
-                                            <span style="float:right;">135 <i class="fa fa-info-circle" aria-hidden="true" data-toggle="tooltip" title="Subject 3 CGH0542"></i></span>
-                                            </a>
-                                        </li>
-                                        <li><a href="#"><i class="fa fa-cube" aria-hidden="true" style="width:20px; text-align:center;">&nbsp;</i>
-                                            Parents
-                                            <span style="float:right;">215 <i class="fa fa-info-circle" aria-hidden="true"></i></span>
-                                            </a>
-                                        </li>
-                                        <li><a href="#" style="font-weight:bold;"><i class="fa fa-cube" aria-hidden="true" style="width:20px; text-align:center;">&nbsp;</i>
-                                            De Novo
-                                            <span style="float:right;">40 <i class="fa fa-info-circle" aria-hidden="true"></i></span>
-                                            </a>
-                                        </li>
-                                        <li><a href="#"><i class="fa fa-cube" aria-hidden="true" style="width:20px; text-align:center;">&nbsp;</i>
-                                            X link
-                                            <span style="float:right;">32 <i class="fa fa-info-circle" aria-hidden="true"></i></span>
-                                            </a>
-                                        </li>
-                                        <li><a href="#"><i class="fa fa-cube" aria-hidden="true" style="width:20px; text-align:center;">&nbsp;</i>
-                                            To check
-                                            <span style="float:right;">7 <i class="fa fa-info-circle" aria-hidden="true"></i></span>
-                                            </a>
-                                        </li>
-                                    </ul>
+                                <div id="browserNavSamplesPanel" class="tab-pane fade in active">
+
+                                    <a class="btn section" style="display:block; text-align:left;" href="#modal_import" title="Import data" data-toggle="modal"  href="#modal_import">
+                                        <i class="fa fa-download" style="width:20px; text-align:center;" aria-hidden="true"></i> Import data
+                                    </a>
+                                    <a class="btn section" style="display:block; text-align:left;" href="#modal_import" title="Import data" data-toggle="modal"  href="#modal_import">
+                                        <i class="fa fa-folder-open" style="width:20px; text-align:center;" aria-hidden="true"></i> Browse samples
+                                    </a>
+                                    <hr/>
+
+                                    <a class="btn section" style="display:block; text-align:left;" role="button" data-toggle="collapse" href="#browserNavSamplesPanelSamples" aria-expanded="false" aria-controls="browserNavSamplesPanelSamples">
+                                        <i class="fa fa-users" style="width:20px; text-align:center;" aria-hidden="true"></i> Selected for the analysis 
+                                        <span style="float:right;">
+                                            <span id="selection_count" class="badge"></span>&nbsp;<i class="fa fa-chevron-right" aria-hidden="true" style="width:20px; text-align:center;"></i>
+                                        </span>
+                                    </a>
+                                    <div id="browserNavSamplesPanelSamples" class="collapse">
+                                        <ul>
+                                            <li><a href="#"><i class="fa fa-user text-success" aria-hidden="true" style="width:20px; text-align:center;">&nbsp;</i>
+                                                Dad <span style="float:right;">116</span>
+                                                </a>
+                                            </li>
+                                            <li><a href="#" style="color:#999; padding-left: 50px;"><i class="fa fa-user" aria-hidden="true" style="width:20px; text-align:center;">&nbsp;</i> 
+                                                Subject : AP-VD-09</a>
+                                            </li>
+                                            <li><a href="#" style="color:#999; padding-left: 50px;"><i class="fa fa-flask" aria-hidden="true" style="width:20px; text-align:center;">&nbsp;</i> 
+                                                Sample : CGH0157
+                                                </a>
+                                            </li>
+                                            <li><a href="#" style="color:#999; padding-left: 50px;"><i class="fa fa-mars" aria-hidden="true" style="width:20px; text-align:center;">&nbsp;</i> 
+                                                Sex : Male
+                                                </a>
+                                            </li>
+                                            <li><a href="#" style="color:#999; padding-left: 50px;"><i class="fa fa-check-circle-o" aria-hidden="true" style="width:20px; text-align:center;">&nbsp;</i> 
+                                                Is control
+                                                </a>
+                                            </li>
+                                            <li><a href="#"><i class="fa fa-user text-success" aria-hidden="true" style="width:20px; text-align:center;">&nbsp;</i>
+                                                Mom
+                                                <span style="float:right;">99 <i class="fa fa-info-circle" aria-hidden="true" data-toggle="tooltip" title="DG-FP-14 CGH0413 Control"></i></span>
+                                                </a>
+                                            </li>
+                                            <li><a href="#"><i class="fa fa-user text-danger" aria-hidden="true" style="width:20px; text-align:center;">&nbsp;</i>
+                                                Child
+                                                <span style="float:right;">135 <i class="fa fa-info-circle" aria-hidden="true" data-toggle="tooltip" title="GH-RC-A1 CGH0542"></i></span>
+                                                </a>
+                                            </li>
+                                        </ul>
+                                    </div>
                                 </div>
 
 
+                                <!--                  -->
+                                <!-- FILTERS NAV PANEL --> 
+                                <!--                  -->
+                                <div id="browserNavFiltersPanel" class="tab-pane fade">
 
-                                <!--                  -->
-                                <!-- FIELDS NAV PANEL --> 
-                                <!--                  -->
-                                <a class="btn section" style="display:block; text-align:left;" role="button" data-toggle="collapse" href="#browserNavFieldsPanel" aria-expanded="false" aria-controls="browserNavFieldsPanel">
-                                    <i class="fa fa-info" aria-hidden="true" style="width:20px; text-align:center;">&nbsp;</i> Fields 
-                                    <span style="float:right;">
-                                        <span id="selection_count" class="badge"></span>&nbsp;<i class="fa fa-chevron-right" aria-hidden="true" style="width:20px; text-align:center;"></i>
-                                    </span>
-                                </a>
-                                <div id="browserNavFieldsPanel" class="collapse">
-                                    <form class="form-inline form-navpanel">
-                                        <div class="input-group">
-                                            <span class="input-group-addon"><i class="fa fa-search" aria-hidden="true"></i></span>
-                                            <input id="browserNavFieldsPanel_filter_input" type="text" class="form-control" placeholder="Filter sample" aria-describedby="sizing-addon1">
-                                        </div>
-                                    </form>
-                                    <ul>
-                                        <li><a href="#"><input type="checkbox"/> Annso</a>
-                                            <ul><li><a href="#" style="padding-left:50px"><input type="checkbox" checked/> Chrom
-                                                        <span style="float:right;"><i class="fa fa-info-circle" aria-hidden="true"></i></span>
-                                                    </a></li>
-                                                <li><a href="#" style="padding-left:50px"><input type="checkbox" checked/> Pos
-                                                        <span style="float:right;"><i class="fa fa-info-circle" aria-hidden="true"></i></span>
-                                                    </a></li>
-                                                <li><a href="#" style="padding-left:50px"><input type="checkbox" checked/> Ref
-                                                        <span style="float:right;"><i class="fa fa-info-circle" aria-hidden="true"></i></span>
-                                                    </a></li>
-                                                <li><a href="#" style="padding-left:50px"><input type="checkbox" checked/> Alt
-                                                        <span style="float:right;"><i class="fa fa-info-circle" aria-hidden="true"></i></span>
-                                                    </a></li>
-                                                <li><a href="#" style="padding-left:50px"><input type="checkbox"/> Bin
-                                                        <span style="float:right;"><i class="fa fa-info-circle" aria-hidden="true"></i></span>
-                                                    </a></li>
-                                                <li><a href="#" style="padding-left:50px"><input type="checkbox" checked/> Sample
-                                                        <span style="float:right;"><i class="fa fa-info-circle" aria-hidden="true"></i></span>
-                                                    </a></li>
-                                                <li><a href="#" style="padding-left:50px"><input type="checkbox"/> DP
-                                                        <span style="float:right;"><i class="fa fa-info-circle" aria-hidden="true"></i></span>
-                                                    </a></li>
-                                                <li><a href="#" style="padding-left:50px"><input type="checkbox"/> GT
-                                                        <span style="float:right;"><i class="fa fa-info-circle" aria-hidden="true"></i></span>
-                                                    </a></li>
-                                            </ul>
-                                        </li>
-                                        <li><a href="#"><input type="checkbox"/> RefGene</a>
-                                                <li><a href="#" style="padding-left:50px"><input type="checkbox"/> CDS
-                                                        <span style="float:right;"><i class="fa fa-info-circle" aria-hidden="true"></i></span>
-                                                    </a></li>
-                                                <li><a href="#" style="padding-left:50px"><input type="checkbox"/> Exon count
-                                                        <span style="float:right;"><i class="fa fa-info-circle" aria-hidden="true"></i></span>
-                                                    </a></li>
-                                                <li><a href="#" style="padding-left:50px"><input type="checkbox"/> Exon positions
-                                                        <span style="float:right;"><i class="fa fa-info-circle" aria-hidden="true"></i></span>
-                                                    </a></li>
-                                            <ul><li><a href="#" style="padding-left:50px"><input type="checkbox"/> Name
-                                                        <span style="float:right;"><i class="fa fa-info-circle" aria-hidden="true"></i></span>
-                                                    </a></li>
-                                                <li><a href="#" style="padding-left:50px"><input type="checkbox"/> Name2
-                                                        <span style="float:right;"><i class="fa fa-info-circle" aria-hidden="true"></i></span>
-                                                    </a></li>
-                                                <li><a href="#" style="padding-left:50px"><input type="checkbox"/> Score
-                                                        <span style="float:right;"><i class="fa fa-info-circle" aria-hidden="true"></i></span>
-                                                    </a></li>
-                                                <li><a href="#" style="padding-left:50px"><input type="checkbox"/> Tx
-                                                        <span style="float:right;"><i class="fa fa-info-circle" aria-hidden="true"></i></span>
-                                                    </a></li>
-                                            </ul>
-                                        </li>
-                                    </ul>
+                                    <a href="#" class="btn section" style="display:block; text-align:left;" role="button">
+                                        <i class="fa fa-cube" aria-hidden="true" style="width:20px; text-align:center;">&nbsp;</i>
+                                        All variants
+                                        <span style="float:right;">350</span>
+                                    </a>
+                                    <a class="btn section" style="display:block; text-align:left;" role="button" data-toggle="collapse" href="#browserNavFiltersPanelFilters" aria-expanded="false" aria-controls="browserNavFiltersPanelFilters">
+                                        <i class="fa fa-cubes" style="width:20px; text-align:center;" aria-hidden="true"></i> Saved filters 
+                                        <span style="float:right;">
+                                            <span id="selection_count" class="badge"></span>&nbsp;<i class="fa fa-chevron-right" aria-hidden="true" style="width:20px; text-align:center;"></i>
+                                        </span>
+                                    </a>
+                                    <div id="browserNavFiltersPanelFilters" class="collapse">
+                                        <ul>
+                                            
+                                            <li><a href="#" style="font-weight:bold;"><i class="fa fa-cube" aria-hidden="true" style="width:20px; text-align:center;">&nbsp;</i>
+                                                De Novo
+                                                <span style="float:right;">40 <i class="fa fa-info-circle" aria-hidden="true"></i></span>
+                                                </a>
+                                            </li>
+                                            <li><a href="#"><i class="fa fa-cube" aria-hidden="true" style="width:20px; text-align:center;">&nbsp;</i>
+                                                X link
+                                                <span style="float:right;">32 <i class="fa fa-info-circle" aria-hidden="true"></i></span>
+                                                </a>
+                                            </li>
+                                            <li><a href="#"><i class="fa fa-cube" aria-hidden="true" style="width:20px; text-align:center;">&nbsp;</i>
+                                                Final
+                                                <span style="float:right;">7 <i class="fa fa-info-circle" aria-hidden="true"></i></span>
+                                                </a>
+                                            </li>
+                                        </ul>
+                                    </div>
+
+
+
+                                    <a class="btn section" style="display:block; text-align:left;" role="button" data-toggle="collapse" href="#browserNavFiltersPanelCurrent" aria-expanded="false" aria-controls="browserNavFiltersPanelCurrent">
+                                        <i class="fa fa-filter" aria-hidden="true" style="width:20px; text-align:center;">&nbsp;</i> Filter
+                                        <span style="float:right;">
+                                            <span id="selection_count" class="badge">40</span>
+                                        </span>
+                                    </a>
+                                    <div id="browserNavFiltersPanelCurrent" class="collapse">
+                                        <form class="form-inline form-navpanel">
+
+                                            <div class="input-group">
+                                                <span class="input-group-addon" title="Name of the selection"><i class="fa fa-tag" aria-hidden="true"></i></span>
+                                                <input id="browserNavFilterPanel_selection_input" type="text" class="form-control" placeholder="Name of the selection" aria-describedby="sizing-addon1" value="De Novo (1)" title="Name of the selection">
+                                            </div>
+                                        </form>
+                                        <a class="btn section" style="padding-left: 25px;" role="button">Filterinf condition :</a>
+                                        <ul>
+                                            <li><a href="#" style="padding-left: 50px;"><input type="checkbox" checked/> SIFT > 13 
+                                                <span style="float:right;"><i class="fa fa-pencil" aria-hidden="true"></i> <i class="fa fa-times" aria-hidden="true"></i></span></a></li>
+                                            <li><a href="#" style="padding-left: 50px;"><input type="checkbox" checked/> DP < 400
+                                                <span style="float:right;"><i class="fa fa-pencil" aria-hidden="true"></i> <i class="fa fa-times" aria-hidden="true"></i></span></a></li>
+                                            <li><a href="#" style="padding-left: 50px;"><input type="checkbox" checked/> is deletion
+                                                <span style="float:right;"><i class="fa fa-pencil" aria-hidden="true"></i> <i class="fa fa-times" aria-hidden="true"></i></span></a></li>
+                                            <li><a href="#" style="padding-left: 50px; font-style:italic; color:#999"><i class="fa fa-plus" aria-hidden="true">&nbsp;</i> Add condition</a></li>
+                                        </ul>
+
+                                        <button type="button" class="btn btn-default" title="Create a selection for this filter and continue with a new filter" style="display:block; margin:auto; ">
+                                            <i class="fa fa-floppy-o" aria-hidden="true"></i> Save filter
+                                        </button>
+                                    </div>
                                 </div>
 
 
-
-
-
                                 <!--                  -->
-                                <!-- FILTER NAV PANEL --> 
+                                <!-- SELECTION NAV PANEL --> 
                                 <!--                  -->
-                                <hr/>
-                                <a class="btn section" style="display:block; text-align:left;" role="button">
-                                    <i class="fa fa-filter" aria-hidden="true" style="width:20px; text-align:center;">&nbsp;</i> Current selection 
-                                    <span style="float:right;">
-                                        <span id="selection_count" class="badge">40</span>
-                                    </span>
-                                </a>
-                                <div id="browserNavFilterPanel">
-                                    <form class="form-inline form-navpanel">
-
-                                        <div class="input-group">
-                                            <span class="input-group-addon" title="Name of the selection"><i class="fa fa-tag" aria-hidden="true"></i></span>
-                                            <input id="browserNavFilterPanel_selection_input" type="text" class="form-control" placeholder="Name of the selection" aria-describedby="sizing-addon1" value="De Novo" title="Name of the selection">
-                                        </div>
-                                    </form>
-                                    <a class="btn section" style="padding-left: 25px;" role="button">Sources </a>
-                                    <ul>
-                                        <li><a href="#" style="padding-left: 50px;"><i class="fa fa-cubes" aria-hidden="true">&nbsp;</i>
-                                            Parents \ Child <span style="float:right;"><i class="fa fa-pencil" aria-hidden="true"></i> <i class="fa fa-times" aria-hidden="true"></i></span></a></li>
-                                        <li><a href="#" style="padding-left: 50px; font-style:italic; color:#999"><i class="fa fa-plus" aria-hidden="true">&nbsp;</i> Add source</a></li>
-                                    </ul>
-
-
-                                    <a class="btn section" style="padding-left: 25px;" role="button">Filtering</a>
-                                    <ul>
-                                        <li><a href="#" style="padding-left: 50px;"><input type="checkbox" checked/> SIFT > 13 
-                                            <span style="float:right;"><i class="fa fa-pencil" aria-hidden="true"></i> <i class="fa fa-times" aria-hidden="true"></i></span></a></li>
-                                        <li><a href="#" style="padding-left: 50px;"><input type="checkbox" checked/> DP < 400
-                                            <span style="float:right;"><i class="fa fa-pencil" aria-hidden="true"></i> <i class="fa fa-times" aria-hidden="true"></i></span></a></li>
-                                        <li><a href="#" style="padding-left: 50px;"><input type="checkbox" checked/> is deletion
-                                            <span style="float:right;"><i class="fa fa-pencil" aria-hidden="true"></i> <i class="fa fa-times" aria-hidden="true"></i></span></a></li>
-                                        <li><a href="#" style="padding-left: 50px; font-style:italic; color:#999"><i class="fa fa-plus" aria-hidden="true">&nbsp;</i> Add filter</a></li>
-                                    </ul>
-
-                                    <button type="button" class="btn btn-default" title="Create a selection for this filter and continue with a new filter" style="display:block; margin:auto; ">
-                                        <i class="fa fa-floppy-o" aria-hidden="true"></i> Save selection
-                                    </button>
+                                <div id="browserNavSelectionPanel" class="tab-pane fade">
+                                    
+                                    <a class="btn section" style="display:block; text-align:left;" role="button">
+                                        <i class="fa fa-check-square-o" aria-hidden="true" style="width:20px; text-align:center;">&nbsp;</i> Selected variants 
+                                        <span style="float:right;">
+                                            <span id="selection_count" class="badge">7</span>&nbsp;<i class="fa fa-chevron-right" aria-hidden="true" style="width:20px; text-align:center;"></i>
+                                        </span>
+                                    </a>
+                                    <a class="btn section" style="display:block; text-align:left;" role="button">
+                                        <i class="fa fa-share-square-o" aria-hidden="true" style="width:20px; text-align:center;">&nbsp;</i> Export data
+                                    </a>
+                                    <a class="btn section" style="display:block; text-align:left;" role="button">
+                                        <i class="fa fa-print" aria-hidden="true" style="width:20px; text-align:center;">&nbsp;</i> Generate report
+                                    </a>
                                 </div>
-
                             </div>
+
+
 
                             <div id="browser_content" class="col-md-9" style="height:500px; padding-left:0; padding-right:0; overflow-y: auto;">
                                 <!--            -->
-                                <!-- FILES LIST -->
+                                <!-- VARIANTS LIST -->
                                 <!--            -->
                                 <div id="browser_files">
                                     <table id="browser_files_table" class="table table-striped table-bordered" cellspacing="0" width="100%" style="margin:0">

@@ -36,8 +36,27 @@ app.router.add_route('GET',    "/v1/config", website.get_config)
 app.router.add_route('GET',    "/v1/ws",     websocket.get)
 
 
-app.router.add_route('GET',    "/v1/db",     dbHandler.get_db)
-app.router.add_route('GET',    "/v1/db/{db_name}",     dbHandler.get_db_details)
+# app.router.add_route('GET',    "/v1/db",     dbHandler.get_db)
+# app.router.add_route('GET',    "/v1/db/{db_name}",     dbHandler.get_db_details)
+
+
+
+# app.router.add_route('GET',    "/v1/analysis",     analysisHandler.get_analyses)
+# app.router.add_route('GET',    "/v1/analysis/{analysis_id}",     analysisHandler.get_analysis)
+# app.router.add_route('GET',    "/v1/analysis/{analysis_id}/sample",     analysisHandler.get_analyses)
+# app.router.add_route('GET',    "/v1/analysis/{analysis_id}/sample/{sample_id}",     analysisHandler.get_analyses)
+# app.router.add_route('GET',    "/v1/analysis/{analysis_id}/sample/{sample_id}/variant",     analysisHandler.get_analyses)
+# app.router.add_route('GET',    "/v1/analysis/{analysis_id}/selection",     analysisHandler.get_analyses)
+# app.router.add_route('GET',    "/v1/analysis/{analysis_id}/selection/{selection_id}",     analysisHandler.get_analyses)
+# app.router.add_route('GET',    "/v1/analysis/{analysis_id}/selection/{selection_id}/variant",     analysisHandler.get_analyses)
+
+
+
+# app.router.add_route('GET',    "/v1/field",                fieldsHandler.get_fields)
+# app.router.add_route('GET',    "/v1/field/{field_id}",     fieldsHandler.get_field)
+
+
+
 
 
 # DEV/DEBUG - Routes that should be manages directly by NginX

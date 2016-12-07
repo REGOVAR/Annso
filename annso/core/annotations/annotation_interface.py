@@ -34,15 +34,48 @@ class AnnotationInterface:
         """ 
             In the init all check must be done if requierement are well installed
         """
-        if dependencies in annso.extensions
-        pass
+        #if dependencies in annso.extensions:
+        disabled = True
 
 
 
     def public_fields(self):
-        return PirusFile.public_fields
 
+
+        
+INSERT INTO public.annotation_fields(database_id, name) VALUES 
+  (@id, 'name', 'string', '', NULL),
+  (@id, 'chrom', 'string', '', NULL),
+  (@id, 'strand', 'string', '', NULL),
+  (@id, 'tx', 'range_int', '', NULL),
+  (@id, 'cds', 'range_int', '', NULL),
+  (@id, 'exoncount', 'int', '', NULL),
+  (@id, 'exons', 'list_range_int', '', NULL),
+  (@id, 'score', 'int', '', NULL),
+  (@id, 'name2', 'string', '', NULL),
+  (@id, 'score', 'int', '', NULL),
+  (@id, 'score', 'int', '', NULL),
+        return ["field 1", "field 2"]
 
 
     def total(self):
-        return PirusFile.objects.count()
+        """ Return total number of entry in database or None if not possible """
+        return None
+
+
+    def get(self, fields=None, query=None, order=None, offset=None, limit=None, sublvl=0):
+        """ Generic method to request annotations """
+        return None
+
+
+    def get_form(self, fields=None):
+        """ Return JSON that describes the form(s) to used to filter on provided fields """
+        return None
+
+
+    def get_type(self, fields=None):
+        """ Return JSON that describes the type(s) of the provided field(s). This information should be used by the HMI to display properly annotation """
+        return None
+
+
+

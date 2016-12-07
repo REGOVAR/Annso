@@ -86,13 +86,21 @@ CREATE INDEX refgene_hg19_txrange_idx
 UPDATE public.refgene_hg19 SET txrange=int8range(txstart, txend);
 
 
-UPDATE public.refgene_hg19 SET variant_ids=array_agg(v.id)
-FROM public.variant_hg19 v
-LEFT JOIN public.refgene_hg19 rg ON rg.txrange @> int8(v.pos)
-GROUP BY v.id
+
+UPDATE public.refgene_hg19 SET variant_ids=ids
+FROM (
+    SELECT rg.id as rid, array_agg(v.id) as ids
+    FROM public.variant_hg19 v
+    LEFT JOIN public.refgene_hg19 rg ON rg.txrange @> int8(v.pos)
+    GROUP BY rg.id
+) as SR
+WHERE id=rid
 
 
 
 
-
-INSERT INTO 
+--
+-- Register refGen into annso database
+-- 
+INSERT INTO public.annotation_database(name, description, url, reference, update_date) 
+VALUES ('refGene', 'refGen database from USCIS', 'http://hgdownload.soe.ucsc.edu/goldenPath/hg19/database/refGene.txt.gz', 'hg19', CURRENT_TIMESTAMP);
