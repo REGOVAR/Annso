@@ -7,8 +7,8 @@ DEBUG          = True
 
 
 # HOST
-HOST           = "dev1.absolumentg.fr"
-PORT           = "8080"
+HOST           = "0.0.0.0"
+PORT           = "8100"
 VERSION        = "v1"
 HOSTNAME       = HOST + ":" + PORT + "/" + VERSION
 
