@@ -47,14 +47,14 @@
         </div>
     </nav>
 
-    <div class="container" role="main">
+    <div class="container" role="main" style="width:100%; padding:10px 50px 0 50px">
         <h1 class="content-subhead hidden" style="margin-top:70px"><i class="fa fa-retweet" aria-hidden="true"></i> WS [ <span id="message"></span> ]</h1>
         <div class="tab-content" style="margin-top:70px">
 
             <!--              -->
             <!-- PRESENTATION -->
             <!--              -->
-            <div id="presentation" class="tab-pane fade">
+            <div id="presentation" class="tab-pane fade container">
                 <h1>Annso !!</h1>
             </div>
 
@@ -62,7 +62,7 @@
             <!--      -->
             <!-- DEMO -->
             <!--      -->
-            <div id="demo" class="tab-pane fade in active" >
+            <div id="demo" class="tab-pane fade in active"  >
 
                 <div id="tus_support_alert" class="alert alert-warining hidden">
                     <b>Warning!</b> Your browser does not seem to support the features necessary to run tus-js-client.
@@ -80,7 +80,7 @@
 
                                         <div class="btn-group">
                                             <button type="button" class="btn btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" title="Start new analysis">
-                                                <i class="fa fa-filter" aria-hidden="true"></i> Analysis<!--<span class="caret"></span>-->
+                                                <i class="fa fa-filter" aria-hidden="true"></i> New analysis<!--<span class="caret"></span>-->
                                             </button>
                                             <ul class="dropdown-menu" role="menu" aria-labelledby="dLabel">
                                                 <li><a href="#">From scratch</a></li>
@@ -94,9 +94,10 @@
                                     <!-- ANALYSIS TAB MENU -->
                                     <!--                   -->
                                     <ul class="nav navbar-nav">
-                                        <li class="active"><a data-toggle="tab" href="#browserNavSamplesPanel"><i class="fa fa-user" style="width:20px; text-align:center;" aria-hidden="true"></i> Samples </a></li>
-                                        <li><a data-toggle="tab" href="#browserNavFiltersPanel"><i class="fa fa-filter" style="width:20px; text-align:center;" aria-hidden="true"></i> Filter</a></li>
-                                        <li><a data-toggle="tab" href="#browserNavSelectionPanel"><i class="fa fa-check-square-o" aria-hidden="true" style="width:20px; text-align:center;">&nbsp;</i> Selection</a></li>
+                                         <li style="color:#999; padding:15px 10px 0 10px;">My analysis :</li>
+                                        <li class="active"><a data-toggle="tab" href="#samples_panel"><i class="fa fa-user" style="width:20px; text-align:center;" aria-hidden="true"></i> Samples </a></li>
+                                        <li><a data-toggle="tab" href="#filters_panel"><i class="fa fa-filter" style="width:20px; text-align:center;" aria-hidden="true"></i> Filter</a></li>
+                                        <li><a data-toggle="tab" href="#selection_panel"><i class="fa fa-check-square-o" aria-hidden="true" style="width:20px; text-align:center;">&nbsp;</i> Selection</a></li>
                                     </ul>
 
                                     <!--                     -->
@@ -186,15 +187,21 @@
                         
                         </div>
                     </div>
-                    <div class="panel-body" style="padding: 0;">
-                        <div class="row" style="margin:0;">
-                            <div id="browser_navpanel" class="col-md-3 browser-panel tab-content">
-                                
-                                <!--                  -->
-                                <!-- SAMPLE NAV PANEL --> 
-                                <!--                  -->
-                                <div id="browserNavSamplesPanel" class="tab-pane fade in active">
 
+                    <div class="panel-body tab-content" style="padding: 0;">
+
+
+                        <!--              -->
+                        <!-- SAMPLE PANEL --> 
+                        <!--              -->
+                        <div id="samples_panel" class="tab-pane fade in active">
+                            <div class="row" style="margin:0;">
+                                <!--              -->
+                                <!-- SAMPLES MENU -->
+                                <!--              -->
+
+                                <div class="col-md-2 browser-panel">
+                                
                                     <a class="btn section" style="display:block; text-align:left;" href="#modal_import" title="Import data" data-toggle="modal"  href="#modal_import">
                                         <i class="fa fa-download" style="width:20px; text-align:center;" aria-hidden="true"></i> Import data
                                     </a>
@@ -203,13 +210,11 @@
                                     </a>
                                     <hr/>
 
-                                    <a class="btn section" style="display:block; text-align:left;" role="button" data-toggle="collapse" href="#browserNavSamplesPanelSamples" aria-expanded="false" aria-controls="browserNavSamplesPanelSamples">
+                                    <a class="btn section" style="display:block; text-align:left;">
                                         <i class="fa fa-users" style="width:20px; text-align:center;" aria-hidden="true"></i> Selected for the analysis 
-                                        <span style="float:right;">
-                                            <span id="selection_count" class="badge"></span>&nbsp;<i class="fa fa-chevron-right" aria-hidden="true" style="width:20px; text-align:center;"></i>
-                                        </span>
+                                        <span id="selection_count" class="badge" style="float:right; margin-top:3px">3</span>
                                     </a>
-                                    <div id="browserNavSamplesPanelSamples" class="collapse">
+                                    <div id="browserNavSamplesPanelSamples">
                                         <ul>
                                             <li><a href="#"><i class="fa fa-user text-success" aria-hidden="true" style="width:20px; text-align:center;">&nbsp;</i>
                                                 Dad <span style="float:right;">116</span>
@@ -245,11 +250,75 @@
                                 </div>
 
 
-                                <!--                  -->
-                                <!-- FILTERS NAV PANEL --> 
-                                <!--                  -->
-                                <div id="browserNavFiltersPanel" class="tab-pane fade">
 
+                                <div class="col-md-10" style="height:500px; padding-left:0; padding-right:0; overflow-y: auto;">
+                                    <!--              -->
+                                    <!-- SAMPLES LIST -->
+                                    <!--              -->
+                                    <div id="browser_samples">
+                                        <table id="browser_samples_table" class="table table-striped table-bordered" cellspacing="0" width="100%" style="margin:0">
+                                            <thead>
+                                                <tr>
+                                                    <th></th>
+                                                    <th>Subject</th>
+                                                    <th>Sample</th>
+                                                    <th>Variant count</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {% for r in variants %}
+                                                <tr id="fileEntry-{{ r[0] }}" style="cursor: pointer;">
+                                                    <td><input type="checkbox" value="{{ r[0] }}"/></td>
+                                                    <td>{{ r[1] }} </td>
+                                                    <td>{{ r[2] }} </td>
+                                                    <td class="pos">{{ r[3] }} </td>
+                                                </tr>
+                                                {% endfor %}
+                                            </tbody>
+                                        </table>
+                                    </div>
+
+                                    <!--                -->
+                                    <!-- SAMPLE DETAILS -->
+                                    <!--                -->
+                                    <div id="samples_details" class="collapse" >
+                                        <div id="browser_run_monitoring_header" class="">
+                                            <div id="browser_run_monitoring_progress" style="right:50%">&nbsp;
+                                            </div>
+
+                                            <div style="position:absolute; top:0; bottom:0; left:0; right:0">
+                                                <button id="browser_run_monitoring_refresh" type="button" class="btn btn-primary" style="display; block; float:right; margin-top: 10px; margin-right:10px" ><i class="fa fa-refresh" aria-hidden="true"></i> Refresh</button>
+                                                <button id="browser_run_monitoring_delete" type="button" class="btn btn-danger" style="display; block; float:right; margin-top: 10px; margin-right:10px"><i class="fa fa-trash" aria-hidden="true"></i> Delete</button>
+                                            
+                                                <p id="browser_run_icon" style="float: left; display: block; font-size: 5em; margin: 10px; margin-top: 0px;"></p>
+                                                <h3 id="browser_run_name" style="margin-left: 20px;"></h3>
+                                                <div  style="margin-left: 58px; color:#999; margin-top:10px;">
+                                                    <p id="browser_run_details" style="display:block; float: left;"></p>
+                                                    <p id="browser_run_status" style="display:block; float: right; margin-right: 10px; font-size: 20px; font-weight: bold;"></p>
+                                                </div>
+                                            </div> 
+                                            
+                                        </div>
+                                        <div>
+                                            blablabla : subject/sample details
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+
+
+                        <!--               -->
+                        <!-- FILTERS PANEL --> 
+                        <!--               -->
+                        <div id="filters_panel" class="tab-pane fade">
+                            <div class="row" style="margin:0;">
+
+                                <!--              -->
+                                <!-- FILTERS MENU -->
+                                <!--              -->
+                                <div class="col-md-2 browser-panel">
                                     <a href="#" class="btn section" style="display:block; text-align:left;" role="button">
                                         <i class="fa fa-cube" aria-hidden="true" style="width:20px; text-align:center;">&nbsp;</i>
                                         All variants
@@ -316,11 +385,55 @@
                                 </div>
 
 
-                                <!--                  -->
-                                <!-- SELECTION NAV PANEL --> 
-                                <!--                  -->
-                                <div id="browserNavSelectionPanel" class="tab-pane fade">
-                                    
+
+                                <div class="col-md-10" style="height:500px; padding-left:0; padding-right:0; overflow-y: auto;">
+                                    <!--                        -->
+                                    <!-- FILTERED VARIANTS LIST -->
+                                    <!--                        -->
+                                    <div id="variants_list">
+                                        <table id="variants_list_table" class="table table-striped table-bordered" cellspacing="0" width="100%" style="margin:0">
+                                            <thead>
+                                                <tr>
+                                                    <th></th>
+                                                    <th>Sample</th>
+                                                    <th>chr</th>
+                                                    <th>pos</th>
+                                                    <th>ref</th>
+                                                    <th>alt</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {% for r in variants %}
+                                                <tr id="fileEntry-{{ r[0] }}" style="cursor: pointer;">
+                                                    <td><input type="checkbox" value="{{ r[0] }}"/></td>
+                                                    <td>{{ r[1] }} </td>
+                                                    <td>{{ r[2] }} </td>
+                                                    <td class="pos">{{ r[3] }} </td>
+                                                    <td>{{ r[4] }} </td>
+                                                    <td>{{ r[5] }} </td>
+                                                </tr>
+                                                {% endfor %}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+
+
+
+                        <!--                 -->
+                        <!-- SELECTION PANEL --> 
+                        <!--                 -->
+                        <div id="selection_panel" class="tab-pane fade">
+                            <div class="row" style="margin:0;">
+
+
+                                <!--                -->
+                                <!-- SELECTION MENU --> 
+                                <!--                -->
+                                <div class="col-md-2 browser-panel">
                                     <a class="btn section" style="display:block; text-align:left;" role="button">
                                         <i class="fa fa-check-square-o" aria-hidden="true" style="width:20px; text-align:center;">&nbsp;</i> Selected variants 
                                         <span style="float:right;">
@@ -334,350 +447,351 @@
                                         <i class="fa fa-print" aria-hidden="true" style="width:20px; text-align:center;">&nbsp;</i> Generate report
                                     </a>
                                 </div>
-                            </div>
 
 
+                                <div class="col-md-10" style="height:500px; padding-left:0; padding-right:0; overflow-y: auto;">
+                                    <!--                        -->
+                                    <!-- SELECTED VARIANTS LIST -->
+                                    <!--                        -->
+                                    <div id="selection_list">
+                                        <table id="selection_list_table" class="table table-striped table-bordered" cellspacing="0" width="100%" style="margin:0">
+                                            <thead>
+                                                <tr>
+                                                    <th></th>
+                                                    <th>Sample</th>
+                                                    <th>chr</th>
+                                                    <th>pos</th>
+                                                    <th>ref</th>
+                                                    <th>alt</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {% for r in variants %}
+                                                <tr id="fileEntry-{{ r[0] }}" style="cursor: pointer;">
+                                                    <td><input type="checkbox" value="{{ r[0] }}"/></td>
+                                                    <td>{{ r[1] }} </td>
+                                                    <td>{{ r[2] }} </td>
+                                                    <td class="pos">{{ r[3] }} </td>
+                                                    <td>{{ r[4] }} </td>
+                                                    <td>{{ r[5] }} </td>
+                                                </tr>
+                                                {% endfor %}
+                                            </tbody>
+                                        </table>
+                                    </div>
 
-                            <div id="browser_content" class="col-md-9" style="height:500px; padding-left:0; padding-right:0; overflow-y: auto;">
-                                <!--            -->
-                                <!-- VARIANTS LIST -->
-                                <!--            -->
-                                <div id="browser_files">
-                                    <table id="browser_files_table" class="table table-striped table-bordered" cellspacing="0" width="100%" style="margin:0">
-                                        <thead>
-                                            <tr>
-                                                <th></th>
-                                                <th>Sample</th>
-                                                <th>chr</th>
-                                                <th>pos</th>
-                                                <th>ref</th>
-                                                <th>alt</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            {% for r in variants %}
-                                            <tr id="fileEntry-{{ r[0] }}" style="cursor: pointer;">
-                                                <td><input type="checkbox" value="{{ r[0] }}"/></td>
-                                                <td>{{ r[1] }} </td>
-                                                <td>{{ r[2] }} </td>
-                                                <td class="pos">{{ r[3] }} </td>
-                                                <td>{{ r[4] }} </td>
-                                                <td>{{ r[5] }} </td>
-                                            </tr>
-                                            {% endfor %}
-                                        </tbody>
-                                    </table>
-                                </div>
 
-
-                                <!--           -->
-                                <!-- RUN PANEL -->
-                                <!--           -->
-                                <div id="browser_run" class="collapse" >
-                                    <div id="browser_run_monitoring_header" class="">
-                                        <div id="browser_run_monitoring_progress" style="right:50%">&nbsp;
-                                        </div>
-
-                                        <div style="position:absolute; top:0; bottom:0; left:0; right:0">
-                                            <button id="browser_run_monitoring_refresh" type="button" class="btn btn-primary" style="display; block; float:right; margin-top: 10px; margin-right:10px" ><i class="fa fa-refresh" aria-hidden="true"></i> Refresh</button>
-                                            <button id="browser_run_monitoring_delete" type="button" class="btn btn-danger" style="display; block; float:right; margin-top: 10px; margin-right:10px"><i class="fa fa-trash" aria-hidden="true"></i> Delete</button>
-                                        
-                                            <p id="browser_run_icon" style="float: left; display: block; font-size: 5em; margin: 10px; margin-top: 0px;"></p>
-                                            <h3 id="browser_run_name" style="margin-left: 20px;"></h3>
-                                            <div  style="margin-left: 58px; color:#999; margin-top:10px;">
-                                                <p id="browser_run_details" style="display:block; float: left;"></p>
-                                                <p id="browser_run_status" style="display:block; float: right; margin-right: 10px; font-size: 20px; font-weight: bold;"></p>
+                                    <!--                     -->
+                                    <!-- EXPORT CONFIG PANEL -->
+                                    <!--                     -->
+                                    <div id="selection_export" class="collapse" >
+                                        <div id="browser_run_monitoring_header" class="">
+                                            <div id="browser_run_monitoring_progress" style="right:50%">&nbsp;
                                             </div>
-                                        </div> 
-                                        
-                                    </div>
-                                    <nav class="navbar navbar-default" style="margin-bottom: 0;">
-                                        <div class="navbar-collapse" style="height: 1px;">
-                                            <ul class="nav navbar-nav">
-                                                <li>
-                                                    <a id="browser_run_playpause" class="btn btn-default" title="Play/Pause" style="width: 40px;padding:5px!important;margin: 9px;margin-right: 0;">
-                                                        
-                                                    </a>
-                                                </li>
-                                                <li >
-                                                    <a id="browser_run_stop" class="btn btn-default" title="Cancel the run" style="width: 40px;padding:5px!important;margin: 9px;margin-right: 50px;" onclick="javascript:run_cmd('stop');">
-                                                        <i class="fa fa-stop" aria-hidden="true"></i>
-                                                    </a>
-                                                </li>
-                                                <li class="active"><a data-toggle="tab" href="#monitoring_tab_inputs"><i class="fa fa-files-o" aria-hidden="true"></i> Inputs</a></li>
-                                                <li><a data-toggle="tab" href="#monitoring_tab_outputs"><i class="fa fa-files-o" aria-hidden="true"></i> Ouputs</a></li>
-                                                <li><a data-toggle="tab" href="#monitoring_tab_vm"><i class="fa fa-tachometer" aria-hidden="true"></i> Status</a></li>
-                                                <li><a data-toggle="tab" href="#monitoring_tab_stdout"><i class="fa fa-desktop" aria-hidden="true"></i> Logs</a></li>
-                                                <li><a data-toggle="tab" href="#monitoring_tab_stderr"><i class="fa fa-desktop" aria-hidden="true"></i> Errors</a></li>
-                                            </ul>
-                                        </div>
-                                    </nav>
-                                    <div class="tab-content">
-                                        <div id="monitoring_tab_inputs" class="tab-pane fade in active" style="padding: 20px;">
 
+                                            <div style="position:absolute; top:0; bottom:0; left:0; right:0">
+                                                <button id="browser_run_monitoring_refresh" type="button" class="btn btn-primary" style="display; block; float:right; margin-top: 10px; margin-right:10px" ><i class="fa fa-refresh" aria-hidden="true"></i> Refresh</button>
+                                                <button id="browser_run_monitoring_delete" type="button" class="btn btn-danger" style="display; block; float:right; margin-top: 10px; margin-right:10px"><i class="fa fa-trash" aria-hidden="true"></i> Delete</button>
+                                            
+                                                <p id="browser_run_icon" style="float: left; display: block; font-size: 5em; margin: 10px; margin-top: 0px;"></p>
+                                                <h3 id="browser_run_name" style="margin-left: 20px;"></h3>
+                                                <div  style="margin-left: 58px; color:#999; margin-top:10px;">
+                                                    <p id="browser_run_details" style="display:block; float: left;"></p>
+                                                    <p id="browser_run_status" style="display:block; float: right; margin-right: 10px; font-size: 20px; font-weight: bold;"></p>
+                                                </div>
+                                            </div> 
+                                            
                                         </div>
-                                        <div id="monitoring_tab_outputs" class="tab-pane fade" style="padding: 20px;">
-                                        </div>
-                                        <div id="monitoring_tab_vm" class="tab-pane fade" style="padding: 20px;">
-                                            <p id="browser_run_monitoring_vm"></p>
-                                        </div>
-                                        <div id="monitoring_tab_stdout" class="tab-pane fade">
-                                            <pre id="browser_run_monitoring_stdout"></pre>
-                                        </div>
-                                        <div id="monitoring_tab_stderr" class="tab-pane fade">
-                                            <pre id="browser_run_monitoring_stderr"></pre>
-                                        </div>
-                                    </div>
-                                </div>
-
-
-
-                                <!--            -->
-                                <!-- FILE PANEL -->
-                                <!--            -->
-                                <div id="browser_file" class="collapse" >
-                                    <div id="browser_file_header" class="">
-                                        <div id="browser_file_progress" style="right:50%">&nbsp;
-                                        </div>
-
-                                        <div style="position:absolute; top:0; bottom:0; left:0; right:0">
-                                            <button id="browser_file_delete" type="button" class="btn btn-danger" style="display; block; float:right; margin-top: 10px; margin-right:10px" ><i class="fa fa-trash" aria-hidden="true"></i> Delete</button>
-                                        
-                                            <p id="browser_file_icon" style="float: left; display: block; font-size: 5em; margin: 10px; margin-top: 0px;"></p>
-                                            <h3 id="browser_file_name" style="margin-left: 20px;"></h3>
-                                            <div  style="margin-left: 58px; color:#999; margin-top:10px;">
-                                                <p id="browser_file_details" style="display:block; float: left;"></p>
-                                                <p id="browser_file_status" style="display:block; float: right; margin-right: 10px; font-size: 20px; font-weight: bold;"></p>
+                                        <nav class="navbar navbar-default" style="margin-bottom: 0;">
+                                            <div class="navbar-collapse" style="height: 1px;">
+                                                <ul class="nav navbar-nav">
+                                                    <li>
+                                                        <a id="browser_run_playpause" class="btn btn-default" title="Play/Pause" style="width: 40px;padding:5px!important;margin: 9px;margin-right: 0;">
+                                                            
+                                                        </a>
+                                                    </li>
+                                                    <li >
+                                                        <a id="browser_run_stop" class="btn btn-default" title="Cancel the run" style="width: 40px;padding:5px!important;margin: 9px;margin-right: 50px;" onclick="javascript:run_cmd('stop');">
+                                                            <i class="fa fa-stop" aria-hidden="true"></i>
+                                                        </a>
+                                                    </li>
+                                                    <li class="active"><a data-toggle="tab" href="#monitoring_tab_inputs"><i class="fa fa-files-o" aria-hidden="true"></i> Inputs</a></li>
+                                                    <li><a data-toggle="tab" href="#monitoring_tab_outputs"><i class="fa fa-files-o" aria-hidden="true"></i> Ouputs</a></li>
+                                                    <li><a data-toggle="tab" href="#monitoring_tab_vm"><i class="fa fa-tachometer" aria-hidden="true"></i> Status</a></li>
+                                                    <li><a data-toggle="tab" href="#monitoring_tab_stdout"><i class="fa fa-desktop" aria-hidden="true"></i> Logs</a></li>
+                                                    <li><a data-toggle="tab" href="#monitoring_tab_stderr"><i class="fa fa-desktop" aria-hidden="true"></i> Errors</a></li>
+                                                </ul>
                                             </div>
-                                        </div> 
-                                        
+                                        </nav>
+                                        <div class="tab-content">
+                                            <div id="monitoring_tab_inputs" class="tab-pane fade in active" style="padding: 20px;">
+
+                                            </div>
+                                            <div id="monitoring_tab_outputs" class="tab-pane fade" style="padding: 20px;">
+                                            </div>
+                                            <div id="monitoring_tab_vm" class="tab-pane fade" style="padding: 20px;">
+                                                <p id="browser_run_monitoring_vm"></p>
+                                            </div>
+                                            <div id="monitoring_tab_stdout" class="tab-pane fade">
+                                                <pre id="browser_run_monitoring_stdout"></pre>
+                                            </div>
+                                            <div id="monitoring_tab_stderr" class="tab-pane fade">
+                                                <pre id="browser_run_monitoring_stderr"></pre>
+                                            </div>
+                                        </div>
                                     </div>
-                                    <nav class="navbar navbar-default" style="margin-bottom: 0;">
-                                        <div class="navbar-collapse" style="height: 1px;">
-                                            <ul class="nav navbar-nav">
-                                                <li class="active"><a data-toggle="tab" href="#file_tab_edit"><i class="fa fa-pencil" aria-hidden="true"></i> Edit</a></li>
-                                                <li><a data-toggle="tab" href="#file_tab_infos"><i class="fa fa-list" aria-hidden="true"></i> Infos</a></li>
-                                                <li><a data-toggle="tab" href="#file_tab_preview"><i class="fa fa-eye" aria-hidden="true"></i> Preview</a></li>
-                                            </ul>
+
+
+                                    <!--                      -->
+                                    <!-- REPORT EDITION PANEL -->
+                                    <!--                      -->
+                                    <div id="selection_report" class="collapse" >
+                                        <div id="browser_file_header" class="">
+                                            <div id="browser_file_progress" style="right:50%">&nbsp;
+                                            </div>
+
+                                            <div style="position:absolute; top:0; bottom:0; left:0; right:0">
+                                                <button id="browser_file_delete" type="button" class="btn btn-danger" style="display; block; float:right; margin-top: 10px; margin-right:10px" ><i class="fa fa-trash" aria-hidden="true"></i> Delete</button>
+                                            
+                                                <p id="browser_file_icon" style="float: left; display: block; font-size: 5em; margin: 10px; margin-top: 0px;"></p>
+                                                <h3 id="browser_file_name" style="margin-left: 20px;"></h3>
+                                                <div  style="margin-left: 58px; color:#999; margin-top:10px;">
+                                                    <p id="browser_file_details" style="display:block; float: left;"></p>
+                                                    <p id="browser_file_status" style="display:block; float: right; margin-right: 10px; font-size: 20px; font-weight: bold;"></p>
+                                                </div>
+                                            </div> 
+                                            
                                         </div>
-                                    </nav>
-                                    <div class="tab-content">
-                                        <div id="file_tab_edit" class="tab-pane fade in active" style="padding: 20px;">
-                                            <form class="form-horizontal">
-                                                <div class="form-group">
-                                                    <label for="file_tab_edit_name" class="col-sm-2 control-label">Name</label>
-                                                    <div class="col-sm-10">
-                                                        <input type="text" class="form-control" id="file_tab_edit_name" placeholder="File name with extension">
+                                        <nav class="navbar navbar-default" style="margin-bottom: 0;">
+                                            <div class="navbar-collapse" style="height: 1px;">
+                                                <ul class="nav navbar-nav">
+                                                    <li class="active"><a data-toggle="tab" href="#file_tab_edit"><i class="fa fa-pencil" aria-hidden="true"></i> Edit</a></li>
+                                                    <li><a data-toggle="tab" href="#file_tab_infos"><i class="fa fa-list" aria-hidden="true"></i> Infos</a></li>
+                                                    <li><a data-toggle="tab" href="#file_tab_preview"><i class="fa fa-eye" aria-hidden="true"></i> Preview</a></li>
+                                                </ul>
+                                            </div>
+                                        </nav>
+                                        <div class="tab-content">
+                                            <div id="file_tab_edit" class="tab-pane fade in active" style="padding: 20px;">
+                                                <form class="form-horizontal">
+                                                    <div class="form-group">
+                                                        <label for="file_tab_edit_name" class="col-sm-2 control-label">Name</label>
+                                                        <div class="col-sm-10">
+                                                            <input type="text" class="form-control" id="file_tab_edit_name" placeholder="File name with extension">
+                                                        </div>
                                                     </div>
-                                                </div>
-                                                <div class="form-group">
-                                                    <label for="file_tab_edit_type" class="col-sm-2 control-label">Type</label>
-                                                    <div class="col-sm-10">
-                                                        <input type="text" class="form-control" id="file_tab_edit_type" placeholder="File type without the first point">
+                                                    <div class="form-group">
+                                                        <label for="file_tab_edit_type" class="col-sm-2 control-label">Type</label>
+                                                        <div class="col-sm-10">
+                                                            <input type="text" class="form-control" id="file_tab_edit_type" placeholder="File type without the first point">
+                                                        </div>
                                                     </div>
-                                                </div>
-                                                <div class="form-group">
-                                                    <label for="file_tab_edit_comments" class="col-sm-2 control-label">Comments</label>
-                                                    <div class="col-sm-10">
-                                                        <input type="text" class="form-control" id="file_tab_edit_comments" placeholder="Free comments about the file">
+                                                    <div class="form-group">
+                                                        <label for="file_tab_edit_comments" class="col-sm-2 control-label">Comments</label>
+                                                        <div class="col-sm-10">
+                                                            <input type="text" class="form-control" id="file_tab_edit_comments" placeholder="Free comments about the file">
+                                                        </div>
                                                     </div>
-                                                </div>
-                                                <div class="form-group">
-                                                    <label for="file_tab_edit_tags" class="col-sm-2 control-label">Tags</label>
-                                                    <div class="col-sm-10">
-                                                        <input type="text" class="form-control" id="file_tab_edit_tags" placeholder="Tags comma separated">
+                                                    <div class="form-group">
+                                                        <label for="file_tab_edit_tags" class="col-sm-2 control-label">Tags</label>
+                                                        <div class="col-sm-10">
+                                                            <input type="text" class="form-control" id="file_tab_edit_tags" placeholder="Tags comma separated">
+                                                        </div>
                                                     </div>
-                                                </div>
 
-                                                <div class="form-group">
-                                                    <div class="col-sm-offset-2 col-sm-10">
-                                                        <button class="btn btn-default">Reset</button>
+                                                    <div class="form-group">
+                                                        <div class="col-sm-offset-2 col-sm-10">
+                                                            <button class="btn btn-default">Reset</button>
 
-                                                        <button type="submit" class="btn btn-success">Save</button>
+                                                            <button type="submit" class="btn btn-success">Save</button>
+                                                        </div>
                                                     </div>
-                                                </div>
-                                            </form>
-                                        </div>
+                                                </form>
+                                            </div>
 
-                                        <div id="file_tab_infos" class="tab-pane fade" style="padding: 20px;">
-                                        </div>
+                                            <div id="file_tab_infos" class="tab-pane fade" style="padding: 20px;">
+                                            </div>
 
-                                        <div id="file_tab_preview" class="tab-pane fade" style="padding: 20px;">
+                                            <div id="file_tab_preview" class="tab-pane fade" style="padding: 20px;">
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
-                        <div id="demo_footer" class="panel-footer">&nbsp;</div>
                     </div>
+
+                    <div id="demo_footer" class="panel-footer">&nbsp;</div>
                 </div>
+            </div>
 
 
-                <ul id="context_menu" class="dropdown-menu" role="menu" style="display:none" >
-                    <li><a id="context_menu_info" tabindex="-1" href="#"><i class="fa fa-info-circle" aria-hidden="true"></i> Informations</a></li>
-                    <li><a id="context_menu_dl" tabindex="-1" href="#"><i class="fa fa-cloud-download" aria-hidden="true"></i> Download</a></li>
+            <ul id="context_menu" class="dropdown-menu" role="menu" style="display:none" >
+                <li><a id="context_menu_info" tabindex="-1" href="#"><i class="fa fa-info-circle" aria-hidden="true"></i> Informations</a></li>
+                <li><a id="context_menu_dl" tabindex="-1" href="#"><i class="fa fa-cloud-download" aria-hidden="true"></i> Download</a></li>
+            </ul>
+
+
+
+
+
+
+            <!--     -->
+            <!-- API -->
+            <!--     -->
+            <div id="api" class="tab-pane fade">
+                <h1> Comming soon</h1>
+                <ul>
+                    <li><a href="https://github.com/REGOVAR/Pirus/blob/master/examples/pipelines/PirusBasic/readme.md">Pipeline creation</a></li>
+                    <li><a href="https://github.com/REGOVAR/Pirus/tree/master/docs">Doc</a></li>
+                    <li><a href="https://annuel.framapad.org/p/pirusAPI">Spec in progress</a></li>
                 </ul>
+            </div>
 
 
 
 
 
-
-                <!--     -->
-                <!-- API -->
-                <!--     -->
-                <div id="api" class="tab-pane fade">
-                    <h1> Comming soon</h1>
-                    <ul>
-                        <li><a href="https://github.com/REGOVAR/Pirus/blob/master/examples/pipelines/PirusBasic/readme.md">Pipeline creation</a></li>
-                        <li><a href="https://github.com/REGOVAR/Pirus/tree/master/docs">Doc</a></li>
-                        <li><a href="https://annuel.framapad.org/p/pirusAPI">Spec in progress</a></li>
-                    </ul>
-                </div>
-
-
-
-
-
-                <!--                           -->
-                <!-- MODAL POPUP - File Upload -->
-                <!--                           -->
-                <div id="modal_new_file" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
-                    <div class="modal-dialog" role="document">
-                        <div class="modal-content">
-                            <div class="modal-header">
-                                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                                <h4 class="modal-title"><i class="fa fa-folder-open-o" aria-hidden="true"></i> Upload a file on Pirus</h4>
-                            </div>
-                            <div class="modal-body">
-                                <input type="hidden" id="modal_new_file_tus_endpoint" name="modal_new_file_tus_endpoint" value="http://{{ hostname }}/file/upload">
-                                <input type="hidden" id="modal_new_file_tus_chunksize" name="modal_new_file_tus_chunksize" value="256000">
-                                <input type="file" id="modal_new_file_tus_localinput">
-                                <p id="modal_new_file_progress" style="margin-top:20px; height:50px;"></p>
-
-                                <div class="modal-footer">
-                                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-                                </div>
-                            </div>
+            <!--                           -->
+            <!-- MODAL POPUP - File Upload -->
+            <!--                           -->
+            <div id="modal_new_file" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+                <div class="modal-dialog" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                            <h4 class="modal-title"><i class="fa fa-folder-open-o" aria-hidden="true"></i> Upload a file on Pirus</h4>
                         </div>
-                    </div>
-                </div>
+                        <div class="modal-body">
+                            <input type="hidden" id="modal_new_file_tus_endpoint" name="modal_new_file_tus_endpoint" value="http://{{ hostname }}/file/upload">
+                            <input type="hidden" id="modal_new_file_tus_chunksize" name="modal_new_file_tus_chunksize" value="256000">
+                            <input type="file" id="modal_new_file_tus_localinput">
+                            <p id="modal_new_file_progress" style="margin-top:20px; height:50px;"></p>
 
-
-
-
-                <!--                               -->
-                <!-- MODAL POPUP - Pipeline upload -->
-                <!--                               -->
-                <div id="modal_new_pipeline" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
-                    <div class="modal-dialog" role="document">
-                        <div class="modal-content">
-                            <div class="modal-header">
-                                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                                <h4 class="modal-title"><i class="fa fa-folder-open-o" aria-hidden="true"></i> Install a pipeline on Pirus</h4>
-                            </div>
-                            <div class="modal-body">
-                                <input type="hidden" id="modal_new_pipeline_tus_endpoint" name="modal_new_pipeline_tus_endpoint" value="http://{{ hostname }}/pipeline/upload">
-                                <input type="hidden" id="modal_new_pipeline_tus_chunksize" name="modal_new_pipeline_tus_chunksize" value="256000">
-                                <input type="file" id="modal_new_pipeline_tus_localinput">
-
-                                <div class="modal-footer">
-                                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-
-
-
-                <!--                        -->
-                <!-- MODAL POPUP - New Run  -->
-                <!--                        -->
-                <div id="modal_new_run" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
-                    <div class="modal-dialog" role="document">
-                        <div class="modal-content">
-                            <div class="modal-header">
-                                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                                <h4 class="modal-title"><i class="fa fa-play" aria-hidden="true"></i> New <span id="newRunPipeName" class="text-primary"></span> run</h4>
-                            </div>
-
-                            <div class="tab-content" style="margin:0 10px;">
-                                <div id="runConfigInputsTab" class="tab-pane fade in active">
-                                    <div class="runConfigHeader">
-                                        <p class="current"><span>1</span><br/><i class="fa fa-files-o" aria-hidden="true"></i> Inputs</p>
-                                        <p class="sp"> • • • • </p>
-                                        <p class=""><span>2</span><br/><i class="fa fa-cog" aria-hidden="true"></i> Configure</p>
-                                        <p class="sp"> • • • • </p>
-                                        <p class=""><span>3</span><br/><i class="fa fa-check" aria-hidden="true"></i> Confirm</p>
-                                    </div>
-
-                                    <div class="runConfigTabDescription">Below the list of input files selected for the run</div>
-                                    <table id="inputFilesList" class="table table-striped table-bordered" cellspacing="0" width="100%">
-                                        <thead>
-                                            <tr>
-                                                <th>Name</th>
-                                                <th>Size</th>
-                                                <th>Creation</th>
-                                            </tr>
-                                        </thead>
-
-                                        <tbody>
-         
-                                        </tbody>
-                                    </table>
-                                    <p style="margin-top: 20px; text-align:right;"> 
-                                        <button type="button" class="btn btn-primary" data-toggle="tab" href="#runConfigFormTab" onclick="javascript:run_config_step_2();">Next &nbsp;<i class="fa fa-chevron-right" aria-hidden="true"></i></button>
-                                    </p>
-                                </div>
-                                <div id="runConfigFormTab" class="tab-pane fade">
-                                    <div class="runConfigHeader">
-                                        <p class="ok"><span>1</span><br/><i class="fa fa-files-o" aria-hidden="true"></i> Inputs</p>
-                                        <p class="sp ok"> ——————— </p>
-                                        <p class="current"><span>2</span><br/><i class="fa fa-cog" aria-hidden="true"></i> Configure</p>
-                                        <p class="sp"> • • • • </p>
-                                        <p class="next"><span>3</span><br/><i class="fa fa-check" aria-hidden="true"></i> Confirm</p>
-                                    </div>
-                                    <div class="runConfigTabDescription">Configure the run</div>
-                                    <div id="runConfigContainer"></div>
-                                    <p style="margin-top: 20px; text-align:right;"> 
-                                        <button type="button" class="btn btn-primary" data-toggle="tab" href="#runConfigInputsTab"><i class="fa fa-chevron-left" aria-hidden="true"></i>&nbsp; Previous</button> &nbsp; 
-                                        <button type="button" class="btn btn-primary" data-toggle="tab" href="#runConfigConfirmTab" onclick="javascript:run_config_step_3();">Next &nbsp;<i class="fa fa-chevron-right" aria-hidden="true"></i></button>
-                                    </p>
-                                </div>
-                                <div id="runConfigConfirmTab" class="tab-pane fade">
-                                    <div class="runConfigHeader">
-                                        <p class="ok"><span>1</span><br/><i class="fa fa-files-o" aria-hidden="true"></i> Inputs</p>
-                                        <p class="sp ok"> ——————— </p>
-                                        <p class="ok"><span>2</span><br/><i class="fa fa-cog" aria-hidden="true"></i> Configure</p>
-                                        <p class="sp ok"> ——————— </p>
-                                        <p class="current"><span>3</span><br/><i class="fa fa-check" aria-hidden="true"></i> Confirm</p>
-                                    </div>
-                                    <div class="runConfigTabDescription"> The run is ready to start !</i></div>
-                                    <div id="runConfirmContainer">
-                                        <dl>
-                                            <dt>Inputs </dt>
-                                            <ll>file1</ll>
-                                            <ll>file2</ll>
-                                            <ll>file3</ll>
-
-                                            <dt>Parameters</dt>
-                                            <ll>Param1 : val 1</ll>
-                                            <ll>Param2 : val 2</ll>
-                                            <ll>Param3 : val 3</ll>
-                                        </dl>
-                                    </div>
-                                    <p style="margin-top: 20px; text-align:center;"> 
-                                        <button type="button" class="btn btn-primary" data-toggle="tab" href="#runConfigFormTab"><i class="fa fa-chevron-left" aria-hidden="true"></i>&nbsp; Previous</button>  &nbsp; 
-                                        <button id="runConfirmButton" type="button" class="btn btn-success" onclick="javascript:run_config_step_4();"><i class="fa fa-check" aria-hidden="true"></i>&nbsp; Run !</button>
-                                    </p>
-                                </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
+
+
+
+
+            <!--                               -->
+            <!-- MODAL POPUP - Pipeline upload -->
+            <!--                               -->
+            <div id="modal_new_pipeline" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+                <div class="modal-dialog" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                            <h4 class="modal-title"><i class="fa fa-folder-open-o" aria-hidden="true"></i> Install a pipeline on Pirus</h4>
+                        </div>
+                        <div class="modal-body">
+                            <input type="hidden" id="modal_new_pipeline_tus_endpoint" name="modal_new_pipeline_tus_endpoint" value="http://{{ hostname }}/pipeline/upload">
+                            <input type="hidden" id="modal_new_pipeline_tus_chunksize" name="modal_new_pipeline_tus_chunksize" value="256000">
+                            <input type="file" id="modal_new_pipeline_tus_localinput">
+
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
+
+
+            <!--                        -->
+            <!-- MODAL POPUP - New Run  -->
+            <!--                        -->
+            <div id="modal_new_run" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+                <div class="modal-dialog" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                            <h4 class="modal-title"><i class="fa fa-play" aria-hidden="true"></i> New <span id="newRunPipeName" class="text-primary"></span> run</h4>
+                        </div>
+
+                        <div class="tab-content" style="margin:0 10px;">
+                            <div id="runConfigInputsTab" class="tab-pane fade in active">
+                                <div class="runConfigHeader">
+                                    <p class="current"><span>1</span><br/><i class="fa fa-files-o" aria-hidden="true"></i> Inputs</p>
+                                    <p class="sp"> • • • • </p>
+                                    <p class=""><span>2</span><br/><i class="fa fa-cog" aria-hidden="true"></i> Configure</p>
+                                    <p class="sp"> • • • • </p>
+                                    <p class=""><span>3</span><br/><i class="fa fa-check" aria-hidden="true"></i> Confirm</p>
+                                </div>
+
+                                <div class="runConfigTabDescription">Below the list of input files selected for the run</div>
+                                <table id="inputFilesList" class="table table-striped table-bordered" cellspacing="0" width="100%">
+                                    <thead>
+                                        <tr>
+                                            <th>Name</th>
+                                            <th>Size</th>
+                                            <th>Creation</th>
+                                        </tr>
+                                    </thead>
+
+                                    <tbody>
+     
+                                    </tbody>
+                                </table>
+                                <p style="margin-top: 20px; text-align:right;"> 
+                                    <button type="button" class="btn btn-primary" data-toggle="tab" href="#runConfigFormTab" onclick="javascript:run_config_step_2();">Next &nbsp;<i class="fa fa-chevron-right" aria-hidden="true"></i></button>
+                                </p>
+                            </div>
+                            <div id="runConfigFormTab" class="tab-pane fade">
+                                <div class="runConfigHeader">
+                                    <p class="ok"><span>1</span><br/><i class="fa fa-files-o" aria-hidden="true"></i> Inputs</p>
+                                    <p class="sp ok"> ——————— </p>
+                                    <p class="current"><span>2</span><br/><i class="fa fa-cog" aria-hidden="true"></i> Configure</p>
+                                    <p class="sp"> • • • • </p>
+                                    <p class="next"><span>3</span><br/><i class="fa fa-check" aria-hidden="true"></i> Confirm</p>
+                                </div>
+                                <div class="runConfigTabDescription">Configure the run</div>
+                                <div id="runConfigContainer"></div>
+                                <p style="margin-top: 20px; text-align:right;"> 
+                                    <button type="button" class="btn btn-primary" data-toggle="tab" href="#runConfigInputsTab"><i class="fa fa-chevron-left" aria-hidden="true"></i>&nbsp; Previous</button> &nbsp; 
+                                    <button type="button" class="btn btn-primary" data-toggle="tab" href="#runConfigConfirmTab" onclick="javascript:run_config_step_3();">Next &nbsp;<i class="fa fa-chevron-right" aria-hidden="true"></i></button>
+                                </p>
+                            </div>
+                            <div id="runConfigConfirmTab" class="tab-pane fade">
+                                <div class="runConfigHeader">
+                                    <p class="ok"><span>1</span><br/><i class="fa fa-files-o" aria-hidden="true"></i> Inputs</p>
+                                    <p class="sp ok"> ——————— </p>
+                                    <p class="ok"><span>2</span><br/><i class="fa fa-cog" aria-hidden="true"></i> Configure</p>
+                                    <p class="sp ok"> ——————— </p>
+                                    <p class="current"><span>3</span><br/><i class="fa fa-check" aria-hidden="true"></i> Confirm</p>
+                                </div>
+                                <div class="runConfigTabDescription"> The run is ready to start !</i></div>
+                                <div id="runConfirmContainer">
+                                    <dl>
+                                        <dt>Inputs </dt>
+                                        <ll>file1</ll>
+                                        <ll>file2</ll>
+                                        <ll>file3</ll>
+
+                                        <dt>Parameters</dt>
+                                        <ll>Param1 : val 1</ll>
+                                        <ll>Param2 : val 2</ll>
+                                        <ll>Param3 : val 3</ll>
+                                    </dl>
+                                </div>
+                                <p style="margin-top: 20px; text-align:center;"> 
+                                    <button type="button" class="btn btn-primary" data-toggle="tab" href="#runConfigFormTab"><i class="fa fa-chevron-left" aria-hidden="true"></i>&nbsp; Previous</button>  &nbsp; 
+                                    <button id="runConfirmButton" type="button" class="btn btn-success" onclick="javascript:run_config_step_4();"><i class="fa fa-check" aria-hidden="true"></i>&nbsp; Run !</button>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
         </div>
     </div>
 

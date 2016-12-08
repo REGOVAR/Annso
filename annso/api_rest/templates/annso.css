@@ -3,7 +3,11 @@
 
 .browser-panel
 {
-
+    height:500px;
+    border-right: 1px solid #ddd;
+    overflow-y: auto;
+    padding: 0;
+    background-color: #f5f5f4;
 }
 .browser-panel hr 
 {
@@ -11,6 +15,14 @@
     margin-bottom: 10px;
     border-top: 1px solid #ddd;
 }
+
+.browser-panel ul         { padding: 0 ;}
+.browser-panel li         {clear:both; list-style-type: none;}
+.browser-panel li a       { display: block; height:1.4em;  padding-left: 30px; padding-right: 12px; height: 2em; line-height: 2em;  border-top: 1px solid #f5f5f4; color: #333;}
+.browser-panel li a:hover { background-color: #dcdfe1; border-top: 1px solid #fff; text-decoration: none; color:#337ab7;}
+.browser-panel li span    { float: right; }
+
+
 
 
 
@@ -87,20 +99,7 @@ table tbody tr:hover
 }
 
 
-#browser_navpanel 
-{
-    height:500px;
-    border-right: 1px solid #ddd;
-    overflow-y: auto;
-    padding: 0;
-    background-color: #f5f5f4;
 
-}
-#browser_navpanel ul         { padding: 0 ;}
-#browser_navpanel li         {clear:both; list-style-type: none;}
-#browser_navpanel li a       { display: block; height:1.4em;  padding-left: 30px; padding-right: 12px; height: 2em; line-height: 2em;  border-top: 1px solid #f5f5f4; color: #333;}
-#browser_navpanel li a:hover { background-color: #dcdfe1; border-top: 1px solid #fff; text-decoration: none; color:#337ab7;}
-#browser_navpanel li span    { float: right; }
 
 
 li.empty_selection
