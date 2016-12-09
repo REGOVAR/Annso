@@ -203,7 +203,7 @@ class SampleManager:
         for s in db_session.execute("SELECT sj.id, sj.name, sp.id, sp.name  FROM sample sp LEFT JOIN subject sj ON sj.id = sp.subject_id"):
             result.append({
                 "subject" : {"id" : s[0], "name" : s[1]},
-                "sample"  : {"id" : s[2], "name" : s[3], "vtotal" : 122}
+                "sample"  : {"id" : s[2], "name" : s[3]}
             })
         return result
 

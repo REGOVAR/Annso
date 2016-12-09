@@ -4,63 +4,62 @@ var demo_pirus_displayed_run_pipename;
 var demo_pirus_displayed_file;
 var demo_pirus_displayed_pipe;
 
+
+
+var demo_sample_attributes = []
 var demo_annso_samples = {};
-var demo_annso_sample_selected = null;
+var demo_annso_sample_displayed = null;
 
 
 
 
 
-function select_sample(sample_id)
+function select_sample(sample_id, swith_input)
 {
+    var input =  $('#sampleEntry-' + sample_id + ' input')[0];
+    var check = !input.checked;
+    var count = Object.keys(demo_annso_samples).length;
 
-    var check = false;
-    if (sample_id == -1 || sample_id == demo_annso_sample_selected)
+    var data = {
+        "id" : sample_id,
+        "name" : $('#sampleEntry-' + sample_id + ' td:nth-child(3)').html(),
+        "nickname" : $('#sampleEntry-' + sample_id + ' td:nth-child(1)').html(),
+        "subject" : $('#sampleEntry-' + sample_id + ' td:nth-child(2)').html()
+    };
+
+   
+    if (check)
     {
-        if ($('#samples_details_attributes_details').is( ":visible" ))
-        {
-            $('#samples_details_select_btn i').removeClass('fa-check-square-o');
-            $('#samples_details_select_btn i').addClass('fa-square-o');
-            check = false;
-        }
-        else
+        if (count == 0) $('#samples_panel_selection').html('');
+        demo_annso_samples[sample_id] = data;
+        var html = '<li id="samples_panel-' + sample_id + "\"><a onclick=\"javascript:show_sample(" + sample_id + ", false)\" href=\"#\">";
+        html += "<i class=\"fa fa-user\" aria-hidden=\"true\" style=\"width:20px; text-align:center;\">&nbsp;</i>" + data["name"] + '</a></li>';
+        $('#samples_panel_selection').append(html);
+
+        if (demo_annso_sample_displayed != null && demo_annso_sample_displayed["id"] == sample_id)
         {
             $('#samples_details_select_btn i').removeClass('fa-square-o');
             $('#samples_details_select_btn i').addClass('fa-check-square-o');
-            check = true;
+            $('#samples_details_attributes_details').removeClass('collapse');
         }
-    }
-    
-
-
-    if (sample_id == -1)
-    {
-        sample_id = demo_annso_sample_selected;
-    }
-    else
-    {
-        check = !input.checked;
-    }
-
-    var name  = $('#sampleEntry-' + sample_id + ' td:nth-child(3)').html();
-    var count = Object.keys(demo_annso_samples).length;
-    var input =  $('#sampleEntry-' + sample_id + ' input')[0];
-/*    if (check)
-    {
-        if (count == 0) $('#samples_panel > ul').html('');
-        demo_annso_samples[sample_id] = name;
-        var html = '<li id="samples_panel-' + sample_id + "\"><a onclick=\"javascript:show_sample('browser_file','" + sample_id + "')\" href=\"#\">";
-        html += "<i class=\"fa fa-user " + "" + "\" aria-hidden=\"true\"></i> " + name + '</a></li>';
-        $('#samples_panel ul').append(html);
         count += 1;
+        if (!swith_input) input.checked = true;
     }
     else
     {
         delete demo_annso_samples[sample_id];
         $('#samples_panel-' + sample_id).remove();
-        if (count == 1) $('#samples_panel > ul').html('<li class="empty_selection">No sample selected</li>');
+        if (count == 1) $('#samples_panel_selection').html('<li class="empty_selection">No sample selected</li>');
+        if (demo_annso_sample_displayed != null && demo_annso_sample_displayed["id"] == sample_id)
+        {
+            $('#samples_details_select_btn i').removeClass('fa-check-square-o');
+            $('#samples_details_select_btn i').addClass('fa-square-o');
+            $('#samples_details_attributes_details').addClass('collapse');
+        }
         count -= 1;
-    }*/
+        if (!swith_input) input.checked = false;
+    }
+    $('#samples_count').html(count);
 }
 
 
@@ -68,17 +67,39 @@ function select_sample(sample_id)
 
 function show_sample(sample_id)
 {
+    // Display sample details tab
     $('#browser_samples').addClass("col-md-7");
     $('#browser_samples').removeClass("col-md-10");
     $('#samples_details').addClass("col-md-3");
     $('#samples_details').removeClass("collapse");
 
+    // Get data of the displayed sample
+    demo_annso_sample_displayed = {
+        "id" : sample_id,
+        "name" : $('#sampleEntry-' + sample_id + ' td:nth-child(3)').html(),
+        "nickname" : $('#sampleEntry-' + sample_id + ' td:nth-child(1)').html(),
+        "subject" : $('#sampleEntry-' + sample_id + ' td:nth-child(2)').html()
+    };
 
-    demo_annso_samples[sample_id] = name;
-    demo_annso_sample_selected = sample_id;
 
-    $('#samples_details_subject').text( $('#sampleEntry-' + sample_id + ' td:nth-child(2)').html() )
-    $('#samples_details_name').text( $('#sampleEntry-' + sample_id + ' td:nth-child(3)').html() )
+    // Update view with sample data
+    $('#samples_details_subject').text( demo_annso_sample_displayed["subject"] );
+    $('#samples_details_name').text( demo_annso_sample_displayed["name"] );
+    $('#samples_details_nickname').text( demo_annso_sample_displayed["nickname"] );
+    $('#samples_details_select_btn').attr('onclick', "javascript:select_sample("+ sample_id +");");
+
+    if (sample_id in demo_annso_samples)
+    {
+        $('#samples_details_select_btn i').removeClass('fa-square-o');
+        $('#samples_details_select_btn i').addClass('fa-check-square-o');
+        $('#samples_details_attributes_details').removeClass('collapse');
+    }
+    else
+    {
+        $('#samples_details_select_btn i').removeClass('fa-check-square-o');
+        $('#samples_details_select_btn i').addClass('fa-square-o');
+        $('#samples_details_attributes_details').addClass('collapse');
+    }
 }
 
 
@@ -333,7 +354,7 @@ function select_file(file_id)
         count -= 1
     }
     
-    $('#selection_count').html(count == 0 ? 0 : count);
+    $('#selection_count').html(count);
 }
 
 var activity_inprogress_count = 0

@@ -208,11 +208,11 @@
 
                                     <a class="btn section" style="display:block; text-align:left;">
                                         <i class="fa fa-users" style="width:20px; text-align:center;" aria-hidden="true"></i> Selected for the analysis 
-                                        <span id="selection_count" class="badge" style="float:right; margin-top:3px">3</span>
+                                        <span id="samples_count" class="badge" style="float:right; margin-top:3px">0</span>
                                     </a>
-                                    <ul>
-
-
+                                    <ul id="samples_panel_selection">
+                                        <li class="empty_selection">No sample selected</li>
+                                        <!--
                                         <li><a class="section" role="button" data-toggle="collapse" href="#samples_selections_1" aria-expanded="false" aria-controls="samples_selections_1">
                                         <i class="fa fa-user" aria-hidden="true" style="width:20px; text-align:center;">&nbsp;</i>Dad <span style="float:right;">116</span>
                                         </a></li>
@@ -274,7 +274,7 @@
                                                 Sex : Male
                                                 </a>
                                             </li>
-                                        </div>
+                                        </div>-->
                                     </ul>
                                 </div>
 
@@ -285,21 +285,17 @@
                                     <table id="browser_samples_table" class="table table-striped table-bordered" cellspacing="0" width="100%" style="margin:0">
                                         <thead>
                                             <tr>
-                                                <th>Selection</th>
+                                                <th style="width:200px">Selection</th>
                                                 <th class="collapse">Subject</th>
                                                 <th>Sample</th>
-                                                <th>Variant count</th>
-                                                <th class="collapse">Attributes</th>
                                             </tr>
                                         </thead>
                                         <tbody>
                                             {% for s in samples %}
                                             <tr id="sampleEntry-{{ s["sample"]["id"] }}" style="cursor: pointer;" onclick="javascript:show_sample('{{ s["sample"]["id"] }}');">
-                                                <td><input type="checkbox" value="{{ s["sample"]["id"] }}" onchanged="javascript:select_sample({{ s["sample"]["id"] }})"/></td>
+                                                <td><input type="checkbox" value="{{ s["sample"]["id"] }}" onmouseup="javascript:select_sample({{ s["sample"]["id"] }}, false)"/></td>
                                                 <td class="collapse">{{ s["subject"]["name"] }} </td>
                                                 <td>{{ s["sample"]["name"] }} </td>
-                                                <td class="pos">{{ s["sample"]["vtotal"] }} </td>
-                                                <td></td>
                                             </tr>
                                             {% endfor %}
                                         </tbody>
@@ -360,7 +356,7 @@
                                     </div>
 
                                     <hr/>
-                                    <button id="samples_details_select_btn" class="btn btn-default" data-toggle="collapse" href="#samples_details_attributes_details" aria-expanded="false" aria-controls="samples_details_attributes_details" onclick="javascript:select_sample(-1);">
+                                    <button id="samples_details_select_btn" class="btn btn-default" onclick="javascript:select_sample(-1);">
                                         <i class="fa fa-square-o" aria-hidden="true" style="width:20px; text-align:center;"></i> Select for this analysis
                                     </button>
 
@@ -369,7 +365,7 @@
                                         <form class="form-inline" style="margin-left:15px;margin-bottom:10px;">
                                             <div class="input-group">
                                                 <span class="input-group-addon" title="Optional Nickname of the sample for this analysis"><i class="fa fa-flask" aria-hidden="true"></i></span>
-                                                <input id="samples_details_custom_name" type="text" class="form-control" placeholder="Optional nickname" aria-describedby="sizing-addon1" value="Dad" title="Optional nickname">
+                                                <input id="samples_details_nickname" type="text" class="form-control" placeholder="Optional nickname" aria-describedby="sizing-addon1" value="" title="Optional nickname">
                                             </div>
                                         </form>
                                         <ul>
@@ -765,20 +761,19 @@
 
 
 
-            <!--                               -->
-            <!-- MODAL POPUP - Pipeline upload -->
-            <!--                               -->
-            <div id="modal_new_pipeline" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+            <!--                                -->
+            <!-- MODAL POPUP - sample attribute -->
+            <!--                                -->
+            <div id="modal_sample_attribute" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
                 <div class="modal-dialog" role="document">
                     <div class="modal-content">
                         <div class="modal-header">
                             <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                            <h4 class="modal-title"><i class="fa fa-folder-open-o" aria-hidden="true"></i> Install a pipeline on Pirus</h4>
+                            <h4 class="modal-title"><i class="fa fa-tag" aria-hidden="true"></i> </h4>
                         </div>
                         <div class="modal-body">
-                            <input type="hidden" id="modal_new_pipeline_tus_endpoint" name="modal_new_pipeline_tus_endpoint" value="http://{{ hostname }}/pipeline/upload">
-                            <input type="hidden" id="modal_new_pipeline_tus_chunksize" name="modal_new_pipeline_tus_chunksize" value="256000">
-                            <input type="file" id="modal_new_pipeline_tus_localinput">
+                            <input type="text" id="modal_sample_attribute_name" placeholder="Attribute name"/>
+                            <input type="text" id="modal_sample_attribute_value" placeholder="Attribute value"/>
 
                             <div class="modal-footer">
                                 <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
