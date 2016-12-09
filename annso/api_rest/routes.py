@@ -20,6 +20,8 @@ aiohttp_jinja2.setup(app, loader=jinja2.FileSystemLoader(TEMPLATE_DIR))
 websocket = WebsocketHandler()
 website = WebsiteHandler()
 dbHandler = AnnotationDBHandler()
+sampleHandler = SampleHandler()
+variantHandler = VariantHandler()
 
 # Config server app
 app['websockets'] = []
@@ -40,6 +42,9 @@ app.router.add_route('GET',    "/v1/ws",     websocket.get)
 # app.router.add_route('GET',    "/v1/db",     dbHandler.get_db)
 # app.router.add_route('GET',    "/v1/db/{db_name}",     dbHandler.get_db_details)
 
+
+app.router.add_route('GET',    "/v1/sample",     sampleHandler.get_samples)
+app.router.add_route('GET',    "/v1/variant",     variantHandler.get_variants)
 
 
 # app.router.add_route('GET',    "/v1/analysis",     analysisHandler.get_analyses)

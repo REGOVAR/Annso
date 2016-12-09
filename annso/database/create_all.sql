@@ -82,7 +82,7 @@ CREATE TABLE public.template
     id integer NOT NULL DEFAULT nextval('template_id_seq'::regclass),
     name character varying(50) COLLATE pg_catalog."C.UTF-8",
     author_id integer,
-    description text COLLATE pg_catalog."C.UTF-8",
+    comments text COLLATE pg_catalog."C.UTF-8",
     version character varying(20) COLLATE pg_catalog."C.UTF-8",
     creation_date timestamp without time zone,
     update_date timestamp without time zone,
@@ -234,7 +234,7 @@ CREATE TABLE public."reference"
 (
     id integer NOT NULL DEFAULT nextval('reference_id_seq'::regclass),
     name character varying(50) COLLATE pg_catalog."C.UTF-8",
-    description character varying(255) COLLATE pg_catalog."C.UTF-8",
+    comments character varying(255) COLLATE pg_catalog."C.UTF-8",
     url character varying(255) COLLATE pg_catalog."C.UTF-8",
     table_suffix character varying(10) COLLATE pg_catalog."C.UTF-8",
     CONSTRAINT reference_pkey PRIMARY KEY (id)
@@ -256,7 +256,7 @@ CREATE TABLE public.file
 (
     id integer NOT NULL DEFAULT nextval('file_id_seq'::regclass),
     filename character varying(50) COLLATE pg_catalog."C.UTF-8",
-    description character varying(255) COLLATE pg_catalog."C.UTF-8",
+    comments character varying(255) COLLATE pg_catalog."C.UTF-8",
     type character varying(10) COLLATE pg_catalog."C.UTF-8",
     reference_id integer,
     CONSTRAINT file_pkey PRIMARY KEY (id),
@@ -285,7 +285,7 @@ CREATE TABLE public.sample
 (
     id integer NOT NULL DEFAULT nextval('sample_id_seq'::regclass),
     name character varying(50) COLLATE pg_catalog."C.UTF-8",
-    description character varying(255) COLLATE pg_catalog."C.UTF-8",
+    comments character varying(255) COLLATE pg_catalog."C.UTF-8",
     subject_id integer,
     CONSTRAINT sample_pkey PRIMARY KEY (id),
     CONSTRAINT sample_subject_id_fkey FOREIGN KEY (subject_id)
@@ -430,7 +430,7 @@ CREATE TABLE public.annotation_database
 (
     id integer NOT NULL DEFAULT nextval('annotation_database_id_seq'::regclass),
     name character varying(255) COLLATE pg_catalog."C.UTF-8" NOT NULL,
-    description text,
+    comments text,
     reference character varying(20) COLLATE pg_catalog."C.UTF-8" ,
     url character varying(255) COLLATE pg_catalog."C.UTF-8" ,
     update_date timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
@@ -447,7 +447,7 @@ CREATE TABLE public.annotation_fields
 (
     database_id integer,
     name character varying(255) COLLATE pg_catalog."C.UTF-8" NOT NULL,
-    description text,
+    comments text,
     type field_type,
     unity character varying(20) COLLATE pg_catalog."C.UTF-8" ,
     CONSTRAINT annotation_database_pkey PRIMARY KEY (database_id, name)
@@ -469,7 +469,7 @@ CREATE TABLE public."parameter"
 (
     key character varying(255) COLLATE pg_catalog."C.UTF-8" NOT NULL ,
     value character varying(255) COLLATE pg_catalog."C.UTF-8" NOT NULL,
-    description character varying(255) COLLATE pg_catalog."C.UTF-8",
+    comments character varying(255) COLLATE pg_catalog."C.UTF-8",
     CONSTRAINT parameter_pkey PRIMARY KEY (key)
 )
 WITH ( OIDS=FALSE );
@@ -483,13 +483,13 @@ CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
 
 
-INSERT INTO public.reference(name, description, url, table_suffix)
+INSERT INTO public.reference(name, comment, url, table_suffix)
 VALUES ('Human Genom 19', 'Human Genom version 19', 'http://hgdownload.cse.ucsc.edu/goldenpath/hg19/chromosomes/', 'hg19');
 
 
 
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
-INSERT INTO public."parameter" (key, description, value) VALUES
+INSERT INTO public."parameter" (key, comment, value) VALUES
     ('database_version',          'The current version of the database',                                      'V1.0.0'),
     ('heavy_client_last_version', 'Last complient version of the heavy client',                               'V1.0.0'),
     ('heavy_client',              'Information for the Launcher to be able to download/update the client',    '{}'),

@@ -145,14 +145,9 @@ class WebsiteHandler:
 
     @aiohttp_jinja2.template('home.html')
     def home(self, request):
-
-        result = []
-        sample_id = 0
-        for r in db_engine.execute("SELECT s.name, sv.* FROM sample_variant_hg19 sv INNER JOIN sample s ON s.id = sv.sample_id"):
-            result.append((r[1], r[0], r[3], r[4], r[5], r[6]))
-
         data = {
-            "variants" : result
+            "variants" : annso.variant.get(),
+            "samples" : annso.sample.get()
         }
         return data
 
@@ -191,19 +186,81 @@ class ReportHandler:
 
 
 
-class AnnotationDBHandler:
-    def get_db(self, request):
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
+# SAMPLE HANDLER
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
+class SampleHandler:
+    def get_samples(self, request):
         # Generic processing of the get query
-        fields, query, order, offset, limit = process_generic_get(request.query_string, pirus.files.public_fields())
+        fields, query, order, offset, limit = process_generic_get(request.query_string, annso.sample.public_fields())
         # Get range meta data
         range_data = {
             "range_offset" : offset,
             "range_limit"  : limit,
-            "range_total"  : pirus.files.total(),
+            "range_total"  : annso.sample.total(),
             "range_max"    : RANGE_MAX,
         }
         # Return result of the query for PirusFile 
-        return rest_success(pirus.files.get(fields, query, order, offset, limit, sub_level_loading), range_data)
+        return rest_success(annso.sample.get(fields, query, order, offset, limit), range_data)
+
+
+    def get_details(self, request):
+        # 1- Retrieve request parameters
+        db_name = request.match_info.get('db_name', None)
+        if db_name is None:
+            return rest_error("No database name provided")
+
+        return rest_success({"database" : db_name})
+
+
+
+
+
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
+# VARIANT HANDLER
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
+class VariantHandler:
+    def get_variants(self, request):
+        # Generic processing of the get query
+        fields, query, order, offset, limit = process_generic_get(request.query_string, annso.variant.public_fields())
+        # Get range meta data
+        range_data = {
+            "range_offset" : offset,
+            "range_limit"  : limit,
+            "range_total"  : annso.variant.total(),
+            "range_max"    : RANGE_MAX,
+        }
+        # Return result of the query for PirusFile 
+        return rest_success(annso.variant.get(fields, query, order, offset, limit), range_data)
+
+
+
+    def get_details(self, request):
+        # 1- Retrieve request parameters
+        db_name = request.match_info.get('db_name', None)
+        if db_name is None:
+            return rest_error("No database name provided")
+
+        return rest_success({"database" : db_name})
+
+
+
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
+# ANNOTATION DATABASES HANDLER
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
+class AnnotationDBHandler:
+    def get_db(self, request):
+        # Generic processing of the get query
+        fields, query, order, offset, limit = process_generic_get(request.query_string, annso.annotation.public_fields())
+        # Get range meta data
+        range_data = {
+            "range_offset" : offset,
+            "range_limit"  : limit,
+            "range_total"  : annso.annotation.total(),
+            "range_max"    : RANGE_MAX,
+        }
+        # Return result of the query for PirusFile 
+        return rest_success(annso.annotation.get(fields, query, order, offset, limit), range_data)
 
     def get_db_details(self, request):
         # 1- Retrieve request parameters

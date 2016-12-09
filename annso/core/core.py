@@ -30,11 +30,11 @@ from core.model import *
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
 class Core:
     def __init__(self):
-        # self.analyses = AnalysisManager()
-        # self.templates = TemplateManager()
-        self.samples = SampleManager()
-        # self.variants = VariantManager()
-        # self.selections = SelectionManager()
+        # self.analyse = AnalysisManager()
+        # self.template = TemplateManager()
+        self.sample = SampleManager()
+        self.variant = VariantManager()
+        # self.selection = SelectionManager()
 
         # Todo
         pass
@@ -67,7 +67,7 @@ class AnalysisManager:
 
 
     def total(self):
-        return PirusFile.objects.count()
+        return 1
 
 
 
@@ -107,21 +107,21 @@ class AnalysisManager:
 
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
-# Analysis MANAGER
+# Variant MANAGER
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
-class SampleManager:
+class VariantManager:
     def __init__(self):
         pass
 
 
 
     def public_fields(self):
-        return PirusFile.public_fields
+        return Sample.public_fields
 
 
 
     def total(self):
-        return PirusFile.objects.count()
+        return 350
 
 
 
@@ -130,7 +130,7 @@ class SampleManager:
             Generic method to get files metadata according to provided filtering options
         """
         if fields is None:
-            fields = PirusFile.public_fields
+            fields = Sample.public_fields
         if query is None:
             query = {}
         if order is None:
@@ -140,17 +140,11 @@ class SampleManager:
         if limit is None:
             limit = offset + RANGE_MAX
 
-        result = {}
-
-        sample_id = 0
+        result = []
         for r in db_engine.execute("SELECT s.name, sv.* FROM sample_variant_hg19 sv INNER JOIN sample s ON s.id = sv.sample_id"):
-            if r[0] != sample_id:
-                sample_id = r[0]
-                result[sample_id] = []
-            result[sample_id].append((r[3], r[4], r[5], r[6]))
+            result.append((r[1], r[0], r[3], r[4], r[5], r[6]))
 
         return result
-
 
 
     def get_from_id(self, file_id, sublvl=0, fields=None):
@@ -164,6 +158,64 @@ class SampleManager:
 
 
 
+
+
+
+
+
+
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
+# Samples MANAGER
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
+class SampleManager:
+    def __init__(self):
+        pass
+
+
+
+    def public_fields(self):
+        return Sample.public_fields
+
+
+
+    def total(self):
+        return 3
+
+
+
+    def get(self, fields=None, query=None, order=None, offset=None, limit=None, sublvl=0):
+        """
+            Generic method to get files metadata according to provided filtering options
+        """
+        if fields is None:
+            fields = Sample.public_fields
+        if query is None:
+            query = {}
+        if order is None:
+            order = ['-create_date', "name"]
+        if offset is None:
+            offset = 0
+        if limit is None:
+            limit = offset + RANGE_MAX
+
+
+        result = []
+        for s in db_session.execute("SELECT sj.id, sj.name, sp.id, sp.name  FROM sample sp LEFT JOIN subject sj ON sj.id = sp.subject_id"):
+            result.append({
+                "subject" : {"id" : s[0], "name" : s[1]},
+                "sample"  : {"id" : s[2], "name" : s[3], "vtotal" : 122}
+            })
+        return result
+
+
+
+    def get_from_id(self, file_id, sublvl=0, fields=None):
+        pass
+        
+    
+
+    def get_from_ids(self, file_ids, sublvl=0, fields=None):
+        pass
 
 
 

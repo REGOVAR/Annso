@@ -4,7 +4,83 @@ var demo_pirus_displayed_run_pipename;
 var demo_pirus_displayed_file;
 var demo_pirus_displayed_pipe;
 
-var demo_pirus_selection = [];
+var demo_annso_samples = {};
+var demo_annso_sample_selected = null;
+
+
+
+
+
+function select_sample(sample_id)
+{
+
+    var check = false;
+    if (sample_id == -1 || sample_id == demo_annso_sample_selected)
+    {
+        if ($('#samples_details_attributes_details').is( ":visible" ))
+        {
+            $('#samples_details_select_btn i').removeClass('fa-check-square-o');
+            $('#samples_details_select_btn i').addClass('fa-square-o');
+            check = false;
+        }
+        else
+        {
+            $('#samples_details_select_btn i').removeClass('fa-square-o');
+            $('#samples_details_select_btn i').addClass('fa-check-square-o');
+            check = true;
+        }
+    }
+    
+
+
+    if (sample_id == -1)
+    {
+        sample_id = demo_annso_sample_selected;
+    }
+    else
+    {
+        check = !input.checked;
+    }
+
+    var name  = $('#sampleEntry-' + sample_id + ' td:nth-child(3)').html();
+    var count = Object.keys(demo_annso_samples).length;
+    var input =  $('#sampleEntry-' + sample_id + ' input')[0];
+/*    if (check)
+    {
+        if (count == 0) $('#samples_panel > ul').html('');
+        demo_annso_samples[sample_id] = name;
+        var html = '<li id="samples_panel-' + sample_id + "\"><a onclick=\"javascript:show_sample('browser_file','" + sample_id + "')\" href=\"#\">";
+        html += "<i class=\"fa fa-user " + "" + "\" aria-hidden=\"true\"></i> " + name + '</a></li>';
+        $('#samples_panel ul').append(html);
+        count += 1;
+    }
+    else
+    {
+        delete demo_annso_samples[sample_id];
+        $('#samples_panel-' + sample_id).remove();
+        if (count == 1) $('#samples_panel > ul').html('<li class="empty_selection">No sample selected</li>');
+        count -= 1;
+    }*/
+}
+
+
+
+
+function show_sample(sample_id)
+{
+    $('#browser_samples').addClass("col-md-7");
+    $('#browser_samples').removeClass("col-md-10");
+    $('#samples_details').addClass("col-md-3");
+    $('#samples_details').removeClass("collapse");
+
+
+    demo_annso_samples[sample_id] = name;
+    demo_annso_sample_selected = sample_id;
+
+    $('#samples_details_subject').text( $('#sampleEntry-' + sample_id + ' td:nth-child(2)').html() )
+    $('#samples_details_name').text( $('#sampleEntry-' + sample_id + ' td:nth-child(3)').html() )
+}
+
 
 
 

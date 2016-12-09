@@ -58,6 +58,7 @@ File = Base.classes.file
 
 
 
+Sample.public_fields = ["id", "name", "comment"]
 
 
 
