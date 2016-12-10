@@ -50,6 +50,17 @@ class Core:
         pass
 
     def get_report(self, variants_ids, report_template=None, report_lang=None, report_option=None):
+        # Retrieve gene from variant ids list
+        result = []
+        sql =  "SELECT v.chr, v.pos, v.ref, v.alt, array_agg(rg.name) "
+        sql += "FROM variant_hg19 v "
+        sql += "INNER JOIN refgene_hg19 rg ON v.chr = rg.chrom AND rg.txrange @> int8(v.pos) "
+        sql += "WHERE v.id IN (" + ','.join(variants_ids) + ") GROUP BY v.id"
+        for r in db_engine.execute():
+            result.append((r[1], r[0], r[3], r[4], r[5], r[6]))
+
+
+
         return Gene("GJB2", [])
 
 
