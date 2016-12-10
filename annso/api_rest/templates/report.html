@@ -1,0 +1,58 @@
+
+
+<h1>{{gene.name}}</h1>
+
+{% if gene.data.mim_number %}
+<ul>
+    <li>Name : {{gene.data.name}}</li>
+    <li>Also known as : {{', '.join(gene.data.symbols)}}</li>
+    <li>OMIM: <a href="http://www.omim.org/entry/{{gene.data.mim_number}}">{{gene.data.mim_number}}</a></li>
+</ul>
+{% else %}
+<p>No information found on OMIM.</p>
+{% endif %}
+
+
+{% for variant in gene.variants %}
+<img src="http://annso.absolumentg.fr/cache/{{index}}_chr{{variant[0]}}:{{variant[1]}}.png" title="IGV snapshot"/>
+{% endfor %}
+
+
+<h2>Present in public databases:</h2>
+<ul>
+    <li>Strasbourg's ID genes panel: {{gene.data.strasbourg_panel or 'N/A'}}{{gene.data.id_gene_as and ' (as {})'.format(gene.data.id_gene_as) or ''}} {{gene.name}}</li>
+    <li>REGOVAR GenePanel's ID genes list: {{gene.data.id_gene and 'yes' or 'no'}}{{gene.data.id_gene_as and ' (as {})'.format(gene.data.id_gene_as) or ''}} </li>
+    <li>SFARI autism genes list: {{gene.data.sfari_gene and '`yes <https://gene.sfari.org/autdb/submitsearch?selfld_0=GENES_GENE_SYMBOL&selfldv_0={}&numOfFields=1&userAction=search&tableName=AUT_HG&submit=Submit+Query>`_'.format(gene.data.sfari_gene_as or gene.name) or 'no'}}{{gene.data.sfari_gene_as and ' (as {})'.format(gene.data.sfari_gene_as) or ''}}</li>
+    <li>1000 genomes (all, max): {{' / '.join(gene.get_variant_annotations('dbNSFP_1000Gp1_AF', 'dbNSFP_1000Gp1_pred')) or 'Ø'}}</li>
+    <li>ESP (AA, EA): {{' / '.join(gene.get_variant_annotations('dbNSFP_ESP6500_AA_AF', 'dbNSFP_ESP6500_EA_AF')) or 'Ø'}}</li>
+    <li>dbSNP: {{' / '.join(gene.get_formated_variant_ids('`{} <http://www.ncbi.nlm.nih.gov/SNP/snp_ref.cgi?searchType=adhoc_search&type=rs&rs={}>`_'))}}</li>
+    <li>ClinVar: {{' / '.join(gene.get_clinical_significances())}} {{gene.name}}</li>
+    <li>ExAC (all, max): {{' / '.join(gene.get_variant_annotations('dbNSFP_ExAC_AF', 'dbNSFP_ExAC_max')) or 'Ø'}} </li>
+</ul>
+
+<h2>In silico prediction:</h2>
+<ul>
+    <li><a href="http://genic-intolerance.org/Search?query={{gene.name}}">RVIS</a> : {{gene.data.rvis_score}}</li>
+    <li>Present in the ID genes list: {{gene.data.id_gene and 'yes' or 'no'}}</li>
+
+    <li>Morbid Map: TODO FIXME modbid map</li>
+</ul>
+<h2>Cerebral expression:</h2>
+<ul>
+    <li>GTEX: <a href="http://www.gtexportal.org/home/gene/{{gene.name}}">{{gene.name}}</a></li>
+    <li>TA: <a href="http://www.proteinatlas.org/search/{{gene.name}}">{{gene.name}}</a></li>
+    <li><img src="{{ta_url}}" title="TA snapshot"/></li>
+    <li>HBT: <a href="http://hbatlas.org/hbtd/images/wholeBrain/{{gene.name}}.pdf">{{gene.name}}</a></li>
+    <li><img src="http://annso.absolumentg.fr/cache/hbt_image_{{gene.name}}.png" title="HBT"/></li>
+    <li>SFARI: <a href="https://gene.sfari.org/autdb/submitsearch?selfld_0=GENES_GENE_SYMBOL&amp;selfldv_0={{gene.name}}&amp;numOfFields=1&amp;userAction=search&amp;tableName=AUT_HG&amp;submit=Submit+Query">{% if gene.data.sfari_gene %}OUI{% else %}NON{% endif %}</a></li>
+
+
+
+Decipher: <a href="https://decipher.sanger.ac.uk/search?q={{gene.name}}#consented-patients/results">{{gene.name}}</a>
+<img src="{{decipher_url}}" title="Decipher snapshot"/>
+
+STRING pathway: <a href="http://string-db.org/api/image/network?identifier={{gene.name}}">{{gene.name}}</a>
+<img src="{{stp_url}}" title="String pathway snapshot"/>
+
+
+

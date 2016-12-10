@@ -22,6 +22,7 @@ website = WebsiteHandler()
 dbHandler = AnnotationDBHandler()
 sampleHandler = SampleHandler()
 variantHandler = VariantHandler()
+reportHandler = ReportHandler()
 
 # Config server app
 app['websockets'] = []
@@ -45,6 +46,10 @@ app.router.add_route('GET',    "/v1/ws",     websocket.get)
 
 app.router.add_route('GET',    "/v1/sample",     sampleHandler.get_samples)
 app.router.add_route('GET',    "/v1/variant",     variantHandler.get_variants)
+
+
+app.router.add_route('GET',    "/v1/report",     reportHandler.get_html_report)
+
 
 
 # app.router.add_route('GET',    "/v1/analysis",     analysisHandler.get_analyses)

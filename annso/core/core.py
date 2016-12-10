@@ -15,7 +15,7 @@ import requests
 
 from core.framework import *
 from core.model import *
-
+from core.report import *
 
 
 
@@ -48,6 +48,9 @@ class Core:
              - check that 
         """
         pass
+
+    def get_report(self, variants_ids, report_template=None, report_lang=None, report_option=None):
+        return Gene("GJB2", [])
 
 
  

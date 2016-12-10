@@ -181,7 +181,20 @@ class ReportHandler:
         except Exception as err:
             return rest_error("Unexpected error occured when trying to retrieve OMOM information for the gene : " + str(gene_name) + ". " + str(err))
 
+    @aiohttp_jinja2.template('report.html')
+    async def get_html_report(self, request):
+        from core.report import get_ta_image, get_hbt_image, get_decipher_image, get_sp_image
+        # 1- Retrieve data from request
+        #data = await request.json()
+        data = { "variants" : [1,212,342], "lang" : "EN-en"}
 
+        # 2- Get report data thanks to the core
+        gene = annso.get_report(data["variants"])
+
+        # 3- Return html template
+        return {
+            "gene" : gene
+        }
 
 
 

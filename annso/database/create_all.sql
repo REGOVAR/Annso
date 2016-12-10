@@ -286,6 +286,7 @@ CREATE TABLE public.sample
     id integer NOT NULL DEFAULT nextval('sample_id_seq'::regclass),
     name character varying(50) COLLATE pg_catalog."C.UTF-8",
     comments character varying(255) COLLATE pg_catalog."C.UTF-8",
+    variant_total integer,
     subject_id integer,
     CONSTRAINT sample_pkey PRIMARY KEY (id),
     CONSTRAINT sample_subject_id_fkey FOREIGN KEY (subject_id)
