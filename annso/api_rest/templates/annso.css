@@ -50,7 +50,22 @@
 }
 
 
-
+#welcom_panel ul
+{
+    padding: 0;
+}
+#welcom_panel li
+{
+    list-style-type: none;
+    margin: 0;
+}
+#welcom_panel li .btn-default
+{
+    display: block;
+    width: 200px;
+    text-align: left;
+    margin: 15px 0 0 0;
+}
 
 
 

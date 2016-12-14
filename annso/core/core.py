@@ -51,6 +51,7 @@ class Core:
 
     def get_report(self, variants_ids, report_template=None, report_lang=None, report_option=None):
         # Retrieve gene from variant ids list
+        return Gene("GJB2", [])
         result = []
         sql =  "SELECT v.chr, v.pos, v.ref, v.alt, array_agg(rg.name) "
         sql += "FROM variant_hg19 v "

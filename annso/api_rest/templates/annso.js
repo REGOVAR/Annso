@@ -23,6 +23,32 @@ function fake_select_tab(tab_name)
 
 
 
+function fake_add_samples()
+{
+    i=0;
+    data = [[1, "CGH0157"],
+            [2, "CGH0413"],
+            [3, "CGH0542"]]
+    
+
+    var html = "<tr id=\"sampleEntry-{0}\" style=\"cursor: pointer;\" onclick=\"javascript:select_sample('{0}');\">";
+    html    += "<td><input type=\"checkbox\" value=\"{0}\"/></td>";
+    html    += "<td class=\"collapse\">{1} </td>";
+    html    += "<td>";
+    html    += "<i class=\"fa fa-pencil\" aria-hidden=\"true\" style=\"width:20px; text-align:center;\" onclick=\"javascript:fake_rename_sample();return;\">&nbsp;</i> {1} </td>";
+    html    += "<td><i class=\"fa fa-pencil\" aria-hidden=\"true\" style=\"width:20px; text-align:center;\" onclick=\"javascript:fake_sample_inheritance();return;\">&nbsp;</i> </td></tr>";
+
+    for (var i=0; i< 3; i++)
+    {
+        $('#browser_samples_table tbody').append(html.format(data[i][0], data[i][1]));
+    };
+
+
+
+
+
+}
+
 
 function fake_rename_sample()
 {
@@ -95,13 +121,33 @@ function fake_sample_inheritance()
 function fake_select_variant_submenu(menu_name)
 {
 
+    $('#filters_panel_menu_quick').hide();
     $('#filters_panel_menu_info').hide();
     $('#filters_panel_menu_filter').hide();
     $('#filters_panel_menu_' + menu_name ).show();
 }
 
+function fake_select_select_submenu(menu_name)
+{
 
+    $('#selection_panel_menu_info').hide();
+    $('#selection_panel_menu_export').hide();
+    $('#selection_panel_menu_report').hide();
+    $('#selection_panel_content_info').hide();
+    $('#selection_panel_content_export').hide();
+    $('#selection_panel_content_report').hide();
+    $('#selection_panel_menu_' + menu_name ).show();
+    $('#selection_panel_content_' + menu_name ).show();
+}
 
+function fake_generate_report()
+{
+    $.ajax({ url: "http://annso.absolumentg.fr/v1/report", type: "GET", async: false}).done(function(report)
+    {
+        $('#selection_panel_content_report').html(report);
+        
+    });
+}
 
 
 function select_sample(sample_id, swith_input)
