@@ -4,7 +4,7 @@
     display: block;
     width: 75px;
     height:500px;
-    background-image: linear-gradient(to bottom,#f5f5f5 0,#e8e8e8 100%);
+    background-color: #e8e8e8;
 }
 
 .sidebar-nav .navbar

@@ -127,19 +127,32 @@
                             </form>
 
                             <div style="padding:10px; margin-left:75px; border-left: 1px solid #ddd;">
-                                <div class="btn-group ">
-                                    <a class="btn btn-default" href="#" title="Import sample data from local file" data-toggle="modal">
-                                        <i class="fa fa-download" style="width:20px; text-align:center;" aria-hidden="true"></i>
-                                    </a>
-                                    <a class="btn btn-default" href="#" title="Import sample data from database" data-toggle="modal">
-                                        <i class="fa fa-database" style="width:20px; text-align:center;" aria-hidden="true"></i>
-                                    </a>
+                                <div class="btn-group" data-toggle="buttons">
+                                    <label class="btn btn-default active" onclick="javascript:fake_select_variant_submenu('filter');">
+                                        <input type="radio" name="options" id="option1" checked>  <i class="fa fa-filter" aria-hidden="true"></i>
+                                    </label>
+                                    <label class="btn btn-default" onclick="javascript:fake_select_variant_submenu('info');">
+                                        <input type="radio" name="options" id="option2">  <i class="fa fa-info" aria-hidden="true"></i>
+                                    </label>
                                 </div>
+                            </div>
+                        </div>
 
-                                <div id="" class="btn-group ">
-                                    <a class="btn btn-default" href="#modal_import_local_file" title="Import sample data" data-toggle="modal" onclick="javascript:fake_add_sample_attribute();">
-                                        <i class="fa fa-tag" style="width:20px; text-align:center;" aria-hidden="true"></i> New attribute
-                                    </a>
+                        <!--                 -->
+                        <!-- RESULT TOOLBAR -->
+                        <!--                 -->
+                        <div id="result_toolbar" class="collapse">
+                            <div style="padding:10px; margin-left:75px; border-left: 1px solid #ddd;">
+                                <div class="btn-group" data-toggle="buttons">
+                                    <label class="btn btn-default active" onclick="javascript:fake_select_select_submenu('list');">
+                                        <input type="radio" name="options" id="option1" checked>  <i class="fa fa-list" aria-hidden="true"></i>
+                                    </label>
+                                    <label class="btn btn-default" onclick="javascript:fake_select_select_submenu('export');">
+                                        <input type="radio" name="options" id="option2">  <i class="fa fa-share-square-o" aria-hidden="true"></i>
+                                    </label>
+                                    <label class="btn btn-default" onclick="javascript:fake_select_result_submenu('print');">
+                                        <input type="radio" name="options" id="option2">  <i class="fa fa-print" aria-hidden="true"></i>
+                                    </label>
                                 </div>
                             </div>
                         </div>
@@ -168,72 +181,7 @@
                                 <!--                     -->
                                 <!-- FIELDS DISPLAY MENU -->
                                 <!--                     -->
-                                <div class="btn-group" style="float: right; margin: 9px 9px 0 9px;" role="group">
-                                    <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" title="Choose displayed information">
-                                        <i class="fa fa-info" aria-hidden="true"></i><span class="caret"></span>
-                                    </button>
-                                    <div class="dropdown-menu">
-                                        <form class="form-inline form-navpanel">
-                                            <div class="input-group">
-                                                <span class="input-group-addon"><i class="fa fa-search" aria-hidden="true"></i></span>
-                                                <input id="browserNavFieldsPanel_filter_input" type="text" class="form-control" placeholder="Filter sample" aria-describedby="sizing-addon1">
-                                            </div>
-                                        </form>
-                                        <ul>
-                                            <li><a href="#"><input type="checkbox"/> Annso</a>
-                                                <ul><li><a href="#" style="padding-left:50px"><input type="checkbox" checked/> Chrom
-                                                            <span style="float:right;"><i class="fa fa-info-circle" aria-hidden="true"></i></span>
-                                                        </a></li>
-                                                    <li><a href="#" style="padding-left:50px"><input type="checkbox" checked/> Pos
-                                                            <span style="float:right;"><i class="fa fa-info-circle" aria-hidden="true"></i></span>
-                                                        </a></li>
-                                                    <li><a href="#" style="padding-left:50px"><input type="checkbox" checked/> Ref
-                                                            <span style="float:right;"><i class="fa fa-info-circle" aria-hidden="true"></i></span>
-                                                        </a></li>
-                                                    <li><a href="#" style="padding-left:50px"><input type="checkbox" checked/> Alt
-                                                            <span style="float:right;"><i class="fa fa-info-circle" aria-hidden="true"></i></span>
-                                                        </a></li>
-                                                    <li><a href="#" style="padding-left:50px"><input type="checkbox"/> Bin
-                                                            <span style="float:right;"><i class="fa fa-info-circle" aria-hidden="true"></i></span>
-                                                        </a></li>
-                                                    <li><a href="#" style="padding-left:50px"><input type="checkbox" checked/> Sample
-                                                            <span style="float:right;"><i class="fa fa-info-circle" aria-hidden="true"></i></span>
-                                                        </a></li>
-                                                    <li><a href="#" style="padding-left:50px"><input type="checkbox"/> DP
-                                                            <span style="float:right;"><i class="fa fa-info-circle" aria-hidden="true"></i></span>
-                                                        </a></li>
-                                                    <li><a href="#" style="padding-left:50px"><input type="checkbox"/> GT
-                                                            <span style="float:right;"><i class="fa fa-info-circle" aria-hidden="true"></i></span>
-                                                        </a></li>
-                                                </ul>
-                                            </li>
-                                            <li><a href="#"><input type="checkbox"/> RefGene</a>
-                                                    <li><a href="#" style="padding-left:50px"><input type="checkbox"/> CDS
-                                                            <span style="float:right;"><i class="fa fa-info-circle" aria-hidden="true"></i></span>
-                                                        </a></li>
-                                                    <li><a href="#" style="padding-left:50px"><input type="checkbox"/> Exon count
-                                                            <span style="float:right;"><i class="fa fa-info-circle" aria-hidden="true"></i></span>
-                                                        </a></li>
-                                                    <li><a href="#" style="padding-left:50px"><input type="checkbox"/> Exon positions
-                                                            <span style="float:right;"><i class="fa fa-info-circle" aria-hidden="true"></i></span>
-                                                        </a></li>
-                                                <ul><li><a href="#" style="padding-left:50px"><input type="checkbox"/> Name
-                                                            <span style="float:right;"><i class="fa fa-info-circle" aria-hidden="true"></i></span>
-                                                        </a></li>
-                                                    <li><a href="#" style="padding-left:50px"><input type="checkbox"/> Name2
-                                                            <span style="float:right;"><i class="fa fa-info-circle" aria-hidden="true"></i></span>
-                                                        </a></li>
-                                                    <li><a href="#" style="padding-left:50px"><input type="checkbox"/> Score
-                                                            <span style="float:right;"><i class="fa fa-info-circle" aria-hidden="true"></i></span>
-                                                        </a></li>
-                                                    <li><a href="#" style="padding-left:50px"><input type="checkbox"/> Tx
-                                                            <span style="float:right;"><i class="fa fa-info-circle" aria-hidden="true"></i></span>
-                                                        </a></li>
-                                                </ul>
-                                            </li>
-                                        </ul>
-                                    </div>
-                                </div>
+                                
                             </div>
                         </nav>
                     </div>
@@ -502,15 +450,13 @@
                                 <!--              -->
                                 <!-- FILTERS MENU -->
                                 <!--              -->
-                                <div class="col-md-2 browser-panel">
-
-
-
+                                <div id="filters_panel_menu_filter" class="col-md-2 browser-panel">
                                     <a href="#" class="btn section" style="display:block; text-align:left;" role="button">
                                         <i class="fa fa-cube" aria-hidden="true" style="width:20px; text-align:center;">&nbsp;</i>
                                         All variants
                                         <span style="float:right;">350</span>
                                     </a>
+
                                     <a class="btn section" style="display:block; text-align:left;" role="button" data-toggle="collapse" href="#browserNavFiltersPanelFilters" aria-expanded="false" aria-controls="browserNavFiltersPanelFilters">
                                         <i class="fa fa-cubes" style="width:20px; text-align:center;" aria-hidden="true"></i> Saved filters 
                                         <span style="float:right;">
@@ -538,6 +484,7 @@
                                         </ul>
                                     </div>
 
+                                    
 
 
                                     <a class="btn section" style="display:block; text-align:left;" role="button" data-toggle="collapse" href="#browserNavFiltersPanelCurrent" aria-expanded="false" aria-controls="browserNavFiltersPanelCurrent">
@@ -574,6 +521,76 @@
                                 </div>
 
 
+                                <div id="filters_panel_menu_info" class="col-md-2 browser-panel collapse">
+                                    <span class="btn section" style="display:block; text-align:left;">
+                                        <i class="fa fa-info" style="width:20px; text-align:center;" aria-hidden="true"></i> Select information you want to display
+                                    </span>
+                                    <form class="form-inline form-navpanel">
+                                        <div class="input-group">
+                                            <span class="input-group-addon"><i class="fa fa-search" aria-hidden="true"></i></span>
+                                            <input id="browserNavFieldsPanel_filter_input" type="text" class="form-control" placeholder="Search field" aria-describedby="sizing-addon1">
+                                        </div>
+                                    </form>
+                                    
+                                    <a class="btn section" style="display:block; text-align:left;" role="button" data-toggle="collapse" href="#variant_infos_variant" aria-expanded="false" aria-controls="variant_infos_variant">
+                                        <input type="checkbox"/>  Variant</a>
+                                    </a>
+                                    <div id="variant_infos_variant" class="collapse">
+                                        <ul><li><a href="#"><input type="checkbox" checked/> Chrom
+                                                    <span style="float:right;"><i class="fa fa-info-circle" aria-hidden="true"></i></span>
+                                                </a></li>
+                                            <li><a href="#"><input type="checkbox" checked/> Pos
+                                                    <span style="float:right;"><i class="fa fa-info-circle" aria-hidden="true"></i></span>
+                                                </a></li>
+                                            <li><a href="#"><input type="checkbox" checked/> Ref
+                                                    <span style="float:right;"><i class="fa fa-info-circle" aria-hidden="true"></i></span>
+                                                </a></li>
+                                            <li><a href="#"><input type="checkbox" checked/> Alt
+                                                    <span style="float:right;"><i class="fa fa-info-circle" aria-hidden="true"></i></span>
+                                                </a></li>
+                                            <li><a href="#"><input type="checkbox"/> Bin
+                                                    <span style="float:right;"><i class="fa fa-info-circle" aria-hidden="true"></i></span>
+                                                </a></li>
+                                            <li><a href="#"><input type="checkbox" checked/> Sample
+                                                    <span style="float:right;"><i class="fa fa-info-circle" aria-hidden="true"></i></span>
+                                                </a></li>
+                                            <li><a href="#"><input type="checkbox"/> DP
+                                                    <span style="float:right;"><i class="fa fa-info-circle" aria-hidden="true"></i></span>
+                                                </a></li>
+                                            <li><a href="#"><input type="checkbox"/> GT
+                                                    <span style="float:right;"><i class="fa fa-info-circle" aria-hidden="true"></i></span>
+                                                </a></li>
+                                        </ul>
+                                    </div>
+                                    <a class="btn section" style="display:block; text-align:left;" role="button" data-toggle="collapse" href="#variant_infos_refgene" aria-expanded="false" aria-controls="variant_infos_refgene">
+                                        <input type="checkbox"/>  refGene</a>
+                                    </a>
+                                    <div id="variant_infos_refgene" class="collapse">
+                                        <ul>
+                                            <li><a href="#"><input type="checkbox"/> CDS
+                                                    <span style="float:right;"><i class="fa fa-info-circle" aria-hidden="true"></i></span>
+                                                </a></li>
+                                            <li><a href="#"><input type="checkbox"/> Exon count
+                                                    <span style="float:right;"><i class="fa fa-info-circle" aria-hidden="true"></i></span>
+                                                </a></li>
+                                            <li><a href="#"><input type="checkbox"/> Exon positions
+                                                    <span style="float:right;"><i class="fa fa-info-circle" aria-hidden="true"></i></span>
+                                                </a></li>
+                                            <li><a href="#"><input type="checkbox"/> Name
+                                                    <span style="float:right;"><i class="fa fa-info-circle" aria-hidden="true"></i></span>
+                                                </a></li>
+                                            <li><a href="#"><input type="checkbox"/> Name2
+                                                    <span style="float:right;"><i class="fa fa-info-circle" aria-hidden="true"></i></span>
+                                                </a></li>
+                                            <li><a href="#"><input type="checkbox"/> Score
+                                                    <span style="float:right;"><i class="fa fa-info-circle" aria-hidden="true"></i></span>
+                                                </a></li>
+                                            <li><a href="#"><input type="checkbox"/> Tx
+                                                    <span style="float:right;"><i class="fa fa-info-circle" aria-hidden="true"></i></span>
+                                                </a></li>
+                                        </ul>
+                                    </div>
+                                </div>
 
                                 <div class="col-md-10" style="height:500px; padding-left:0; padding-right:0; overflow-y: auto;">
                                     <!--                        -->

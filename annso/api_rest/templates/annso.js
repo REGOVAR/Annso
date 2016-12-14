@@ -16,6 +16,8 @@ function fake_select_tab(tab_name)
 {
     $('#welcom_toolbar').hide();
     $('#sample_toolbar').hide();
+    $('#variant_toolbar').hide();
+    $('#result_toolbar').hide();
     $('#' + tab_name + '_toolbar').show();
 }
 
@@ -89,6 +91,14 @@ function fake_sample_inheritance()
 }
 
 
+
+function fake_select_variant_submenu(menu_name)
+{
+
+    $('#filters_panel_menu_info').hide();
+    $('#filters_panel_menu_filter').hide();
+    $('#filters_panel_menu_' + menu_name ).show();
+}
 
 
 
