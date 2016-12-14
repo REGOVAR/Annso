@@ -12,6 +12,86 @@ var demo_annso_sample_displayed = null;
 
 
 
+function fake_select_tab(tab_name)
+{
+    $('#welcom_toolbar').hide();
+    $('#sample_toolbar').hide();
+    $('#' + tab_name + '_toolbar').show();
+}
+
+
+
+
+function fake_rename_sample()
+{
+    i=0;
+    data = ["<i class=\"fa fa-pencil\" aria-hidden=\"true\" style=\"width:20px; text-align:center;\">&nbsp;</i> Dad <span style=\"color:#999\"> - CGH0157</span>", 
+            "<i class=\"fa fa-pencil\" aria-hidden=\"true\" style=\"width:20px; text-align:center;\">&nbsp;</i> Mom <span style=\"color:#999\"> - CGH0413</span>", 
+            "<i class=\"fa fa-pencil\" aria-hidden=\"true\" style=\"width:20px; text-align:center;\">&nbsp;</i> Son <span style=\"color:#999\"> - CGH0542</span>"];
+    data2 = ["Dad", "Mom", "Son"];
+
+    $('#browser_samples_table tr td:nth-child(3)').each(function()
+    {
+        $(this).html(data[i]);
+        i += 1;
+    });
+
+    i = 0;
+
+    $('#browser_samples_table tr td:nth-child(2)').each(function()
+    {
+        $(this).html(data2[i]);
+        i += 1;
+    });
+}
+
+
+
+function fake_add_sample_attribute()
+{
+    i=0;
+    data = [["<i class=\"fa fa-tag\" aria-hidden=\"true\" style=\"width:20px; text-align:center;\">&nbsp;</i> Control", "<i class=\"fa fa-tag\" aria-hidden=\"true\" style=\"width:20px; text-align:center;\">&nbsp;</i> Sex"],
+     ["Yes", "Male"], 
+     ["Yes", "Female"], 
+     ["No", "Male"]];
+    
+
+    $('#browser_samples_table tr').each(function()
+    {
+        td = (i == 0) ? "th style=\"width:200px\"" : "td";
+        $(this).append('<{0}>{1}</{0}><{0}>{2}</{0}>'.format(td, data[i][0], data[i][1]));
+        i += 1;
+    });
+
+    var html = "<li><a href=\"#\"><i class=\"fa fa-tag\" aria-hidden=\"true\" style=\"width:20px; text-align:center;\">&nbsp;</i> Control</a></li>";
+    html    += "<li><a href=\"#\"><i class=\"fa fa-tag\" aria-hidden=\"true\" style=\"width:20px; text-align:center;\">&nbsp;</i> Sex</a></li>";
+
+    $('#samples_panel_attributes').html(html);
+    $('#sample_attributes_count').text(2);
+
+
+}
+
+
+function fake_sample_inheritance()
+{
+    i=0;
+    data = ["<i class=\"fa fa-pencil\" aria-hidden=\"true\" style=\"width:20px; text-align:center;\">&nbsp;</i>", 
+        "<i class=\"fa fa-pencil\" aria-hidden=\"true\" style=\"width:20px; text-align:center;\">&nbsp;</i>",
+        "<i class=\"fa fa-pencil\" aria-hidden=\"true\" style=\"width:20px; text-align:center;\">&nbsp;</i> Dad, Mom"];
+    
+
+    $('#browser_samples_table  tr td:nth-child(4)').each(function()
+    {
+        $(this).html(data[i]);
+        i += 1;
+    });
+}
+
+
+
+
+
 
 
 function select_sample(sample_id, swith_input)
@@ -22,7 +102,7 @@ function select_sample(sample_id, swith_input)
 
     var data = {
         "id" : sample_id,
-        "name" : $('#sampleEntry-' + sample_id + ' td:nth-child(3)').html(),
+        "name" : $('#sampleEntry-' + sample_id + ' td:nth-child(2)').html(),
         "nickname" : $('#sampleEntry-' + sample_id + ' td:nth-child(1)').html(),
         "subject" : $('#sampleEntry-' + sample_id + ' td:nth-child(2)').html()
     };
@@ -67,6 +147,7 @@ function select_sample(sample_id, swith_input)
 
 function show_sample(sample_id)
 {
+    return;
     // Display sample details tab
     $('#browser_samples').addClass("col-md-7");
     $('#browser_samples').removeClass("col-md-10");

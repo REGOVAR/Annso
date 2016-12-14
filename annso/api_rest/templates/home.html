@@ -68,143 +68,236 @@
                     <b>Warning!</b> Your browser does not seem to support the features necessary to run tus-js-client.
                 </div>
 
+                <h2 style="color:#999;">My analysis</h2>
                 <div class="panel panel-default" style="box-shadow: 0 0 10px #ccc; border: 1px solid #ccc;">
                     <div class="panel-heading" style="position:relative; padding:0">
                         <!-- <img src="/assets/img/logo.png" width="100px" style="position:absolute; top:-10px; left:-100px;" />  -->
-                        <div class="row">
-                            <nav class="navbar navbar-default" style="margin: 0px 15px; background: inherit; box-shadow: none; -webkit-box-shadow:none; border:none">
-                                <div class="navbar-collapse collapse" aria-expanded="false" style="height: 1px; padding:0;">
-                                    
-                                    <div class="btn-group" style="float: left; margin: 9px 40px 0 9px;" role="group">
-                                        <a class="btn btn-default" href="#modal_new_project" title="New project" data-toggle="modal"  href="#modal_new_project"><i class="fa fa-folder-open" aria-hidden="true"></i></a>
 
-                                        <div class="btn-group">
-                                            <button type="button" class="btn btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" title="Start new analysis">
-                                                <i class="fa fa-filter" aria-hidden="true"></i> New analysis<!--<span class="caret"></span>-->
-                                            </button>
-                                            <ul class="dropdown-menu" role="menu" aria-labelledby="dLabel">
-                                                <li><a href="#">From scratch</a></li>
-                                                <li><a href="#">Hugodims</a></li>
-                                                <li><a href="#">Niourk</a></li>
-                                            </ul>
-                                        </div>
-                                    </div>
 
-                                    <!--                   -->
-                                    <!-- ANALYSIS TAB MENU -->
-                                    <!--                   -->
-                                    <ul class="nav navbar-nav">
-                                         <li style="color:#999; padding:15px 10px 0 10px;">My analysis :</li>
-                                        <li class="active"><a data-toggle="tab" href="#samples_panel"><i class="fa fa-user" style="width:20px; text-align:center;" aria-hidden="true"></i> Samples </a></li>
-                                        <li><a data-toggle="tab" href="#filters_panel"><i class="fa fa-filter" style="width:20px; text-align:center;" aria-hidden="true"></i> Variants</a></li>
-                                        <li><a data-toggle="tab" href="#selection_panel"><i class="fa fa-check-square-o" aria-hidden="true" style="width:20px; text-align:center;">&nbsp;</i> Selection</a></li>
-                                    </ul>
 
-                                    <!--                     -->
-                                    <!-- FIELDS DISPLAY MENU -->
-                                    <!--                     -->
-                                    <div class="btn-group" style="float: right; margin: 9px 9px 0 9px;" role="group">
-                                        <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" title="Choose displayed information">
-                                            <i class="fa fa-info" aria-hidden="true"></i><span class="caret"></span>
-                                        </button>
-                                        <div class="dropdown-menu">
-                                            <form class="form-inline form-navpanel">
-                                                <div class="input-group">
-                                                    <span class="input-group-addon"><i class="fa fa-search" aria-hidden="true"></i></span>
-                                                    <input id="browserNavFieldsPanel_filter_input" type="text" class="form-control" placeholder="Filter sample" aria-describedby="sizing-addon1">
-                                                </div>
-                                            </form>
-                                            <ul>
-                                                <li><a href="#"><input type="checkbox"/> Annso</a>
-                                                    <ul><li><a href="#" style="padding-left:50px"><input type="checkbox" checked/> Chrom
-                                                                <span style="float:right;"><i class="fa fa-info-circle" aria-hidden="true"></i></span>
-                                                            </a></li>
-                                                        <li><a href="#" style="padding-left:50px"><input type="checkbox" checked/> Pos
-                                                                <span style="float:right;"><i class="fa fa-info-circle" aria-hidden="true"></i></span>
-                                                            </a></li>
-                                                        <li><a href="#" style="padding-left:50px"><input type="checkbox" checked/> Ref
-                                                                <span style="float:right;"><i class="fa fa-info-circle" aria-hidden="true"></i></span>
-                                                            </a></li>
-                                                        <li><a href="#" style="padding-left:50px"><input type="checkbox" checked/> Alt
-                                                                <span style="float:right;"><i class="fa fa-info-circle" aria-hidden="true"></i></span>
-                                                            </a></li>
-                                                        <li><a href="#" style="padding-left:50px"><input type="checkbox"/> Bin
-                                                                <span style="float:right;"><i class="fa fa-info-circle" aria-hidden="true"></i></span>
-                                                            </a></li>
-                                                        <li><a href="#" style="padding-left:50px"><input type="checkbox" checked/> Sample
-                                                                <span style="float:right;"><i class="fa fa-info-circle" aria-hidden="true"></i></span>
-                                                            </a></li>
-                                                        <li><a href="#" style="padding-left:50px"><input type="checkbox"/> DP
-                                                                <span style="float:right;"><i class="fa fa-info-circle" aria-hidden="true"></i></span>
-                                                            </a></li>
-                                                        <li><a href="#" style="padding-left:50px"><input type="checkbox"/> GT
-                                                                <span style="float:right;"><i class="fa fa-info-circle" aria-hidden="true"></i></span>
-                                                            </a></li>
-                                                    </ul>
-                                                </li>
-                                                <li><a href="#"><input type="checkbox"/> RefGene</a>
-                                                        <li><a href="#" style="padding-left:50px"><input type="checkbox"/> CDS
-                                                                <span style="float:right;"><i class="fa fa-info-circle" aria-hidden="true"></i></span>
-                                                            </a></li>
-                                                        <li><a href="#" style="padding-left:50px"><input type="checkbox"/> Exon count
-                                                                <span style="float:right;"><i class="fa fa-info-circle" aria-hidden="true"></i></span>
-                                                            </a></li>
-                                                        <li><a href="#" style="padding-left:50px"><input type="checkbox"/> Exon positions
-                                                                <span style="float:right;"><i class="fa fa-info-circle" aria-hidden="true"></i></span>
-                                                            </a></li>
-                                                    <ul><li><a href="#" style="padding-left:50px"><input type="checkbox"/> Name
-                                                                <span style="float:right;"><i class="fa fa-info-circle" aria-hidden="true"></i></span>
-                                                            </a></li>
-                                                        <li><a href="#" style="padding-left:50px"><input type="checkbox"/> Name2
-                                                                <span style="float:right;"><i class="fa fa-info-circle" aria-hidden="true"></i></span>
-                                                            </a></li>
-                                                        <li><a href="#" style="padding-left:50px"><input type="checkbox"/> Score
-                                                                <span style="float:right;"><i class="fa fa-info-circle" aria-hidden="true"></i></span>
-                                                            </a></li>
-                                                        <li><a href="#" style="padding-left:50px"><input type="checkbox"/> Tx
-                                                                <span style="float:right;"><i class="fa fa-info-circle" aria-hidden="true"></i></span>
-                                                            </a></li>
-                                                    </ul>
-                                                </li>
-                                            </ul>
-                                        </div>
-                                    </div>
-
-                                    <!--                      -->
-                                    <!-- QUICK VARIANT FILTER -->
-                                    <!--                      -->
-                                    <form class="form-inline" style="display:block; float: right; margin: 9px 9px 0 9px;">
-                                        <span id="qfilter_message" style="color:#999" style="font-style:italic"></span>
-                                        <span id="qfilter_warning" class="text-danger" style="font-style:italic"></span>
-                                        <div class="input-group">
-                                            <span class="input-group-addon"><i class="fa fa-search" aria-hidden="true"></i></span>
-                                            <input id="browser_filter_input" type="text" class="form-control" placeholder="Filter variants" aria-describedby="sizing-addon1">
-                                        </div>
-                                    </form>
-                                </div>
-                            </nav>
-
-                        
+                        <!--                -->
+                        <!-- Welcom TOOLBAR -->
+                        <!--                -->
+                        <div id="welcom_toolbar" style="height:54px;">
+                            &nbsp;
                         </div>
+
+                        <!--                -->
+                        <!-- SAMPLE TOOLBAR -->
+                        <!--                -->
+                        <div id="sample_toolbar" class="collapse">
+                            <form class="form-inline" style="display:block; float: right; margin: 9px 9px 0 9px;">
+                                <span id="sample_qfilter_message" style="color:#999" style="font-style:italic"></span>
+                                <span id="sample_qfilter_warning" class="text-danger" style="font-style:italic"></span>
+                                <div class="input-group">
+                                    <span class="input-group-addon"><i class="fa fa-search" aria-hidden="true"></i></span>
+                                    <input id="sample_qfilter_input" type="text" class="form-control" placeholder="Filter samples" aria-describedby="sizing-addon1">
+                                </div>
+                            </form>
+
+                            <div style="padding:10px; margin-left:75px; border-left: 1px solid #ddd;">
+                                <div class="btn-group ">
+                                    <a class="btn btn-default" href="#" title="Import sample data from local file" data-toggle="modal">
+                                        <i class="fa fa-download" style="width:20px; text-align:center;" aria-hidden="true"></i>
+                                    </a>
+                                    <a class="btn btn-default" href="#" title="Import sample data from database" data-toggle="modal">
+                                        <i class="fa fa-database" style="width:20px; text-align:center;" aria-hidden="true"></i>
+                                    </a>
+                                </div>
+
+                                <div id="" class="btn-group ">
+                                    <a class="btn btn-default" href="#modal_import_local_file" title="Import sample data" data-toggle="modal" onclick="javascript:fake_add_sample_attribute();">
+                                        <i class="fa fa-tag" style="width:20px; text-align:center;" aria-hidden="true"></i> New attribute
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!--                 -->
+                        <!-- VARIANT TOOLBAR -->
+                        <!--                 -->
+                        <div id="variant_toolbar" class="collapse">
+                            <form class="form-inline" style="display:block; float: right; margin: 9px 9px 0 9px;">
+                                <span id="variant_qfilter_message" style="color:#999" style="font-style:italic"></span>
+                                <span id="variant_qfilter_warning" class="text-danger" style="font-style:italic"></span>
+                                <div class="input-group">
+                                    <span class="input-group-addon"><i class="fa fa-search" aria-hidden="true"></i></span>
+                                    <input id="variant_qfilter_input" type="text" class="form-control" placeholder="Filter variants" aria-describedby="sizing-addon1">
+                                </div>
+                            </form>
+
+                            <div style="padding:10px; margin-left:75px; border-left: 1px solid #ddd;">
+                                <div class="btn-group ">
+                                    <a class="btn btn-default" href="#" title="Import sample data from local file" data-toggle="modal">
+                                        <i class="fa fa-download" style="width:20px; text-align:center;" aria-hidden="true"></i>
+                                    </a>
+                                    <a class="btn btn-default" href="#" title="Import sample data from database" data-toggle="modal">
+                                        <i class="fa fa-database" style="width:20px; text-align:center;" aria-hidden="true"></i>
+                                    </a>
+                                </div>
+
+                                <div id="" class="btn-group ">
+                                    <a class="btn btn-default" href="#modal_import_local_file" title="Import sample data" data-toggle="modal" onclick="javascript:fake_add_sample_attribute();">
+                                        <i class="fa fa-tag" style="width:20px; text-align:center;" aria-hidden="true"></i> New attribute
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+
+
+                    <div id="nav_project" class="sidebar-nav">
+                        <nav class="navbar navbar-default" style="">
+                            <div class="navbar-collapse collapse" aria-expanded="false" style="height: 1px; padding:0;">
+                                
+                                <!--                   -->
+                                <!-- ANALYSIS TAB MENU -->
+                                <!--                   -->
+                                <ul class="nav navbar-nav">
+                                    <li class="active"><a data-toggle="tab" href="#welcom_panel" onclick="javascript:fake_select_tab('welcom');">
+                                        <i class="fa fa-folder-open" style="width:20px; text-align:center;" aria-hidden="true"></i> Welcom </a></li>
+                                    <li><a data-toggle="tab" href="#samples_panel" onclick="javascript:fake_select_tab('sample');">
+                                        <i class="fa fa-user" style="width:20px; text-align:center;" aria-hidden="true"></i> Samples </a></li>
+                                    <li><a data-toggle="tab" href="#filters_panel" onclick="javascript:fake_select_tab('variant');">
+                                        <i class="fa fa-filter" style="width:20px; text-align:center;" aria-hidden="true"></i> Variants</a></li>
+                                    <li><a data-toggle="tab" href="#selection_panel" onclick="javascript:fake_select_tab('result');">
+                                        <i class="fa fa-check-square-o" aria-hidden="true" style="width:20px; text-align:center;">&nbsp;</i> Selection</a></li>
+                                </ul>
+
+                                <!--                     -->
+                                <!-- FIELDS DISPLAY MENU -->
+                                <!--                     -->
+                                <div class="btn-group" style="float: right; margin: 9px 9px 0 9px;" role="group">
+                                    <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" title="Choose displayed information">
+                                        <i class="fa fa-info" aria-hidden="true"></i><span class="caret"></span>
+                                    </button>
+                                    <div class="dropdown-menu">
+                                        <form class="form-inline form-navpanel">
+                                            <div class="input-group">
+                                                <span class="input-group-addon"><i class="fa fa-search" aria-hidden="true"></i></span>
+                                                <input id="browserNavFieldsPanel_filter_input" type="text" class="form-control" placeholder="Filter sample" aria-describedby="sizing-addon1">
+                                            </div>
+                                        </form>
+                                        <ul>
+                                            <li><a href="#"><input type="checkbox"/> Annso</a>
+                                                <ul><li><a href="#" style="padding-left:50px"><input type="checkbox" checked/> Chrom
+                                                            <span style="float:right;"><i class="fa fa-info-circle" aria-hidden="true"></i></span>
+                                                        </a></li>
+                                                    <li><a href="#" style="padding-left:50px"><input type="checkbox" checked/> Pos
+                                                            <span style="float:right;"><i class="fa fa-info-circle" aria-hidden="true"></i></span>
+                                                        </a></li>
+                                                    <li><a href="#" style="padding-left:50px"><input type="checkbox" checked/> Ref
+                                                            <span style="float:right;"><i class="fa fa-info-circle" aria-hidden="true"></i></span>
+                                                        </a></li>
+                                                    <li><a href="#" style="padding-left:50px"><input type="checkbox" checked/> Alt
+                                                            <span style="float:right;"><i class="fa fa-info-circle" aria-hidden="true"></i></span>
+                                                        </a></li>
+                                                    <li><a href="#" style="padding-left:50px"><input type="checkbox"/> Bin
+                                                            <span style="float:right;"><i class="fa fa-info-circle" aria-hidden="true"></i></span>
+                                                        </a></li>
+                                                    <li><a href="#" style="padding-left:50px"><input type="checkbox" checked/> Sample
+                                                            <span style="float:right;"><i class="fa fa-info-circle" aria-hidden="true"></i></span>
+                                                        </a></li>
+                                                    <li><a href="#" style="padding-left:50px"><input type="checkbox"/> DP
+                                                            <span style="float:right;"><i class="fa fa-info-circle" aria-hidden="true"></i></span>
+                                                        </a></li>
+                                                    <li><a href="#" style="padding-left:50px"><input type="checkbox"/> GT
+                                                            <span style="float:right;"><i class="fa fa-info-circle" aria-hidden="true"></i></span>
+                                                        </a></li>
+                                                </ul>
+                                            </li>
+                                            <li><a href="#"><input type="checkbox"/> RefGene</a>
+                                                    <li><a href="#" style="padding-left:50px"><input type="checkbox"/> CDS
+                                                            <span style="float:right;"><i class="fa fa-info-circle" aria-hidden="true"></i></span>
+                                                        </a></li>
+                                                    <li><a href="#" style="padding-left:50px"><input type="checkbox"/> Exon count
+                                                            <span style="float:right;"><i class="fa fa-info-circle" aria-hidden="true"></i></span>
+                                                        </a></li>
+                                                    <li><a href="#" style="padding-left:50px"><input type="checkbox"/> Exon positions
+                                                            <span style="float:right;"><i class="fa fa-info-circle" aria-hidden="true"></i></span>
+                                                        </a></li>
+                                                <ul><li><a href="#" style="padding-left:50px"><input type="checkbox"/> Name
+                                                            <span style="float:right;"><i class="fa fa-info-circle" aria-hidden="true"></i></span>
+                                                        </a></li>
+                                                    <li><a href="#" style="padding-left:50px"><input type="checkbox"/> Name2
+                                                            <span style="float:right;"><i class="fa fa-info-circle" aria-hidden="true"></i></span>
+                                                        </a></li>
+                                                    <li><a href="#" style="padding-left:50px"><input type="checkbox"/> Score
+                                                            <span style="float:right;"><i class="fa fa-info-circle" aria-hidden="true"></i></span>
+                                                        </a></li>
+                                                    <li><a href="#" style="padding-left:50px"><input type="checkbox"/> Tx
+                                                            <span style="float:right;"><i class="fa fa-info-circle" aria-hidden="true"></i></span>
+                                                        </a></li>
+                                                </ul>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </nav>
                     </div>
 
                     <div class="panel-body tab-content" style="padding: 0;">
 
 
                         <!--              -->
+                        <!-- WELCOM PANEL --> 
+                        <!--              -->
+                        <div id="welcom_panel" class="tab-pane fade in active">
+                            <div class="row" style="margin:0; padding-left:75px">
+                                <div class="col-md-3">
+                                    <h3>New analysis
+                                    <ul>
+                                        <li>
+                                            <a class="btn btn-default" href="#" title="Import data" data-toggle="modal">
+                                                <i class="fa fa-download" style="width:20px; text-align:center;" aria-hidden="true"></i> From scratch
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a class="btn btn-default" href="#" title="Import data" data-toggle="modal">
+                                                <i class="fa fa-download" style="width:20px; text-align:center;" aria-hidden="true"></i> Hugodims
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a class="btn btn-default" href="#" title="Import data" data-toggle="modal">
+                                                <i class="fa fa-download" style="width:20px; text-align:center;" aria-hidden="true"></i> Niourk
+                                            </a>
+                                        </li>
+                                    </ul>
+                                </div>
+                                <div class="col-md-3">
+                                    <h3>Open analysis
+                                    <ul>
+                                        <li>
+                                            <a class="btn btn-default" href="#" title="Import data" data-toggle="modal">
+                                                <i class="fa fa-download" style="width:20px; text-align:center;" aria-hidden="true"></i> OGD-AZ-158
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a class="btn btn-default" href="#" title="Import data" data-toggle="modal">
+                                                <i class="fa fa-download" style="width:20px; text-align:center;" aria-hidden="true"></i> My test analysis 
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a class="btn btn-default" href="#" title="Import data" data-toggle="modal">
+                                                <i class="fa fa-download" style="width:20px; text-align:center;" aria-hidden="true"></i> X-Files Trump
+                                            </a>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!--              -->
                         <!-- SAMPLE PANEL --> 
                         <!--              -->
-                        <div id="samples_panel" class="tab-pane fade in active">
-                            <div class="row" style="margin:0;">
+                        <div id="samples_panel" class="tab-pane fade">
+                            <div class="row" style="margin:0; padding-left:75px">
                                 <!--              -->
                                 <!-- SAMPLES MENU -->
                                 <!--              -->
                                 <div class="col-md-2 browser-panel">
-                                
-                                    <a class="btn section" style="display:block; text-align:left;" href="#modal_import" title="Import data" data-toggle="modal"  href="#modal_import">
-                                        <i class="fa fa-download" style="width:20px; text-align:center;" aria-hidden="true"></i> Import data
-                                    </a>
-                                    <hr/>
 
                                     <a class="btn section" style="display:block; text-align:left;">
                                         <i class="fa fa-users" style="width:20px; text-align:center;" aria-hidden="true"></i> Selected for the analysis 
@@ -275,6 +368,16 @@
                                                 </a>
                                             </li>
                                         </div>-->
+
+                                    </ul>
+
+
+                                    <a class="btn section" style="display:block; text-align:left;">
+                                        <i class="fa fa-tags" style="width:20px; text-align:center;" aria-hidden="true"></i> Samples attributes
+                                        <span id="sample_attributes_count" class="badge" style="float:right; margin-top:3px">0</span>
+                                    </a>
+                                    <ul id="samples_panel_attributes">
+                                        <li class="empty_selection">No attribute</li>
                                     </ul>
                                 </div>
 
@@ -285,17 +388,21 @@
                                     <table id="browser_samples_table" class="table table-striped table-bordered" cellspacing="0" width="100%" style="margin:0">
                                         <thead>
                                             <tr>
-                                                <th style="width:200px">Selection</th>
+                                                <th style="width:30px"></th>
                                                 <th class="collapse">Subject</th>
-                                                <th>Sample</th>
+                                                <th style="width:200px;">Sample</th>
+                                                <th>Inheritance</th>
                                             </tr>
                                         </thead>
                                         <tbody>
                                             {% for s in samples %}
-                                            <tr id="sampleEntry-{{ s["sample"]["id"] }}" style="cursor: pointer;" onclick="javascript:show_sample('{{ s["sample"]["id"] }}');">
-                                                <td><input type="checkbox" value="{{ s["sample"]["id"] }}" onmouseup="javascript:select_sample({{ s["sample"]["id"] }}, false)"/></td>
-                                                <td class="collapse">{{ s["subject"]["name"] }} </td>
-                                                <td>{{ s["sample"]["name"] }} </td>
+                                            <tr id="sampleEntry-{{ s["sample"]["id"] }}" style="cursor: pointer;" onclick="javascript:select_sample('{{ s["sample"]["id"] }}');">
+                                                <td><input type="checkbox" value="{{ s["sample"]["id"] }}"/></td>
+                                                <td class="collapse">{{ s["sample"]["name"] }} </td>
+                                                <td>
+                                                    <i class="fa fa-pencil" aria-hidden="true" style="width:20px; text-align:center;" onclick="javascript:fake_rename_sample();return;">&nbsp;</i> 
+                                                    {{ s["sample"]["name"] }} </td>
+                                                <td><i class="fa fa-pencil" aria-hidden="true" style="width:20px; text-align:center;" onclick="javascript:fake_sample_inheritance();return;">&nbsp;</i> </td>
                                             </tr>
                                             {% endfor %}
                                         </tbody>
@@ -390,7 +497,7 @@
                         <!-- FILTERS PANEL --> 
                         <!--               -->
                         <div id="filters_panel" class="tab-pane fade">
-                            <div class="row" style="margin:0;">
+                            <div class="row" style="margin:0; padding-left:75px">
 
                                 <!--              -->
                                 <!-- FILTERS MENU -->
@@ -509,7 +616,7 @@
                         <!-- SELECTION PANEL --> 
                         <!--                 -->
                         <div id="selection_panel" class="tab-pane fade">
-                            <div class="row" style="margin:0;">
+                            <div class="row" style="margin:0; padding-left:75px">
 
 
                                 <!--                -->
