@@ -305,3 +305,33 @@ li.empty_selection
 {
     height: 20px;
 }
+
+
+
+
+
+
+
+
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+/* REPORT
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+h1.fixheader
+{
+    position: fixed;
+    transform-origin: left top;
+    -webkit-transform: rotate(-90deg);
+    margin: 300px -52px;
+    padding-right: 10px;
+    width: 300px;
+    text-align: right;
+    color: #ccc;
+    text-shadow: 0 1px #999
+}
+
+.h1_section
+{
+    border-left: 1px dotted #d0d0d0;
+    border-top: 1px dotted #d0d0d0;
+    padding: 0px 15px;
+}
