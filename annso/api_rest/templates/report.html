@@ -1,5 +1,4 @@
 
-
 <h1>{{gene.name}}</h1>
 
 {% if gene.data.mim_number %}
@@ -32,7 +31,7 @@
 
 <h2>In silico prediction:</h2>
 <ul>
-    <li><a href="http://genic-intolerance.org/Search?query={{gene.name}}">RVIS</a> : {{gene.data.rvis_score}}</li>
+    <li><a href="http://genic-intolerance.org/Search?query={{gene.name}}">RVIS</a> : {{gene.data.rvis_score['%ALL_1%']}}</li>
     <li>Present in the ID genes list: {{gene.data.id_gene and 'yes' or 'no'}}</li>
 
     <li>Morbid Map: TODO FIXME modbid map</li>
@@ -40,19 +39,20 @@
 <h2>Cerebral expression:</h2>
 <ul>
     <li>GTEX: <a href="http://www.gtexportal.org/home/gene/{{gene.name}}">{{gene.name}}</a></li>
-    <li>TA: <a href="http://www.proteinatlas.org/search/{{gene.name}}">{{gene.name}}</a></li>
-    <li><img src="{{ta_url}}" title="TA snapshot"/></li>
+    <li>TA: <a href="http://www.proteinatlas.org/search/{{gene.name}}" style="max-width: 700px;">{{gene.name}}</a> 
+        <div style="max-width: 900px; border: 1px solid #555; padding:20px;">{{ gene.data.ta_graph }}</div></li>
     <li>HBT: <a href="http://hbatlas.org/hbtd/images/wholeBrain/{{gene.name}}.pdf">{{gene.name}}</a></li>
-    <li><img src="http://annso.absolumentg.fr/cache/hbt_image_{{gene.name}}.png" title="HBT"/></li>
+    <li><img src="http://annso.absolumentg.fr/cache/hbt_image_{{gene.name}}.png" title="HBT" style="max-width: 700px;"/></li>
     <li>SFARI: <a href="https://gene.sfari.org/autdb/submitsearch?selfld_0=GENES_GENE_SYMBOL&amp;selfldv_0={{gene.name}}&amp;numOfFields=1&amp;userAction=search&amp;tableName=AUT_HG&amp;submit=Submit+Query">{% if gene.data.sfari_gene %}OUI{% else %}NON{% endif %}</a></li>
+</ul>
 
 
 
-Decipher: <a href="https://decipher.sanger.ac.uk/search?q={{gene.name}}#consented-patients/results">{{gene.name}}</a>
-<img src="{{decipher_url}}" title="Decipher snapshot"/>
+Decipher: <a href="https://decipher.sanger.ac.uk/search?q={{gene.name}}#consented-patients/results">{{gene.name}}</a><br/>
+<img src="http://annso.absolumentg.fr/cache/decipher_image_{{gene.name}}.png" title="Decipher snapshot" style="max-width: 700px;"/><br/>
 
-STRING pathway: <a href="http://string-db.org/api/image/network?identifier={{gene.name}}">{{gene.name}}</a>
-<img src="{{stp_url}}" title="String pathway snapshot"/>
+STRING pathway: <a href="http://string-db.org/api/image/network?identifier={{gene.name}}">{{gene.name}}</a><br/>
+<img src="http://annso.absolumentg.fr/cache/sp_image_{{gene.name}}.png" title="String pathway snapshot" style="max-width: 700px;"/><br/>
 
 
 

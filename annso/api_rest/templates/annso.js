@@ -35,8 +35,7 @@ function fake_add_samples()
     html    += "<td><input type=\"checkbox\" value=\"{0}\"/></td>";
     html    += "<td class=\"collapse\">{1} </td>";
     html    += "<td>";
-    html    += "<i class=\"fa fa-pencil\" aria-hidden=\"true\" style=\"width:20px; text-align:center;\" onclick=\"javascript:fake_rename_sample();return;\">&nbsp;</i> {1} </td>";
-    html    += "<td><i class=\"fa fa-pencil\" aria-hidden=\"true\" style=\"width:20px; text-align:center;\" onclick=\"javascript:fake_sample_inheritance();return;\">&nbsp;</i> </td></tr>";
+    html    += "<i class=\"fa fa-pencil\" aria-hidden=\"true\" style=\"width:20px; text-align:center;\" onclick=\"javascript:fake_rename_sample();return;\">&nbsp;</i> {1} </td></tr>";
 
     for (var i=0; i< 3; i++)
     {
@@ -100,21 +99,6 @@ function fake_add_sample_attribute()
 
 }
 
-
-function fake_sample_inheritance()
-{
-    i=0;
-    data = ["<i class=\"fa fa-pencil\" aria-hidden=\"true\" style=\"width:20px; text-align:center;\">&nbsp;</i>", 
-        "<i class=\"fa fa-pencil\" aria-hidden=\"true\" style=\"width:20px; text-align:center;\">&nbsp;</i>",
-        "<i class=\"fa fa-pencil\" aria-hidden=\"true\" style=\"width:20px; text-align:center;\">&nbsp;</i> Dad, Mom"];
-    
-
-    $('#browser_samples_table  tr td:nth-child(4)').each(function()
-    {
-        $(this).html(data[i]);
-        i += 1;
-    });
-}
 
 
 

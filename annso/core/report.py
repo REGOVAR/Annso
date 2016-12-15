@@ -21,6 +21,11 @@ import http.client
 http.client._MAXHEADERS = 1000
 from bs4 import BeautifulSoup
 
+# Need virtual display to take website snapshot with cutycapt
+import pyvirtualdisplay
+from pyvirtualdisplay.smartdisplay import SmartDisplay
+
+
 
 __version__ = '0.1.0'
 
@@ -239,14 +244,20 @@ class GeneData:
                     break
 
 
-        self.ta_image = None #get_ta_image(name)
-        # self.ta_image_as = None
-        # if not self.ta_image:
-        #     for symbol in self.symbols:
-        #         self.ta_image = get_ta_image(symbol)
-        #         if self.ta_image:
-        #             self.ta_image_as = symbol
-        #             break
+        self.ta_graph = get_ta_image(name)
+        self.ta_image_as = None
+        if not self.ta_graph:
+            for symbol in self.symbols:
+                self.ta_graph = get_ta_image(symbol)
+                if self.ta_graph:
+                    self.ta_image_as = symbol
+                    break
+
+        if os.path.exists(self.ta_graph):
+            with open(self.ta_graph, 'r') as myfile:
+                self.ta_graph=myfile.read()
+        else:
+            self.ta_graph = "no graph"
 
         # TODO FIXME protein / tissue atlas snapshot
 
@@ -259,7 +270,15 @@ class GeneData:
                     self.sp_image_as = symbol
                     break
 
-        # TODO FIXME Decipher snapshot
+        self.decipher_image = get_decipher_image(name)
+        self.decipher_image_as = None
+        if not self.decipher_image:
+            for symbol in self.symbols:
+                self.decipher_image = get_decipher_image(symbol)
+                if self.decipher_image:
+                    self.decipher_image_as = symbol
+                    break
+        
 
         fill_pubmed_articles(self, name)
         self.articles_as = None
@@ -472,7 +491,9 @@ def render_report(data, template_name):
     )
 
 def convert_html(source, destination, delay=0):
-    subprocess.run(['CutyCapt', '--url={}'.format(source), '--out={}'.format(destination), '--delay={}'.format(delay)])
+    print (source, destination, delay)
+    with SmartDisplay(visible=0, bgcolor='black') as disp:
+        subprocess.run(['cutycapt', '--url="{}"'.format(source), '--out={}'.format(destination), '--delay={}'.format(delay)])
 
 def convert_doc(source, destination):
     subprocess.run(['pandoc', '-s', '-o', destination, source])
@@ -554,18 +575,18 @@ def get_decipher_image(gene_name):
     return None
 
 def get_ta_image(gene_name):
-    ta_filename = os.path.join(cache, 'ta_image_{}.png'.format(gene_name))
+    ta_filename = os.path.join(cache, 'ta_image_{}.html'.format(gene_name))
     ta_url  = 'http://www.proteinatlas.org/search/%s' % gene_name
 
-    if os.path.isfile(ta_filename + '.png') :
-        return ta_filename + '.png'
+    if os.path.isfile(ta_filename) :
+        return ta_filename
 
     # 1- Retrieve "true url" from TA "user website url"
     r = requests.get(ta_url)
     if r.status_code == requests.codes.ok:
         soup = BeautifulSoup(r.text, 'html.parser')
         for link in soup.find_all('a'):
-            if (link.text==gene_name):
+            if (link.text.upper()==gene_name.upper()):
                 ta_url = 'http://www.proteinatlas.org' + link.get('href')
 
     # 2- Retrieve html page with graphs
@@ -573,39 +594,31 @@ def get_ta_image(gene_name):
     if r.status_code == requests.codes.ok:
         soup = BeautifulSoup(r.text, 'html.parser')
 
-        html = """<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
-<html>
-    <head>
-        <title>Tissue expression of DRD4 - Summary - The Human Protein Atlas</title>
-        <meta http-equiv="content-type" content="text/html; charset=iso-8859-1">
-        <meta name="description" content="Summary of DRD4 expression in human tissue. ">
-        <link rel="icon" type="image/png" href="http://www.proteinatlas.org/images_static/favicon_anim.gif">
-        <link rel="stylesheet" type="text/css" href="http://www.proteinatlas.org/common.css?version=15.0.0">
-        <link rel="stylesheet" type="text/css" href="http://www.proteinatlas.org/search.css?version=15.0.0">
-        <link rel="stylesheet" type="text/css" href="http://www.proteinatlas.org/image.css?version=15.0.0">
-        <link rel="stylesheet" type="text/css" href="http://www.proteinatlas.org/image_stack.css?version=15.0.0">
-        <script language="javascript" type="text/javascript" src="http://www.proteinatlas.org/utils/jquery.min.js?version=15.0.0"></script>
-        <script language="javascript" type="text/javascript" src="http://www.proteinatlas.org/common.js?version=15.0.0"></script>
-        <script language="javascript" type="text/javascript" src="http://www.proteinatlas.org/search.js?version=15.0.0"></script>
-        <script language="javascript" type="text/javascript" src="http://www.proteinatlas.org/image.js?version=15.0.0"></script>
-        <script language="javascript" type="text/javascript" src="http://www.proteinatlas.org/image_stack.js?version=15.0.0"></script>
-        <script language="javascript" type="text/javascript" src="http://www.proteinatlas.org/utils/d3.min.js?version=15.0.0"></script>
-        <script language="javascript" type="text/javascript" src="http://www.proteinatlas.org/utils/box.min.js?version=15.0.0"></script>
-    </head>
-    <body>
+        html = """<script language="javascript" src="http://www.proteinatlas.org/utils/jquery.min.js?version=15.0.0" type="text/javascript"></script>
+<script language="javascript" src="http://www.proteinatlas.org/common.js?version=15.0.0" type="text/javascript"></script>
+<script language="javascript" src="http://www.proteinatlas.org/utils/d3.min.js?version=15.0.0" type="text/javascript"></script>
 """
-        p = soup.find('p', text='RNA EXPRESSION OVERVIEW')
+        p = soup.find(text='RNA EXPRESSION OVERVIEW')
+        while p.name != 'p':
+            p = p.parent
         html += p.findParent('table').prettify()
-        html += '\n</body></html>'
 
-    # 3- save into file
-    with open(ta_filename + '.html', 'wt') as ta_file:
-        ta_file.write(html)
+    # 3- clean html by removing all image and toggle control
+    html = BeautifulSoup(html, 'html.parser')
+    for x in html.findAll('img'):
+        x.extract() 
+    for x in html.findAll("div", { "class" : "slideToggle" }):
+        x.extract() 
 
-    # 4- convert html into png
-    convert_html('file://{}.html'.format(ta_filename), '{}.png'.format(ta_filename), 500)
-    os.remove(ta_filename+'.html')
-    return ta_filename + '.png'
+    # 4- save into file
+    with open(ta_filename, 'wt') as ta_file:
+        ta_file.write(html.prettify())
+
+    # 5- convert html into png
+    # TODO/FIXME : cutycapt seems not able to convert local html file into image in python virtual display (but work fine in shell with xvfb-run)
+    # convert_html('file:{}.html'.format(ta_filename), ta_filename, 500)
+    # os.remove(ta_filename+'.html')
+    return ta_filename
 
 class PubMedData:
     def __init__(self):
