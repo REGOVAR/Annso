@@ -567,12 +567,6 @@
                                 <!-- FILTERS MENU -->
                                 <!--              -->
                                 <div id="filters_panel_menu_filter" class="col-md-2 browser-panel collapse">
-                                    <a href="#" class="btn section" style="display:block; text-align:left;" role="button">
-                                        <i class="fa fa-cube" aria-hidden="true" style="width:20px; text-align:center;">&nbsp;</i>
-                                        All variants
-                                        <span style="float:right;">350</span>
-                                    </a>
-
                                     <a class="btn section" style="display:block; text-align:left;" role="button" data-toggle="collapse" href="#filters_panel_menu_filter_f" aria-expanded="false" aria-controls="filters_panel_menu_filter_f">
                                         <i class="fa fa-cubes" style="width:20px; text-align:center;" aria-hidden="true"></i> Saved filters 
                                         <span style="float:right;">
@@ -581,7 +575,12 @@
                                     </a>
                                     <div id="filters_panel_menu_filter_f" class="collapse">
                                         <ul>
-                                            
+                                            <li><a href="#">
+                                                    <i class="fa fa-cubes" aria-hidden="true" style="width:20px; text-align:center;">&nbsp;</i>
+                                                    All variants
+                                                    <span style="float:right;">350</span>
+                                                </a>
+                                            </li>
                                             <li><a href="#" style="font-weight:bold;"><i class="fa fa-cube" aria-hidden="true" style="width:20px; text-align:center;">&nbsp;</i>
                                                 De Novo
                                                 <span style="float:right;">40 <i class="fa fa-info-circle" aria-hidden="true"></i></span>
@@ -609,32 +608,80 @@
                                             <span id="selection_count" class="badge">40</span>
                                         </span>
                                     </a>
-                                    <div id="filters_panel_menu_filter_c" class="collapse">
-                                        <form class="form-inline form-navpanel">
+                                    <div id="filters_panel_menu_filter_c">
+                                        <select name="select" style="display: block; margin-left: 15px; color: blue;">
+                                            <option value="value1" selected>AND</option> 
+                                            <option value="value2">OR</option>
+                                            <option value="value3">XOR</option>
+                                        </select>
+                                        <ul style="margin-left: 30px; border-left: 1px solid blue;">
+                                            <li style="margin-left: -56px;"><a href="#" style="padding-left: 50px;">
+                                                <i class="fa fa-check-square-o" aria-hidden="true" style="width:20px; color:blue; background:#f5f5f4;">&nbsp;</i> 
+                                                Not in : <i class="fa fa-tag" aria-hidden="true"></i> Control-Yes
+                                                <span style="float:right;"><i class="fa fa-pencil" aria-hidden="true"></i> <i class="fa fa-times" aria-hidden="true"></i></span></a></li>
+                                            <li style="margin-left: -56px;"><a href="#" style="padding-left: 50px;color:#788396;">
+                                                <i class="fa fa-square-o" aria-hidden="true" style="width:20px; background:#f5f5f4;">&nbsp;</i> 
+                                                In : <i class="fa fa-cube" aria-hidden="true"></i> X link
+                                                <span style="float:right;"><i class="fa fa-pencil" aria-hidden="true"></i> <i class="fa fa-times" aria-hidden="true"></i></span></a></li>
+                                            <li style="margin-left: -56px;"><a href="#" style="padding-left: 50px;">
+                                                <i class="fa fa-check-square-o" aria-hidden="true" style="width:20px; color:blue; background:#f5f5f4;">&nbsp;</i> 
+                                                DP &lt; 400
+                                                <span style="float:right;"><i class="fa fa-pencil" aria-hidden="true"></i> <i class="fa fa-times" aria-hidden="true"></i></span></a></li>
 
+                                            <li style="margin-left: -6px;">
+                                                <i class="fa fa-check-square-o" aria-hidden="true" style="width:20px; color:blue; background:#f5f5f4;">&nbsp;</i>  
+                                                <select name="select" style=" color: green;">
+                                                    <option value="value1">AND</option> 
+                                                    <option value="value2" selected>OR</option>
+                                                    <option value="value3">XOR</option>
+                                                </select>
+                                                <ul style="margin-left: 35px; border-left: 1px solid green;">
+                                                    <li style="margin-left: -56px;"><a href="#" style="padding-left: 50px;">
+                                                        <i class="fa fa-check-square-o" aria-hidden="true" style="width:20px; color:green; background:#f5f5f4;">&nbsp;</i> 
+                                                        Not in : <i class="fa fa-tag" aria-hidden="true"></i> Control-Yes
+                                                        <span style="float:right;"><i class="fa fa-pencil" aria-hidden="true"></i> <i class="fa fa-times" aria-hidden="true"></i></span></a></li>
+                                                    <li style="margin-left: -56px;"><a href="#" style="padding-left: 50px;color:#788396;">
+                                                        <i class="fa fa-square-o" aria-hidden="true" style="width:20px; background:#f5f5f4;">&nbsp;</i> 
+                                                        In : <i class="fa fa-cube" aria-hidden="true"></i> X link
+                                                        <span style="float:right;"><i class="fa fa-pencil" aria-hidden="true"></i> <i class="fa fa-times" aria-hidden="true"></i></span></a></li>
+                                                    <li style="margin-left: -56px;"><a href="#" style="padding-left: 50px;">
+                                                        <i class="fa fa-check-square-o" aria-hidden="true" style="width:20px; color:green; background:#f5f5f4;">&nbsp;</i> 
+                                                        DP &lt; 400
+                                                        <span style="float:right;"><i class="fa fa-pencil" aria-hidden="true"></i> <i class="fa fa-times" aria-hidden="true"></i></span></a></li>
+                                                    <li style="margin-left: -56px;"><a href="#" style="padding-left: 50px;">
+                                                        <i class="fa fa-check-square-o" aria-hidden="true" style="width:20px; color:green; background:#f5f5f4;">&nbsp;</i> 
+                                                        Deletion
+                                                        <span style="float:right;"><i class="fa fa-pencil" aria-hidden="true"></i> <i class="fa fa-times" aria-hidden="true"></i></span></a></li>
+                                                </ul>
+                                                <a href="#modal_filter_add_condition" title="Import sample data" data-toggle="modal" style="padding-left: 30px; font-style:italic; color:#999; display:block; margin-top: -5px;">
+                                                    <i class="fa fa-plus" aria-hidden="true">&nbsp;</i> 
+                                                </a>
+
+                                            </li>
+
+
+
+                                            <li style="margin-left: -56px;"><a href="#" style="padding-left: 50px;">
+                                                <i class="fa fa-check-square-o" aria-hidden="true" style="width:20px; color:blue; background:#f5f5f4;">&nbsp;</i> 
+                                                Deletion
+                                                <span style="float:right;"><i class="fa fa-pencil" aria-hidden="true"></i> <i class="fa fa-times" aria-hidden="true"></i></span></a></li>
+                                        </ul>
+                                        <a href="#modal_filter_add_condition" title="Import sample data" data-toggle="modal" style="padding-left: 25px; font-style:italic; color:#999; display:block; margin-top: -10px;">
+                                            <i class="fa fa-plus" aria-hidden="true">&nbsp;</i>
+                                        </a>
+                                        
+
+
+                                        <form class="form-inline form-navpanel">
                                             <div class="input-group">
                                                 <span class="input-group-addon" title="Name of the selection"><i class="fa fa-tag" aria-hidden="true"></i></span>
                                                 <input id="browserNavFilterPanel_selection_input" type="text" class="form-control" placeholder="Name of the selection" aria-describedby="sizing-addon1" value="De Novo (1)" title="Name of the selection">
+
+                                                <button type="button" class="btn btn-default" title="Create a selection for this filter and continue with a new filter" style="display:block; margin:auto; ">
+                                                    <i class="fa fa-floppy-o" aria-hidden="true"></i> Save filter
+                                                </button>
                                             </div>
                                         </form>
-                                        <a class="btn section" style="padding-left: 25px;" role="button">Filterinf condition :</a>
-                                        <ul>
-                                            <li><a href="#" style="padding-left: 50px;"><input type="checkbox" checked/> Not in : <i class="fa fa-tag" aria-hidden="true"></i> Control-Yes
-                                                <span style="float:right;"><i class="fa fa-pencil" aria-hidden="true"></i> <i class="fa fa-times" aria-hidden="true"></i></span></a></li>
-                                            <li><a href="#" style="padding-left: 50px;"><input type="checkbox" checked/> In : <i class="fa fa-cube" aria-hidden="true"></i> X link
-                                                <span style="float:right;"><i class="fa fa-pencil" aria-hidden="true"></i> <i class="fa fa-times" aria-hidden="true"></i></span></a></li>
-                                            <li><a href="#" style="padding-left: 50px;"><input type="checkbox" checked/> DP &lt; 400
-                                                <span style="float:right;"><i class="fa fa-pencil" aria-hidden="true"></i> <i class="fa fa-times" aria-hidden="true"></i></span></a></li>
-                                            <li><a href="#" style="padding-left: 50px;"><input type="checkbox" checked/> is deletion
-                                                <span style="float:right;"><i class="fa fa-pencil" aria-hidden="true"></i> <i class="fa fa-times" aria-hidden="true"></i></span></a></li>
-
-                                            <li><a href="#modal_filter_add_condition" title="Import sample data" data-toggle="modal" style="padding-left: 50px; font-style:italic; color:#999">
-                                                <i class="fa fa-plus" aria-hidden="true">&nbsp;</i> Add condition</a></li>
-                                        </ul>
-
-                                        <button type="button" class="btn btn-default" title="Create a selection for this filter and continue with a new filter" style="display:block; margin:auto; ">
-                                            <i class="fa fa-floppy-o" aria-hidden="true"></i> Save filter
-                                        </button>
                                     </div>
                                 </div>
 
