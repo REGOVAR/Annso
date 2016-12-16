@@ -45,9 +45,23 @@ function filter_switch_operator(elmt)
     $(elmt).next().removeClass('or');
     $(elmt).next().removeClass('xor');
     $(elmt).next().addClass(map[operator]);
-    
 }
 
+function filter_toggle_condition_group(elmt)
+{
+    if ($(elmt).hasClass('minus'))
+    {
+        $(elmt).next().next().addClass('collapse');
+        $(elmt).removeClass('minus');
+        $(elmt).addClass('plus');
+    }
+    else
+    {
+        $(elmt).next().next().removeClass('collapse');
+        $(elmt).removeClass('plus');
+        $(elmt).addClass('minus');
+    }
+}
 
 
 

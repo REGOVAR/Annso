@@ -218,7 +218,7 @@ li.empty_selection
 .complex_filter li     { margin-left: -16px; }
 /* Indentation - Level 2 */ 
 .complex_filter li select { margin-left: -5px; }
-.complex_filter li ul { margin-left: 50px; }
+.complex_filter li ul     { margin-left: 50px; }
 
 
 
@@ -234,7 +234,7 @@ li.empty_selection
 {
     background-color: rgba(0,0,0,0.1); 
     text-decoration: none; 
-    color:#337ab7;
+    color:inherit;
 }
 .complex_filter button 
 {
@@ -244,15 +244,15 @@ li.empty_selection
     margin: 0;
 }
 
-.and    { color: blue;  border-color: blue; }
-.or     { color: green; border-color: green; }
-.xor    { color: red;   border-color: red; }
-.and .check   { color: blue; }
-.or  .check   { color: green;  }
-.xor .check   { color: red;  }
-.and .uncheck { color: #788396; border-color: #788396; }
-.or  .uncheck { color: #788396; border-color: #788396; }
-.xor .uncheck { color: #788396; border-color: #788396; }
+.and    { color: blue;  border-color: blue!important; }
+.or     { color: green; border-color: green!important; }
+.xor    { color: red;   border-color: red!important; }
+.and>.check   { color: blue; }
+.or>.check   { color: green; }
+.xor>check   { color: red; }
+.and>.uncheck { color: #788396; }
+.or>.uncheck { color: #788396; }
+.xor>.uncheck { color: #788396; }
 
 
 /* checkbox style and text color of the condition according to the check status */
@@ -294,9 +294,9 @@ button.delete:before       { content: "\f00d"; }
 button.toggle.plus:before  { content: "\f196"; }
 button.toggle.minus:before { content: "\f147"; }
 
-li:hover>button.edit       { display: block; }
-li:hover>button.delete     { display: block; }
-li:hover>button.toggle     { display: block; }
+li:hover>button.edit       { display: block; color: #555; }
+li:hover>button.delete     { display: block; color: #f55; }
+li:hover>button.toggle     { display: block; color: #555; }
 
 
 /* New condition button */

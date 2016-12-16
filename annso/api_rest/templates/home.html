@@ -125,22 +125,37 @@
                                     <input id="variant_qfilter_input" type="text" class="form-control" placeholder="Filter variants" aria-describedby="sizing-addon1">
                                 </div>
                             </form>
-
                             <div style="padding:10px; margin-left:75px; border-left: 1px solid #ddd;">
                                 <div class="btn-group" data-toggle="buttons">
                                     <label class="btn btn-default active" onclick="javascript:fake_select_variant_submenu('quick');">
-                                        <input type="radio" name="options" id="option1" checked>  <i class="fa fa-bolt" aria-hidden="true"></i>
+                                        <input type="radio" name="options" id="optionA1" checked>  <i class="fa fa-bolt" aria-hidden="true"></i>
                                     </label>
                                     <label class="btn btn-default" onclick="javascript:fake_select_variant_submenu('filter');">
-                                        <input type="radio" name="options" id="option1" checked>  <i class="fa fa-filter" aria-hidden="true"></i>
+                                        <input type="radio" name="options" id="optionA2">  <i class="fa fa-filter" aria-hidden="true"></i>
                                     </label>
                                     <label class="btn btn-default" onclick="javascript:fake_select_variant_submenu('info');">
-                                        <input type="radio" name="options" id="option2">  <i class="fa fa-info" aria-hidden="true"></i>
+                                        <input type="radio" name="options" id="optionA3">  <i class="fa fa-info" aria-hidden="true"></i>
                                     </label>
                                 </div>
-                                <button type="submit" class="btn btn-default" title="Create a selection for this filter and continue with a new filter" style="">
-                                    <i class="fa fa-floppy-o" aria-hidden="true"></i> Save filter
-                                </button>
+                                &nbsp;
+                                <div class="btn-group" data-toggle="buttons">
+                                    <label class="btn btn-default active" onclick="javascript:fake_switch_variant_display('unique');">
+                                        <input type="radio" name="options" id="optionB1" checked>  <i class="fa fa-table" aria-hidden="true"></i>
+                                    </label>
+                                    <label class="btn btn-default" onclick="javascript:fake_switch_variant_display('bypos');">
+                                        <input type="radio" name="options" id="optionB2">  <i class="fa fa-list" aria-hidden="true"></i>
+                                    </label>
+                                </div>
+                                &nbsp;
+                                <div class="btn-group">
+                                    <button class="btn btn-default" title="Create a selection for this filter and continue with a new filter" style="">
+                                        <i class="fa fa-play" aria-hidden="true">&nbsp;</i>   
+                                    </button>
+                                    <button class="btn btn-default" title="Create a selection for this filter and continue with a new filter" style="">
+                                        <i class="fa fa-floppy-o" aria-hidden="true"></i> Save filter
+                                    </button>
+                                </div>
+                                
                             </div>
                         </div>
 
@@ -425,7 +440,7 @@
 
 
                                     <a class="btn section" style="display:block; text-align:left;" role="button" data-toggle="collapse" href="#browserNavFiltersPanelFilters_v" aria-expanded="false" aria-controls="browserNavFiltersPanelFilters_v">
-                                        <i class="fa fa-map-marker" style="width:20px; text-align:center;" aria-hidden="true"></i> Variant
+                                        <i class="fa fa-map-marker" style="width:20px; text-align:center;" aria-hidden="true"></i> Localisation
                                         <span style="float:right;">
                                             <span id="selection_count" class="badge"></span>&nbsp;<i class="fa fa-chevron-right" aria-hidden="true" style="width:20px; text-align:center;"></i>
                                         </span>
@@ -435,8 +450,6 @@
                                             <li><a href="#" style="color:#999"><i class="fa fa-eye-slash" style="width:20px; text-align:center;" aria-hidden="true"></i> sample</a></li>
                                             <li><a href="#" style="color:#999"><i class="fa fa-eye-slash" style="width:20px; text-align:center;" aria-hidden="true"></i> chr</a></li>
                                             <li><a href="#" style="color:#999"><i class="fa fa-eye-slash" style="width:20px; text-align:center;" aria-hidden="true"></i> pos</a></li>
-                                            <li><a href="#" style="color:#999"><i class="fa fa-eye-slash" style="width:20px; text-align:center;" aria-hidden="true"></i> ref</a></li>
-                                            <li><a href="#" style="color:#999"><i class="fa fa-eye-slash" style="width:20px; text-align:center;" aria-hidden="true"></i> alt</a></li>
                                         </ul>
                                     </div>
 
@@ -609,7 +622,7 @@
                                     </a>
                                     <div id="filters_panel_menu_filter_c" class="complex_filter check">
                                         <button class="fa delete">&nbsp;</button>
-                                        <button class="fa toggle minus">&nbsp;</button>
+                                        <button class="fa toggle minus" onclick="javascript:filter_toggle_condition_group(this);">&nbsp;</button>
                                         <select name="select" class="and" onmouseup="javascript:filter_switch_operator(this);">
                                             <option value="value1" selected>AND</option> 
                                             <option value="value2">OR</option>
@@ -647,7 +660,7 @@
                                                     <i class="fa" aria-hidden="true">&nbsp;</i> 
                                                 </button>
                                                 <button class="fa delete">&nbsp;</button>
-                                                <button class="fa toggle minus">&nbsp;</button>
+                                                <button class="fa toggle minus" onclick="javascript:filter_toggle_condition_group(this);">&nbsp;</button>
                                                 <select name="select" class="or" onmouseup="javascript:filter_switch_operator(this);">
                                                     <option value="value1">AND</option> 
                                                     <option value="value2" selected>OR</option>
@@ -676,7 +689,7 @@
                                                             <i class="fa" aria-hidden="true">&nbsp;</i>
                                                         </button>
                                                         <button class="fa delete">&nbsp;</button>
-                                                        <button class="fa toggle minus">&nbsp;</button>
+                                                        <button class="fa toggle minus" onclick="javascript:filter_toggle_condition_group(this);">&nbsp;</button>
                                                         <select name="select" class="xor" onmouseup="javascript:filter_switch_operator(this);">
                                                             <option value="value1">AND</option> 
                                                             <option value="value2">OR</option>
@@ -1060,83 +1073,20 @@
             <!--                                    -->
             <!-- MODAL POPUP - New Filter condition -->
             <!--                                    -->
-            <div id="modal_filter_add_condition" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+            <div id="modal_filter_add_condition" class="modal fade" tabindex="-1" role="dialog">
                 <div class="modal-dialog" role="document">
                     <div class="modal-content">
                         <div class="modal-header">
                             <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                            <h4 class="modal-title"><i class="fa fa-play" aria-hidden="true"></i> New <span id="newRunPipeName" class="text-primary"></span> run</h4>
+                            <h4 class="modal-title"><i class="fa fa-plus" aria-hidden="true"></i> Add new filter condition </h4>
                         </div>
+                        <div class="modal-body">
+                            <input type="text" id="modal_sample_attribute_name" placeholder="Attribute name"/>
+                            <input type="text" id="modal_sample_attribute_value" placeholder="Attribute value"/>
 
-                        <div class="tab-content" style="margin:0 10px;">
-                            <div id="runConfigInputsTab" class="tab-pane fade in active">
-                                <div class="runConfigHeader">
-                                    <p class="current"><span>1</span><br/><i class="fa fa-files-o" aria-hidden="true"></i> Inputs</p>
-                                    <p class="sp"> • • • • </p>
-                                    <p class=""><span>2</span><br/><i class="fa fa-cog" aria-hidden="true"></i> Configure</p>
-                                    <p class="sp"> • • • • </p>
-                                    <p class=""><span>3</span><br/><i class="fa fa-check" aria-hidden="true"></i> Confirm</p>
-                                </div>
-
-                                <div class="runConfigTabDescription">Below the list of input files selected for the run</div>
-                                <table id="inputFilesList" class="table table-striped table-bordered" cellspacing="0" width="100%">
-                                    <thead>
-                                        <tr>
-                                            <th>Name</th>
-                                            <th>Size</th>
-                                            <th>Creation</th>
-                                        </tr>
-                                    </thead>
-
-                                    <tbody>
-     
-                                    </tbody>
-                                </table>
-                                <p style="margin-top: 20px; text-align:right;"> 
-                                    <button type="button" class="btn btn-primary" data-toggle="tab" href="#runConfigFormTab" onclick="javascript:run_config_step_2();">Next &nbsp;<i class="fa fa-chevron-right" aria-hidden="true"></i></button>
-                                </p>
-                            </div>
-                            <div id="runConfigFormTab" class="tab-pane fade">
-                                <div class="runConfigHeader">
-                                    <p class="ok"><span>1</span><br/><i class="fa fa-files-o" aria-hidden="true"></i> Inputs</p>
-                                    <p class="sp ok"> ——————— </p>
-                                    <p class="current"><span>2</span><br/><i class="fa fa-cog" aria-hidden="true"></i> Configure</p>
-                                    <p class="sp"> • • • • </p>
-                                    <p class="next"><span>3</span><br/><i class="fa fa-check" aria-hidden="true"></i> Confirm</p>
-                                </div>
-                                <div class="runConfigTabDescription">Configure the run</div>
-                                <div id="runConfigContainer"></div>
-                                <p style="margin-top: 20px; text-align:right;"> 
-                                    <button type="button" class="btn btn-primary" data-toggle="tab" href="#runConfigInputsTab"><i class="fa fa-chevron-left" aria-hidden="true"></i>&nbsp; Previous</button> &nbsp; 
-                                    <button type="button" class="btn btn-primary" data-toggle="tab" href="#runConfigConfirmTab" onclick="javascript:run_config_step_3();">Next &nbsp;<i class="fa fa-chevron-right" aria-hidden="true"></i></button>
-                                </p>
-                            </div>
-                            <div id="runConfigConfirmTab" class="tab-pane fade">
-                                <div class="runConfigHeader">
-                                    <p class="ok"><span>1</span><br/><i class="fa fa-files-o" aria-hidden="true"></i> Inputs</p>
-                                    <p class="sp ok"> ——————— </p>
-                                    <p class="ok"><span>2</span><br/><i class="fa fa-cog" aria-hidden="true"></i> Configure</p>
-                                    <p class="sp ok"> ——————— </p>
-                                    <p class="current"><span>3</span><br/><i class="fa fa-check" aria-hidden="true"></i> Confirm</p>
-                                </div>
-                                <div class="runConfigTabDescription"> The run is ready to start !</i></div>
-                                <div id="runConfirmContainer">
-                                    <dl>
-                                        <dt>Inputs </dt>
-                                        <ll>file1</ll>
-                                        <ll>file2</ll>
-                                        <ll>file3</ll>
-
-                                        <dt>Parameters</dt>
-                                        <ll>Param1 : val 1</ll>
-                                        <ll>Param2 : val 2</ll>
-                                        <ll>Param3 : val 3</ll>
-                                    </dl>
-                                </div>
-                                <p style="margin-top: 20px; text-align:center;"> 
-                                    <button type="button" class="btn btn-primary" data-toggle="tab" href="#runConfigFormTab"><i class="fa fa-chevron-left" aria-hidden="true"></i>&nbsp; Previous</button>  &nbsp; 
-                                    <button id="runConfirmButton" type="button" class="btn btn-success" onclick="javascript:run_config_step_4();"><i class="fa fa-check" aria-hidden="true"></i>&nbsp; Run !</button>
-                                </p>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-primary" onclick="javascript:filter_add_condition()">Add</button>
+                                <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
                             </div>
                         </div>
                     </div>
