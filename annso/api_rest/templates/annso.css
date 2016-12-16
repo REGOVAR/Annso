@@ -300,11 +300,11 @@ li:hover>button.toggle     { display: block; }
 
 
 /* New condition button */
-
+li.addcondition>i { background : #f5f5f4; }
 li.addcondition button
 {
     font-style:italic; 
-    color:#999; 
+    color: #555;
     display:block; 
 }
 li.addcondition span { display: none; }

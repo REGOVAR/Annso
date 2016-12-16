@@ -608,13 +608,13 @@
                                         </span>
                                     </a>
                                     <div id="filters_panel_menu_filter_c" class="complex_filter check">
-                                        <select name="select" class="and">
+                                        <button class="fa delete">&nbsp;</button>
+                                        <button class="fa toggle minus">&nbsp;</button>
+                                        <select name="select" class="and" onmouseup="javascript:filter_switch_operator(this);">
                                             <option value="value1" selected>AND</option> 
                                             <option value="value2">OR</option>
                                             <option value="value3">XOR</option>
                                         </select>
-                                        <button class="fa delete">&nbsp;</button>
-                                        <button class="fa toggle minus">&nbsp;</button>
                                         <ul class="and">
                                             <li class="condition check">
                                                 <button onclick="javascript:filter_toggle_condition(this);">
@@ -646,13 +646,13 @@
                                                 <button onclick="javascript:filter_toggle_condition(this);">
                                                     <i class="fa" aria-hidden="true">&nbsp;</i> 
                                                 </button>
-                                                <select name="select" class="or">
+                                                <button class="fa delete">&nbsp;</button>
+                                                <button class="fa toggle minus">&nbsp;</button>
+                                                <select name="select" class="or" onmouseup="javascript:filter_switch_operator(this);">
                                                     <option value="value1">AND</option> 
                                                     <option value="value2" selected>OR</option>
                                                     <option value="value3">XOR</option>
                                                 </select>
-                                                <button class="fa delete">&nbsp;</button>
-                                                <button class="fa toggle minus">&nbsp;</button>
                                                 <ul class="or">
                                                     <li class="condition uncheck">
                                                         <button onclick="javascript:filter_toggle_condition(this);">
@@ -675,13 +675,13 @@
                                                         <button onclick="javascript:filter_toggle_condition(this);">
                                                             <i class="fa" aria-hidden="true">&nbsp;</i>
                                                         </button>
-                                                        <select name="select" class="xor">
+                                                        <button class="fa delete">&nbsp;</button>
+                                                        <button class="fa toggle minus">&nbsp;</button>
+                                                        <select name="select" class="xor" onmouseup="javascript:filter_switch_operator(this);">
                                                             <option value="value1">AND</option> 
                                                             <option value="value2">OR</option>
                                                             <option value="value3" selected>XOR</option>
                                                         </select>
-                                                        <button class="fa delete">&nbsp;</button>
-                                                        <button class="fa toggle minus">&nbsp;</button>
                                                         <ul class="xor">
                                                             <li class="condition uncheck">
                                                                 <button onclick="javascript:filter_toggle_condition(this);">

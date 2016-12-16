@@ -29,6 +29,24 @@ function filter_toggle_condition(elmt)
     }
 }
 
+function filter_switch_operator(elmt)
+{
+    var map = {"AND" : "and", "OR" : "or", "XOR" : "xor"};
+    var operator = $(elmt).find(":selected").text();
+
+
+
+    $(elmt).removeClass('and');
+    $(elmt).removeClass('or');
+    $(elmt).removeClass('xor');
+    $(elmt).addClass(map[operator]);
+
+    $(elmt).next().removeClass('and');
+    $(elmt).next().removeClass('or');
+    $(elmt).next().removeClass('xor');
+    $(elmt).next().addClass(map[operator]);
+    
+}
 
 
 
