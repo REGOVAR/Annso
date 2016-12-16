@@ -12,6 +12,28 @@ var demo_annso_sample_displayed = null;
 
 
 
+
+
+
+function filter_toggle_condition(elmt)
+{
+    if ($(elmt).parent().hasClass('check'))
+    {
+        $(elmt).parent().removeClass('check');
+        $(elmt).parent().addClass('uncheck');
+    }
+    else
+    {
+        $(elmt).parent().addClass('check');
+        $(elmt).parent().removeClass('uncheck');
+    }
+}
+
+
+
+
+
+
 function fake_select_tab(tab_name)
 {
     $('#welcom_toolbar').hide();

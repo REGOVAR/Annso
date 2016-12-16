@@ -601,76 +601,135 @@
                                         </ul>
                                     </div>
 
-                                    
-
-
                                     <a class="btn section" style="display:block; text-align:left;" role="button" data-toggle="collapse" href="#filters_panel_menu_filter_c" aria-expanded="false" aria-controls="filters_panel_menu_filter_c">
                                         <i class="fa fa-filter" aria-hidden="true" style="width:20px; text-align:center;">&nbsp;</i> Filter
                                         <span style="float:right;">
                                             <span id="selection_count" class="badge">40</span>
                                         </span>
                                     </a>
-                                    <div id="filters_panel_menu_filter_c">
-                                        <select name="select" style="display: block; margin-left: 15px; color: blue;">
+                                    <div id="filters_panel_menu_filter_c" class="complex_filter check">
+                                        <select name="select" class="and">
                                             <option value="value1" selected>AND</option> 
                                             <option value="value2">OR</option>
                                             <option value="value3">XOR</option>
                                         </select>
-                                        <ul style="margin-left: 30px; border-left: 1px solid blue;">
-                                            <li style="margin-left: -56px;"><a href="#" style="padding-left: 50px;">
-                                                <i class="fa fa-check-square-o" aria-hidden="true" style="width:20px; color:blue; background:#f5f5f4;">&nbsp;</i> 
-                                                Not in : <i class="fa fa-tag" aria-hidden="true"></i> Control-Yes
-                                                <span style="float:right;"><i class="fa fa-pencil" aria-hidden="true"></i> <i class="fa fa-times" aria-hidden="true"></i></span></a></li>
-                                            <li style="margin-left: -56px;"><a href="#" style="padding-left: 50px;color:#788396;">
-                                                <i class="fa fa-square-o" aria-hidden="true" style="width:20px; background:#f5f5f4;">&nbsp;</i> 
-                                                In : <i class="fa fa-cube" aria-hidden="true"></i> X link
-                                                <span style="float:right;"><i class="fa fa-pencil" aria-hidden="true"></i> <i class="fa fa-times" aria-hidden="true"></i></span></a></li>
-                                            <li style="margin-left: -56px;"><a href="#" style="padding-left: 50px;">
-                                                <i class="fa fa-check-square-o" aria-hidden="true" style="width:20px; color:blue; background:#f5f5f4;">&nbsp;</i> 
-                                                DP &lt; 400
-                                                <span style="float:right;"><i class="fa fa-pencil" aria-hidden="true"></i> <i class="fa fa-times" aria-hidden="true"></i></span></a></li>
+                                        <button class="fa delete">&nbsp;</button>
+                                        <button class="fa toggle minus">&nbsp;</button>
+                                        <ul class="and">
+                                            <li class="condition check">
+                                                <button onclick="javascript:filter_toggle_condition(this);">
+                                                    <i class="fa" aria-hidden="true">&nbsp;</i>
+                                                    <span>Not in : <b class="fa fa-tag" aria-hidden="true"></b> Control-Yes</span>
+                                                </button>
+                                                <button class="fa delete">&nbsp;</button>
+                                                <button class="fa edit">&nbsp;</button>
+                                            </li>
+                                            <li class="condition uncheck">
+                                                <button onclick="javascript:filter_toggle_condition(this);">
+                                                    <i class="fa" aria-hidden="true">&nbsp;</i>
+                                                    <span>In : <b class="fa fa-cube" aria-hidden="true"></b> X link</span>
+                                                </button>
+                                                <button class="fa delete">&nbsp;</button>
+                                                <button class="fa edit">&nbsp;</button>
+                                            </li>
+                                            <li class="condition check">
+                                                <button onclick="javascript:filter_toggle_condition(this);">
+                                                    <i class="fa" aria-hidden="true">&nbsp;</i> 
+                                                    <span>DP &lt; 400</span>
+                                                </button>
+                                                <button class="fa delete">&nbsp;</button>
+                                                <button class="fa edit">&nbsp;</button>
+                                            </li>
 
-                                            <li style="margin-left: -6px;">
-                                                <i class="fa fa-check-square-o" aria-hidden="true" style="width:20px; color:blue; background:#f5f5f4;">&nbsp;</i>  
-                                                <select name="select" style=" color: green;">
+
+                                            <li class="condition check">
+                                                <button onclick="javascript:filter_toggle_condition(this);">
+                                                    <i class="fa" aria-hidden="true">&nbsp;</i> 
+                                                </button>
+                                                <select name="select" class="or">
                                                     <option value="value1">AND</option> 
                                                     <option value="value2" selected>OR</option>
                                                     <option value="value3">XOR</option>
                                                 </select>
-                                                <ul style="margin-left: 35px; border-left: 1px solid green;">
-                                                    <li style="margin-left: -56px;"><a href="#" style="padding-left: 50px;">
-                                                        <i class="fa fa-check-square-o" aria-hidden="true" style="width:20px; color:green; background:#f5f5f4;">&nbsp;</i> 
-                                                        Not in : <i class="fa fa-tag" aria-hidden="true"></i> Control-Yes
-                                                        <span style="float:right;"><i class="fa fa-pencil" aria-hidden="true"></i> <i class="fa fa-times" aria-hidden="true"></i></span></a></li>
-                                                    <li style="margin-left: -56px;"><a href="#" style="padding-left: 50px;color:#788396;">
-                                                        <i class="fa fa-square-o" aria-hidden="true" style="width:20px; background:#f5f5f4;">&nbsp;</i> 
-                                                        In : <i class="fa fa-cube" aria-hidden="true"></i> X link
-                                                        <span style="float:right;"><i class="fa fa-pencil" aria-hidden="true"></i> <i class="fa fa-times" aria-hidden="true"></i></span></a></li>
-                                                    <li style="margin-left: -56px;"><a href="#" style="padding-left: 50px;">
-                                                        <i class="fa fa-check-square-o" aria-hidden="true" style="width:20px; color:green; background:#f5f5f4;">&nbsp;</i> 
-                                                        DP &lt; 400
-                                                        <span style="float:right;"><i class="fa fa-pencil" aria-hidden="true"></i> <i class="fa fa-times" aria-hidden="true"></i></span></a></li>
-                                                    <li style="margin-left: -56px;"><a href="#" style="padding-left: 50px;">
-                                                        <i class="fa fa-check-square-o" aria-hidden="true" style="width:20px; color:green; background:#f5f5f4;">&nbsp;</i> 
-                                                        Deletion
-                                                        <span style="float:right;"><i class="fa fa-pencil" aria-hidden="true"></i> <i class="fa fa-times" aria-hidden="true"></i></span></a></li>
+                                                <button class="fa delete">&nbsp;</button>
+                                                <button class="fa toggle minus">&nbsp;</button>
+                                                <ul class="or">
+                                                    <li class="condition uncheck">
+                                                        <button onclick="javascript:filter_toggle_condition(this);">
+                                                            <i class="fa" aria-hidden="true">&nbsp;</i>
+                                                            <span>In : <b class="fa fa-cube" aria-hidden="true"></b> X link</span>
+                                                        </button>
+                                                        <button class="fa delete">&nbsp;</button>
+                                                        <button class="fa edit">&nbsp;</button>
+                                                    </li>
+                                                    <li class="condition check">
+                                                        <button onclick="javascript:filter_toggle_condition(this);">
+                                                            <i class="fa" aria-hidden="true">&nbsp;</i> 
+                                                            <span>DP &lt; 400</span>
+                                                        </button>
+                                                        <button class="fa delete">&nbsp;</button>
+                                                        <button class="fa edit">&nbsp;</button>
+                                                    </li>
+
+                                                    <li style="condition check">
+                                                        <button onclick="javascript:filter_toggle_condition(this);">
+                                                            <i class="fa" aria-hidden="true">&nbsp;</i>
+                                                        </button>
+                                                        <select name="select" class="xor">
+                                                            <option value="value1">AND</option> 
+                                                            <option value="value2">OR</option>
+                                                            <option value="value3" selected>XOR</option>
+                                                        </select>
+                                                        <button class="fa delete">&nbsp;</button>
+                                                        <button class="fa toggle minus">&nbsp;</button>
+                                                        <ul class="xor">
+                                                            <li class="condition uncheck">
+                                                                <button onclick="javascript:filter_toggle_condition(this);">
+                                                                    <i class="fa" aria-hidden="true">&nbsp;</i>
+                                                                    <span>In : <b class="fa fa-cube" aria-hidden="true"></b> X link</span>
+                                                                </button>
+                                                                <button class="fa delete">&nbsp;</button>
+                                                                <button class="fa edit">&nbsp;</button>
+                                                            </li>
+                                                            <li class="condition check">
+                                                                <button onclick="javascript:filter_toggle_condition(this);">
+                                                                    <i class="fa" aria-hidden="true">&nbsp;</i> 
+                                                                    <span>DP &lt; 400</span>
+                                                                </button>
+                                                                <button class="fa delete">&nbsp;</button>
+                                                                <button class="fa edit">&nbsp;</button>
+                                                            </li>
+                                                            <li class="addcondition">
+                                                                <button href="#modal_filter_add_condition" data-toggle="modal">
+                                                                    <b class="fa fa-plus" aria-hidden="true">&nbsp;</b>
+                                                                    <span>Add new condition</span>
+                                                                </button>
+                                                            </li>
+                                                        </ul>
+                                                    </li>
+                                                    <li class="addcondition">
+                                                        <button href="#modal_filter_add_condition" data-toggle="modal">
+                                                            <b class="fa fa-plus" aria-hidden="true">&nbsp;</b>
+                                                            <span>Add new condition</span>
+                                                        </button>
+                                                    </li>
                                                 </ul>
-                                                <a href="#modal_filter_add_condition" title="Import sample data" data-toggle="modal" style="padding-left: 30px; font-style:italic; color:#999; display:block; margin-top: -5px;">
-                                                    <i class="fa fa-plus" aria-hidden="true">&nbsp;</i> 
-                                                </a>
-
                                             </li>
-
-
-
-                                            <li style="margin-left: -56px;"><a href="#" style="padding-left: 50px;">
-                                                <i class="fa fa-check-square-o" aria-hidden="true" style="width:20px; color:blue; background:#f5f5f4;">&nbsp;</i> 
-                                                Deletion
-                                                <span style="float:right;"><i class="fa fa-pencil" aria-hidden="true"></i> <i class="fa fa-times" aria-hidden="true"></i></span></a></li>
+                                            <li class="condition check">
+                                                <button onclick="javascript:filter_toggle_condition(this);">
+                                                    <i class="fa" aria-hidden="true">&nbsp;</i> 
+                                                    <span>Deletion</span>
+                                                </button>
+                                                <button class="fa delete">&nbsp;</button>
+                                                <button class="fa edit">&nbsp;</button>
+                                            </li>
+                                            <li class="addcondition">
+                                                <button href="#modal_filter_add_condition" data-toggle="modal">
+                                                    <b class="fa fa-plus" aria-hidden="true">&nbsp;</b>
+                                                    <span>Add new condition</span>
+                                                </button>
+                                            </li>
                                         </ul>
-                                        <a href="#modal_filter_add_condition" title="Import sample data" data-toggle="modal" style="padding-left: 25px; font-style:italic; color:#999; display:block; margin-top: -10px;">
-                                            <i class="fa fa-plus" aria-hidden="true">&nbsp;</i>
-                                        </a>
                                     </div>
                                 </div>
 
@@ -1090,8 +1149,6 @@
 
 
     <script src="/assets/annso.js"></script>
-    <script src="/assets/tus.js"></script>
-    <script src="/assets/tus_client.js"></script>
     <script>
         var rootURL = "http://{{ hostname }}";
 
@@ -1119,7 +1176,6 @@
 
         $(document).ready(function()
         {
-            update_datagrid();
 
             $("#browser_files_table td").contextMenu({
                 menuSelector: "#context_menu",
@@ -1132,16 +1188,12 @@
                 }
             });
 
-            $("#browser_files_table").tablesorter(); 
+            //$("#browser_files_table").tablesorter(); 
 
         });
 
 
 
-        function update_datagrid()
-        {
-            $('[data-toggle="tooltip"]').tooltip(); 
-        }
 
         
 
