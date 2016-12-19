@@ -77,8 +77,8 @@ def process_generic_get(query_string, allowed_fields):
         get_params = MultiDict(parse_qsl(query_string))
         r_range  = get_params.get('range', "0-" + str(RANGE_DEFAULT))
         r_fields = get_params.get('fields', None)
-        r_order  = get_params.get('order_by', None)
-        r_sort   = get_params.get('order_sort', None)
+        r_sort  = get_params.get('sort_by', None)
+        r_order = get_params.get('sort_order', None)
         r_filter = get_params.get('filter', None)
 
         # 2- fields to extract

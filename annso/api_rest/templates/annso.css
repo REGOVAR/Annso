@@ -311,6 +311,62 @@ li.addcondition span { display: none; }
 li.addcondition:hover span { display: inline-block; }
 
 
+
+
+
+
+
+/* New condition building navigation tree */
+
+.new_cond_tree
+{
+    float: left;
+    display: block;
+    width: 150px;
+    height:500px;
+    padding-left: 10px;
+}
+
+.new_cond_tree .navbar
+{
+    margin: 0px; 
+    background: inherit; 
+    box-shadow: none; 
+    -webkit-box-shadow:none; 
+    border:none;
+    text-align: center;
+}
+
+.new_cond_tree .navbar ul 
+{
+    margin:0;
+  }
+.new_cond_tree .navbar li 
+{
+    float: none;
+    display: block;
+    height:75px;
+    width: 150px;
+}
+.new_cond_tree .navbar li a 
+{
+    padding-top: 12px;
+    padding-bottom: 12px;
+    display: block;
+    height:150px;
+}
+
+
+
+
+
+
+
+
+
+
+
+
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 /* Demo - Browser - File table
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
