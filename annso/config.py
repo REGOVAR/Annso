@@ -26,8 +26,8 @@ DATABASE_NAME = "annso"
 
 
 # FILESYSTEM
-FILES_DIR     = "/tmp/pirus_" + VERSION + "/files"
-TEMP_DIR      = "/tmp/pirus_" + VERSION + "/downloads"
+FILES_DIR     = "/tmp/annso_" + VERSION + "/files"
+TEMP_DIR      = "/tmp/annso_" + VERSION + "/downloads"
 CACHE_DIR     = "/tmp/annso_" + VERSION + "/cache"
 
 # AUTOCOMPUTED VALUES

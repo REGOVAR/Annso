@@ -146,7 +146,7 @@ class WebsiteHandler:
     @aiohttp_jinja2.template('home.html')
     def home(self, request):
         data = {
-            "hostname" : "",
+            "hostname" : "annso.absolumentg.fr/v1",
             "templates" : annso.template.get(), # return by default last 10 templates
             "analysis" : annso.analysis.get(),  # return by default last 10 analyses
         }
