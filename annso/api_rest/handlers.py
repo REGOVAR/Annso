@@ -16,7 +16,7 @@ from urllib.parse import parse_qsl
 
 from config import *
 from core import *
-
+from api_rest.tus import tus_manager
 
 
 
@@ -146,6 +146,7 @@ class WebsiteHandler:
     @aiohttp_jinja2.template('home.html')
     def home(self, request):
         data = {
+            "hostname" : "",
             "templates" : annso.template.get(), # return by default last 10 templates
             "analysis" : annso.analysis.get(),  # return by default last 10 analyses
         }
@@ -254,6 +255,26 @@ class SampleHandler:
             return rest_error("No database name provided")
 
         return rest_success({"database" : db_name})
+
+
+
+    # Resumable download implement the TUS.IO protocol.
+    def tus_config(self, request):
+        return tus_manager.options(request)
+
+    def tus_upload_init(self, request):
+        return tus_manager.creation(request)
+
+    def tus_upload_resume(self, request):
+        return tus_manager.resume(request)
+
+    async def tus_upload_chunk(self, request):
+        result = await tus_manager.patch(request)
+        return result
+
+    def tus_upload_delete(self, request):
+        return tus_manager.delete_file(request)
+
 
 
 

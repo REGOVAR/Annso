@@ -84,4 +84,23 @@ def export_client_analysis(self, fields=None):
 	return result
 
 
+
+def new_sample_from_tus(filename, file_size):
+    sfile   = File()
+    sfile.name = filename
+    sfile.type = os.path.splitext(filename)[1][1:].strip().lower()
+    sfile.path = os.path.join(TEMP_DIR, str(uuid.uuid4()))
+    sfile.size = int(file_size)
+    sfile.upload_offset = 0
+    sfile.status = "UPLOADING"
+    sfile.create_date = str(datetime.datetime.now().timestamp())
+    sfile.source =  {"type" : "upload"}
+    sfile.save()
+    sfile.url = "http://" + HOSTNAME + "/dl/f/" + str(pfile.id)
+    sfile.upload_url = "http://" + HOSTNAME + "/file/upload/" + str(pfile.id)
+    sfile.save()
+    return pfile
+
+
+
 Analysis.export_client = export_client_analysis 

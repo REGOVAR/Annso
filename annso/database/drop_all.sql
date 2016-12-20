@@ -55,5 +55,5 @@ DROP TYPE IF EXISTS field_type CASCADE;
 
 -- If doesn't work. you can try to force drop the de db and recreate it
 -- psql -U postgres -c "SELECT pg_terminate_backend(pid) FROM pg_stat_activity WHERE datname = 'annso'"
--- psql -U postgres -c "DROP DATABASE mydb;"
+-- psql -U postgres -c "DROP DATABASE annso"
 -- psql -U postgres -c "CREATE DATABASE annso OWNER annso"

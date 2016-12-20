@@ -51,15 +51,15 @@ app.router.add_route('GET',    "/v1/report",     reportHandler.get_html_report)
 
 
 
-# app.router.add_route('GET',    "/v1/analysis",     analysisHandler.get_analyses)
-app.router.add_route('POST',    "/v1/analysis",  analysisHandler.create_analysis)
+# app.router.add_route('GET',  "/v1/analysis",     analysisHandler.get_analyses)
+app.router.add_route('POST',   "/v1/analysis",  analysisHandler.create_analysis)
 app.router.add_route('GET',    "/v1/analysis/{analysis_id}",  analysisHandler.get_analysis)
-# app.router.add_route('GET',    "/v1/analysis/{analysis_id}/sample",     analysisHandler.get_analyses)
-# app.router.add_route('GET',    "/v1/analysis/{analysis_id}/sample/{sample_id}",     analysisHandler.get_analyses)
-# app.router.add_route('GET',    "/v1/analysis/{analysis_id}/sample/{sample_id}/variant",     analysisHandler.get_analyses)
-# app.router.add_route('GET',    "/v1/analysis/{analysis_id}/selection",     analysisHandler.get_analyses)
-# app.router.add_route('GET',    "/v1/analysis/{analysis_id}/selection/{selection_id}",     analysisHandler.get_analyses)
-# app.router.add_route('GET',    "/v1/analysis/{analysis_id}/selection/{selection_id}/variant",     analysisHandler.get_analyses)
+# app.router.add_route('GET',  "/v1/analysis/{analysis_id}/sample",     analysisHandler.get_analyses)
+# app.router.add_route('GET',  "/v1/analysis/{analysis_id}/sample/{sample_id}",     analysisHandler.get_analyses)
+# app.router.add_route('GET',  "/v1/analysis/{analysis_id}/sample/{sample_id}/variant",     analysisHandler.get_analyses)
+# app.router.add_route('GET',  "/v1/analysis/{analysis_id}/selection",     analysisHandler.get_analyses)
+# app.router.add_route('GET',  "/v1/analysis/{analysis_id}/selection/{selection_id}",     analysisHandler.get_analyses)
+# app.router.add_route('GET',  "/v1/analysis/{analysis_id}/selection/{selection_id}/variant",     analysisHandler.get_analyses)
 
 
 
@@ -67,6 +67,11 @@ app.router.add_route('GET',    "/v1/analysis/{analysis_id}",  analysisHandler.ge
 # app.router.add_route('GET',    "/v1/field/{field_id}",     fieldsHandler.get_field)
 
 
+app.router.add_route('POST',   "/v1/sample/upload",           SampleHandler.tus_upload_init)
+app.router.add_route('OPTIONS',"/v1/sample/upload",           SampleHandler.tus_config)
+app.router.add_route('HEAD',   "/v1/sample/upload/{file_id}", SampleHandler.tus_upload_resume)
+app.router.add_route('PATCH',  "/v1/sample/upload/{file_id}", SampleHandler.tus_upload_chunk)
+app.router.add_route('DELETE', "/v1/sample/upload/{file_id}", SampleHandler.tus_upload_delete)
 
 
 

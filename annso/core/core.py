@@ -276,13 +276,50 @@ class SampleManager:
 
 
 
-    def get_from_id(self, file_id, sublvl=0, fields=None):
-        pass
-        
-    
+    def upload_init(self, filename, file_size, metadata={}):
+        """ 
+            Create an entry for the file in the database and return the id of the file in annso
+            This method shall be used to init a resumable upload of a file 
+            (the file is not yet available, but we can manipulate its annso metadata)
+        """
+        sample_file = File.new_from_tus(filename, file_size)
+        if len(metadata) > 0:
+            pirusfile.import_data(metadata)
+            pirusfile.save()
+        plog.info('core.FileManager.register : New file registered with the id ' + str(pirusfile.id) + ' (available at ' + pirusfile.path + ')')
+        return pirusfile.export_client_data(0, PirusFile.public_fields +  ["path"])
 
-    def get_from_ids(self, file_ids, sublvl=0, fields=None):
-        pass
+
+
+    def upload_finish(self, file_id, checksum=None, checksum_type="md5"):
+        """ 
+            When upload of a file is finish, we move it from the download temporary folder to the
+            files folder. A checksum validation can also be done if provided. 
+            Update finaly the status of the file to UPLOADED or CHECKED -> file ready to be used
+        """
+        # Retrieve file
+        pfile = PirusFile.from_id(file_id)
+        if pfile == None:
+            raise PirusException("Unable to retrieve the pirus file with the provided id : " + file_id)
+        # Move file
+        old_path = pfile.path
+        new_path = os.path.join(FILES_DIR, str(uuid.uuid4()))
+        os.rename(old_path, new_path)
+        # If checksum provided, check that file is correct
+        file_status = "UPLOADED"
+        if checksum is not None:
+            if checksum_type == "md5" and md5(fullpath) != checksum : 
+                raise error
+            file_status = "CHECKED"            
+        # Update file data in database
+        pfile.upload_offset = pfile.size
+        pfile.status = file_status
+        pfile.path = new_path
+        pfile.save()
+        # Notify all about the new status
+        msg = {"action":"file_changed", "data" : [pfile.export_client_data()] }
+        pirus.notify_all(json.dumps(msg))
+        # TODO : check if run was waiting the end of the upload to start
 
 
 

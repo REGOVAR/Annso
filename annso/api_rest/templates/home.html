@@ -97,10 +97,10 @@
 
                             <div style="padding:10px; margin-left:75px; border-left: 1px solid #ddd;">
                                 <div class="btn-group ">
-                                    <a class="btn btn-default" href="#" title="Import sample data from local file" data-toggle="modal">
+                                    <a class="btn btn-default" href="#modal_import_sample_file" title="Import sample/variant data from local file" data-toggle="modal">
                                         <i class="fa fa-download" style="width:20px; text-align:center;" aria-hidden="true"></i>
                                     </a>
-                                    <a class="btn btn-default" href="#" title="Import sample data from database" data-toggle="modal" onclick="javascript:fake_add_samples();">
+                                    <a class="btn btn-default" href="#modal_import_sample_db" title="Import sample/variant data from database" data-toggle="modal">
                                         <i class="fa fa-database" style="width:20px; text-align:center;" aria-hidden="true"></i>
                                     </a>
                                 </div>
@@ -273,7 +273,7 @@
                                 <!--              -->
                                 <!-- SAMPLES MENU -->
                                 <!--              -->
-                                <div class="col-md-2 browser-panel">
+                                <div id="browser_samples_side" class="col-md-2 browser-panel">
 
                                     <a class="btn section" style="display:block; text-align:left;">
                                         <i class="fa fa-users" style="width:20px; text-align:center;" aria-hidden="true"></i> Selected for the analysis 
@@ -1019,21 +1019,61 @@
             <!--                           -->
             <!-- MODAL POPUP - File Upload -->
             <!--                           -->
-            <div id="modal_new_file" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+            <div id="modal_import_sample_file" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
                 <div class="modal-dialog" role="document">
                     <div class="modal-content">
                         <div class="modal-header">
                             <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                            <h4 class="modal-title"><i class="fa fa-folder-open-o" aria-hidden="true"></i> Upload a file on Pirus</h4>
+                            <h4 class="modal-title"><i class="fa fa-download" aria-hidden="true"></i> Import sample/variant data from file</h4>
                         </div>
                         <div class="modal-body">
-                            <input type="hidden" id="modal_new_file_tus_endpoint" name="modal_new_file_tus_endpoint" value="http://{{ hostname }}/file/upload">
-                            <input type="hidden" id="modal_new_file_tus_chunksize" name="modal_new_file_tus_chunksize" value="256000">
-                            <input type="file" id="modal_new_file_tus_localinput">
+
+                            <form class="form">
+                                <div class="input-group">
+
+                                    <input type="hidden" id="modal_new_file_tus_endpoint" name="modal_new_file_tus_endpoint" value="http://{{ hostname }}/sample/import">
+                                    <input type="hidden" id="modal_new_file_tus_chunksize" name="modal_new_file_tus_chunksize" value="256000">
+
+                                    <span class="input-group-addon"><i class="fa fa-file" aria-hidden="true"></i></span>
+                                    <input type="file" id="modal_import_file_tus_localinput" class="form-control">
+                                </div>
+                            </form>
+
                             <p id="modal_new_file_progress" style="margin-top:20px; height:50px;"></p>
 
                             <div class="modal-footer">
-                                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                                <button id="modal_new_file_cancel_btn" type="button" class="btn btn-default" data-dismiss="modal">Cancel</button> &nbsp; 
+                                <button id="modal_new_file_start_btn" type="button" class="btn btn-success" onclick="javascript:create_analysis();">Start import !</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
+
+
+
+
+            <!--                           -->
+            <!-- MODAL POPUP - File Upload -->
+            <!--                           -->
+            <div id="modal_import_sample_db" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+                <div class="modal-dialog" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                            <h4 class="modal-title"><i class="fa fa-folder-open-o" aria-hidden="true"></i> Import sample/variant from annso database</h4>
+                        </div>
+                        <div class="modal-body">
+
+                            <form class="form">
+                                TODO
+                            </form>
+
+                            <div class="modal-footer">
+                                <button id="modal_new_file_cancel_btn" type="button" class="btn btn-default" data-dismiss="modal">Cancel</button> &nbsp; 
+                                <button id="modal_new_file_start_btn" type="button" class="btn btn-success">Start import !</button>
                             </div>
                         </div>
                     </div>
@@ -1258,7 +1298,7 @@
 
     <script src="/assets/annso.js"></script>
     <script>
-        var rootURL = "http://annso.absolumentg.fr/v1";
+        var rootURL = "http://{{ hostname }}";
 
         var ws = new WebSocket('ws://{{ hostname }}/ws');
         var $message = $('#message');

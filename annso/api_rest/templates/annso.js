@@ -75,7 +75,8 @@ function load_analysis(json)
 
 
     // Todo : reset samples screen, filters, reports, ...
-    $('#browser_samples').html("<span class=\"maincontent_placeholder\">← Select or import sample(s) you want to analyse.</span>")
+    $('#browser_samples_side').addClass("collapse");
+    $('#browser_samples').html("<span class=\"maincontent_placeholder\">⮤ Import and select sample(s) you want to analyse.</span>")
 
     // Automaticaly select the Sample section
     $('#nav_project_sample')[0].click(function (e) { e.preventDefault(); $(this).tab('show'); })

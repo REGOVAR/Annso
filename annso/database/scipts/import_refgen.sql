@@ -45,7 +45,7 @@ COPY import_refgene_hg19 FROM '/tmp/hg19_db/refGene.txt' DELIMITER E'\t' CSV;
 -- Create Annso tables for refgene data
 --
 DROP TABLE IF EXISTS public.refgene_hg19;
-CREATE TABLE public.refgene_hg19_id_seq
+CREATE TABLE public.refgene_hg19
 (
   bin integer NOT NULL,
   name character varying(255),
@@ -128,24 +128,24 @@ ALTER TABLE public.refgene_exon_hg19
 --
 INSERT INTO public.refgene_hg19(bin, name, chr, strand, txstart, txend, txrange, cdsstart, cdsend, cdsrange, exoncount, score, name2, cdsstartstat, cdsendstat)
 SELECT bin, name, chrom, strand, txstart, txend, int8range(txstart, txend), cdsstart, cdsend, int8range(cdsstart, cdsend), exoncount, score, name2, cdsstartstat, cdsendstat
-FROM import_refgene_hg19
+FROM import_refgene_hg19;
 
 
 INSERT INTO public.refgene_exon_hg19(bin, name, chr, strand, txstart, txend, txrange, cdsstart, cdsend, cdsrange, exoncount, i_exonstart, i_exonend, score, name2, cdsstartstat, cdsendstat)
 SELECT bin, name, chrom, strand, txstart, txend, int8range(txstart, txend), cdsstart, cdsend, int8range(cdsstart, cdsend), exoncount, unnest(string_to_array(trim(trailing ',' from exonstarts), ',')), unnest(string_to_array(trim(trailing ',' from exonends), ',')), score, name2, cdsstartstat, cdsendstat
-FROM import_refgene_hg19
+FROM import_refgene_hg19;
 
 
 
 UPDATE public.refgene_exon_hg19 SET 
   exonstart=CAST(coalesce(i_exonstart, '0') AS integer),
   exonend  =CAST(coalesce(i_exonend,   '0') AS integer),
-  exonrange=int8range(CAST(coalesce(i_exonstart, '0') AS integer), CAST(coalesce(i_exonend, '0') AS integer)) 
+  exonrange=int8range(CAST(coalesce(i_exonstart, '0') AS integer), CAST(coalesce(i_exonend, '0') AS integer)) ;
 
 
 
-ALTER TABLE public.refgene_exon_hg19 DROP COLUMN i_exonstart
-ALTER TABLE public.refgene_exon_hg19 DROP COLUMN i_exonend
+ALTER TABLE public.refgene_exon_hg19 DROP COLUMN i_exonstart;
+ALTER TABLE public.refgene_exon_hg19 DROP COLUMN i_exonend;
 
 
 

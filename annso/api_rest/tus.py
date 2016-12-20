@@ -50,23 +50,22 @@ class TusFileWrapper:
         if id == -1:
             return TusManager.build_response(code=404)
 
-        # We can upload file or pipeline, we check model according to url
-        if "/file/upload" in request.raw_path and pirus.files.get_from_id(id) is not None:
-            return PirusFileWrapper(id)
-        if "pipeline/upload" in request.raw_path and pirus.pipelines.get_from_id(id) is not None :
-            return PirusPipelineWrapper(id)
+        # We can upload file or custom annotation db, we check model according to url
+        if "/sample/upload" in request.raw_path and annso.file.get_from_id(id) is not None:
+            return SampleFileWrapper(id)
+        # TODO : import wrapper for custom annotation db/csv
         return TusManager.build_response(code=404)
 
     @staticmethod
     def new_upload(request, filename, file_size):
         # Create and return the wrapper to manipulate the uploading file
-        if "/file/upload" in request.raw_path :
-            pfile   = pirus.files.upload_init(filename, file_size)
-            return PirusFileWrapper(pfile["id"])
+        if "/sample/upload" in request.raw_path :
+            pfile   = annso.sample.upload_init(filename, file_size)
+            return SampleFileWrapper(pfile["id"])
 
-        if "/pipeline/upload" in request.raw_path :
-            pipe = pirus.pipeline.upload_init(filename, file_size)
-            return PirusPipelineWrapper(pipe["id"])
+        # if "/customdb/upload" in request.raw_path :
+        #     pipe = pirus.pipeline.upload_init(filename, file_size)
+        #     return PirusPipelineWrapper(pipe["id"])
 
 
 
@@ -196,7 +195,7 @@ class TusManager:
 
 
 # Custom wrapper for Pirus file
-class PirusFileWrapper (TusFileWrapper) :
+class SampleFileWrapper (TusFileWrapper) :
     def __init__(self, id):
         self.pfile = pirus.files.get_from_id(id, 0, ["name", "upload_offset", "path", "size", "upload_url"])
         self.id = id
