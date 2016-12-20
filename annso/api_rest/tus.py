@@ -197,13 +197,13 @@ class TusManager:
 # Custom wrapper for Pirus file
 class SampleFileWrapper (TusFileWrapper) :
     def __init__(self, id):
-        self.pfile = pirus.files.get_from_id(id, 0, ["name", "upload_offset", "path", "size", "upload_url"])
+        self.pfile = pirus.files.get_from_id(id, 0, ["name", "upload_offset", "path", "size"])
         self.id = id
         self.name = self.pfile["name"]
         self.upload_offset = self.pfile["upload_offset"]
         self.path = self.pfile["path"]
         self.size = self.pfile["size"]
-        self.upload_url = self.pfile["upload_url"]
+        self.upload_url = "http://" + HOSTNAME + "/sample/upload/" + str(id)
 
     def save(self):
         try:

@@ -283,11 +283,7 @@ class SampleManager:
             (the file is not yet available, but we can manipulate its annso metadata)
         """
         sample_file = File.new_from_tus(filename, file_size)
-        if len(metadata) > 0:
-            pirusfile.import_data(metadata)
-            pirusfile.save()
-        plog.info('core.FileManager.register : New file registered with the id ' + str(pirusfile.id) + ' (available at ' + pirusfile.path + ')')
-        return pirusfile.export_client_data(0, PirusFile.public_fields +  ["path"])
+        return sample_file.export_client(["id", "name", "upload_offset", "path", "size"])
 
 
 
