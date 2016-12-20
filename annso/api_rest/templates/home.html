@@ -68,7 +68,7 @@
                     <b>Warning!</b> Your browser does not seem to support the features necessary to run tus-js-client.
                 </div>
 
-                <h2 style="color:#999;">My analysis</h2>
+                <h2 id="analysis_title" style="color:#999;"></h2>
                 <div class="panel panel-default" style="box-shadow: 0 0 10px #ccc; border: 1px solid #ccc;">
                     <div class="panel-heading" style="position:relative; padding:0">
                         <!-- <img src="/assets/img/logo.png" width="100px" style="position:absolute; top:-10px; left:-100px;" />  -->
@@ -195,13 +195,13 @@
                                 <!-- ANALYSIS TAB MENU -->
                                 <!--                   -->
                                 <ul class="nav navbar-nav">
-                                    <li class="active"><a data-toggle="tab" href="#welcom_panel" onclick="javascript:fake_select_tab('welcom');">
+                                    <li class="active"><a id="nav_project_welcom" data-toggle="tab" href="#welcom_panel" onclick="javascript:fake_select_tab('welcom');">
                                         <i class="fa fa-folder-open" style="width:20px; text-align:center;" aria-hidden="true"></i> Welcom </a></li>
-                                    <li><a data-toggle="tab" href="#samples_panel" onclick="javascript:fake_select_tab('sample');">
+                                    <li><a id="nav_project_sample" data-toggle="tab" href="#samples_panel" onclick="javascript:fake_select_tab('sample');">
                                         <i class="fa fa-user" style="width:20px; text-align:center;" aria-hidden="true"></i> Samples </a></li>
-                                    <li><a data-toggle="tab" href="#filters_panel" onclick="javascript:fake_select_tab('variant');">
+                                    <li><a id="nav_project_variant" data-toggle="tab" href="#filters_panel" onclick="javascript:fake_select_tab('variant');">
                                         <i class="fa fa-filter" style="width:20px; text-align:center;" aria-hidden="true"></i> Variants</a></li>
-                                    <li><a data-toggle="tab" href="#selection_panel" onclick="javascript:fake_select_tab('result');">
+                                    <li><a id="nav_project_selection" data-toggle="tab" href="#selection_panel" onclick="javascript:fake_select_tab('result');">
                                         <i class="fa fa-check-square-o" aria-hidden="true" style="width:20px; text-align:center;">&nbsp;</i> Selection</a></li>
                                 </ul>
                             </div>
@@ -216,53 +216,51 @@
                         <!--              -->
                         <div id="welcom_panel" class="tab-pane fade in active">
                             <div class="row" style="margin:0; padding-left:75px">
-                                <div class="col-md-3">
+                                <div class="col-md-3" style="margin-left:30px;">
                                     <h3>New analysis</h3>
                                     <ul>
                                         <li>
-                                            <a class="btn btn-default" href="#" title="Import data" data-toggle="modal">
-                                                <i class="fa fa-filter" style="width:20px; text-align:center;" aria-hidden="true"></i> From scratch
-                                            </a>
-                                        </li>
-                                        <li>
-                                            <a class="btn btn-default" href="#" title="Import data" data-toggle="modal">
-                                                <i class="fa fa-filter" style="width:20px; text-align:center;" aria-hidden="true"></i> Hugodims
-                                            </a>
-                                        </li>
-                                        <li>
-                                            <a class="btn btn-default" href="#" title="Import data" data-toggle="modal">
-                                                <i class="fa fa-filter" style="width:20px; text-align:center;" aria-hidden="true"></i> Niourk
+                                            <a class="btn btn-default" href="#modal_new_analysis" title="Start a new empty analysis" data-toggle="modal">
+                                                <i class="fa fa-filter" style="width:20px; text-align:center;" aria-hidden="true"></i> Start new analysis
                                             </a>
                                         </li>
                                     </ul>
+
+                                    {% if templates|length > 0 %}
+                                    <h3>New specific analysis</h3>
+                                    <ul>
+                                        {% for t in templates %}
+                                        <li>
+                                            <a class="btn btn-default" onclick="javascript:start_analysis({{t["id"]}});" title="Start a new analysis with {{t["name"]}} filters predifined">
+                                                <i class="fa fa-filter" style="width:20px; text-align:center;" aria-hidden="true"></i> Start {{ t["name"] }} analysis
+                                            </a>
+                                        </li>
+                                        {% endfor %}
+                                    </ul>
+                                    {% endif %}
                                 </div>
                                 <div class="col-md-3">
                                     <h3>Open analysis</h3>
                                     <ul>
                                         <li>
-                                            <a class="btn btn-default" href="#" title="Import data" data-toggle="modal">
-                                                <i class="fa fa-folder-open" style="width:20px; text-align:center;" aria-hidden="true"></i> Open Analysis
+                                            <a class="btn btn-default" href="#" title="Open an existing analysis" data-toggle="modal">
+                                                <i class="fa fa-folder-open" style="width:20px; text-align:center;" aria-hidden="true"></i> Open analysis
                                             </a>
                                         </li>
                                     </ul>
+
+                                    {% if analysis|length > 0 %}
                                     <h3>Recent analysis</h3>
                                     <ul>
+                                        {% for a in analysis %}
                                         <li>
-                                            <a class="btn btn-default" href="#" title="Import data" data-toggle="modal">
-                                                <i class="fa fa-folder-o" style="width:20px; text-align:center;" aria-hidden="true"></i> OGD-AZ-158
+                                            <a class="btn btn-default" onclick="javascript:start_analysis({{a["id"]}});" title="Open " data-toggle="modal">
+                                                <i class="fa fa-folder-o" style="width:20px; text-align:center;" aria-hidden="true"></i> {{ a["name"] }}
                                             </a>
                                         </li>
-                                        <li>
-                                            <a class="btn btn-default" href="#" title="Import data" data-toggle="modal">
-                                                <i class="fa fa-folder-o" style="width:20px; text-align:center;" aria-hidden="true"></i> My test analysis 
-                                            </a>
-                                        </li>
-                                        <li>
-                                            <a class="btn btn-default" href="#" title="Import data" data-toggle="modal">
-                                                <i class="fa fa-folder-o" style="width:20px; text-align:center;" aria-hidden="true"></i> X-Files Trump
-                                            </a>
-                                        </li>
+                                        {% endfor %}
                                     </ul>
+                                    {% endif %}
                                 </div>
                             </div>
                         </div>
@@ -316,33 +314,6 @@
                                 <!-- SAMPLE DETAILS -->
                                 <!--                -->
                                 <div id="samples_details" class="collapse" >
-                                    <div class="collapse">
-                                        <h3>
-                                            <a style="display:block; text-align:left;" role="button" data-toggle="collapse" href="#samples_details_subject_details" aria-expanded="false" aria-controls="samples_details_subject_details">
-                                                <i class="fa fa-user" aria-hidden="true" style="width:20px; text-align:center;">&nbsp;</i> Subject : <span id="samples_details_subject"></span>
-                                                <span style="float:right"><i class="fa fa-pencil" aria-hidden="true" style="width:20px; text-align:center;"></i></span>
-                                            </a>
-                                        </h3>
-                                        <div id="samples_details_subject_details" class="row collapse">
-                                            <div class="col-md-6">
-                                                <b>Phenotype :</b>
-                                                <ul>
-                                                    <li><b>Nez :</b> gros</li>
-                                                    <li><b>Menton :</b> Dalton</li>
-                                                    <li><b>Yeux :</b> 5</li>
-                                                    <li><b>Cheveux :</b> Trump</li>
-                                                </ul>
-                                            </div>
-                                            <div class="col-md-6">
-                                                <b>Characteristics :</b>
-                                                <ul>
-                                                    <li><b>Sex :</b> Male</li>
-                                                    <li><b>Size :</b> 2m75</li>
-                                                    <li><b>Age :</b> 115</li>
-                                                </ul>
-                                            </div>
-                                        </div>
-                                    </div>
                                     <h3>
                                         <a style="display:block; text-align:left;" role="button" data-toggle="collapse" href="#samples_details_sample_details" aria-expanded="false" aria-controls="samples_details_sample_details">
                                             <i class="fa fa-flask" aria-hidden="true" style="width:20px; text-align:center;">&nbsp;</i> Sample : <span id="samples_details_name"></span>
@@ -974,7 +945,6 @@
                                 <!--                 -->
                                 <!-- EXPORT VARIANTS -->
                                 <!--                 -->
-                                <script language="javascript" src="http://www.proteinatlas.org/utils/jquery.min.js?version=15.0.0" type="text/javascript"></script>
                                 <script language="javascript" src="http://www.proteinatlas.org/common.js?version=15.0.0" type="text/javascript"></script>
                                 <script language="javascript" src="http://www.proteinatlas.org/utils/d3.min.js?version=15.0.0" type="text/javascript"></script>
                                 <div id="selection_panel_content_report" class="col-md-10 collapse" style="height:500px; padding-left:60px; padding-right:0; overflow-y: auto;">
@@ -1010,6 +980,36 @@
                     <li><a href="https://annuel.framapad.org/p/pirusAPI">Pirus API</a></li>
                     <li><a href="https://semestriel.framapad.org/p/annso">Annso API</a></li>
                 </ul>
+            </div>
+
+
+
+            <!--                            -->
+            <!-- MODAL POPUP - New analysis -->
+            <!--                            -->
+            <div id="modal_new_analysis" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+                <div class="modal-dialog" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                            <h4 class="modal-title"><i class="fa fa-folder-open-o" aria-hidden="true"></i> Create a new analysis</h4>
+                        </div>
+                        <div class="modal-body">
+
+                            <form class="form">
+                                <div class="input-group">
+                                    <span class="input-group-addon"><i class="fa fa-folder" aria-hidden="true"></i></span>
+                                    <input type="text" id="modal_new_analysis_name" placeholder="The name of your analysis" class="form-control">
+                                </div>
+                            </form>
+
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button> &nbsp; 
+                                <button type="button" class="btn btn-success" onclick="javascript:create_analysis();">Create</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
 
 
@@ -1258,7 +1258,7 @@
 
     <script src="/assets/annso.js"></script>
     <script>
-        var rootURL = "http://{{ hostname }}";
+        var rootURL = "http://annso.absolumentg.fr/v1";
 
         var ws = new WebSocket('ws://{{ hostname }}/ws');
         var $message = $('#message');

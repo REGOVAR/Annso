@@ -3,6 +3,7 @@
 import os
 import sys
 import time
+import datetime
 import logging
 import json
 import yaml
@@ -45,20 +46,23 @@ db_session = Session(db_engine)
 # MODEL DEFINITION - Build from the database (see sql scripts used to generate the database)
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
 
-User = Base.classes.user
-Project = Base.classes.project
+
+Analysis = Base.classes.analysis
+Template = Base.classes.template
 Sample = Base.classes.sample
 Variant = Base.classes.variant_hg19
 SampleVariant = Base.classes.sample_variant_hg19
-Analysis = Base.classes.analysis
 Selection = Base.classes.selection
-Template = Base.classes.template
-Subject = Base.classes.subject
+
+Attribute = Base.classes.attribute
+
 File = Base.classes.file
 
 
 
-Sample.public_fields = ["id", "name", "comment"]
+Analysis.public_fields = ["id", "name", "template_id", "creation_date", "update_date"]
+Template.public_fields = ["id", "name", "author", "description", "version", "creation_date", "update_date"]
+Sample.public_fields   = ["id", "name", "comments", "is_mosaic"]
 
 
 
@@ -66,6 +70,18 @@ Sample.public_fields = ["id", "name", "comment"]
 
 
 
+def export_client_analysis(self, fields=None):
+	result = {}
+
+	if fields is None:
+		fields = Analysis.public_fields
+
+	for f in fields:
+		if f == "creation_date" or f == "update_date":
+			result.update({f : eval("self." + f + ".ctime()")})
+		else:
+			result.update({f : eval("self." + f)})
+	return result
 
 
-
+Analysis.export_client = export_client_analysis 

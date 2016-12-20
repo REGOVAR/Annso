@@ -146,8 +146,8 @@ class WebsiteHandler:
     @aiohttp_jinja2.template('home.html')
     def home(self, request):
         data = {
-            "variants" : annso.variant.get(),
-            "samples" : annso.sample.get()
+            "templates" : annso.template.get(), # return by default last 10 templates
+            "analysis" : annso.analysis.get(),  # return by default last 10 analyses
         }
         return data
 
@@ -168,8 +168,38 @@ class WebsiteHandler:
 
 
 
+
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
-# XXX HANDLER
+# SAMPLE HANDLER
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
+class AnalysisHandler:
+
+    def get_analysis(self, request):
+        analysis_id = request.match_info.get('analysis_id', -1)
+        analysis = annso.analysis.get_from_id(analysis_id)
+        if analysis is None:
+            return rest_error("Unable to find the analysis with id=" + str(analysis_id))
+        return rest_success(analysis)
+
+
+
+    async def create_analysis(self, request):
+        # 1- Retrieve data from request
+        data = await request.json()
+        name = data["name"]
+        template_id = None # data["template_id"] # TODO
+        # Create the project 
+        analysis = annso.analysis.create(name, template_id)
+        if analysis is None:
+            return rest_error("Unable to create an analsis with provided information.")
+        return rest_success(analysis)
+
+
+
+
+
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
+# REPORT HANDLER
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
 
 

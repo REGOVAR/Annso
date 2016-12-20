@@ -66,8 +66,6 @@
 
 
 
-
-
 .biglist li
 {
     display:inline-block; 
@@ -83,6 +81,12 @@
 }
 
 
+#welcom_panel h3
+{
+    margin-top:50px; 
+    color: #999;
+}
+
 #welcom_panel ul
 {
     padding: 0;
@@ -95,12 +99,21 @@
 #welcom_panel li .btn-default
 {
     display: block;
-    width: 200px;
+    width: 250px;
     text-align: left;
     margin: 15px 0 0 0;
 }
 
 
+
+
+.maincontent_placeholder
+{
+    display: block;
+    font-size: 2em;
+    color: #aaa;
+    margin:30px;
+}
 
 .browser-panel
 {

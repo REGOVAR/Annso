@@ -30,8 +30,8 @@ from core.report import *
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
 class Core:
     def __init__(self):
-        # self.analyse = AnalysisManager()
-        # self.template = TemplateManager()
+        self.analysis = AnalysisManager()
+        self.template = TemplateManager()
         self.sample = SampleManager()
         self.variant = VariantManager()
         # self.selection = SelectionManager()
@@ -77,21 +77,17 @@ class AnalysisManager:
 
 
     def public_fields(self):
-        return PirusFile.public_fields
+        return Analysis.public_fields
 
-
-
-    def total(self):
-        return 1
 
 
 
     def get(self, fields=None, query=None, order=None, offset=None, limit=None, sublvl=0):
         """
-            Generic method to get files metadata according to provided filtering options
+            Generic method to get analysis metadata according to provided filtering options
         """
         if fields is None:
-            fields = PirusFile.public_fields
+            fields = Analysis.public_fields
         if query is None:
             query = {}
         if order is None:
@@ -100,7 +96,67 @@ class AnalysisManager:
             offset = 0
         if limit is None:
             limit = offset + RANGE_MAX
-        return []
+        return db_session.query(Analysis).filter_by(**query).offset(offset).limit(limit).all()
+
+
+
+    def create(self, name, template_id=None):
+        instance = None
+        db_session.begin(nested=True)
+        try:
+            instance = Analysis(name=name, creation_date=datetime.datetime.now(), update_date=datetime.datetime.now())
+            db_session.add(instance)
+            db_session.commit()
+            return instance.export_client(), True
+        except IntegrityError as e:
+            db_session.rollback()
+        return None, False
+        
+
+    def get_from_id(self, analysis_id):
+        analysis = db_session.query(Analysis).filter_by(id=analysis_id).first()
+        return analysis.export_client()
+
+
+    def get_from_ids(self, file_ids, sublvl=0, fields=None):
+        pass
+
+
+
+
+
+
+
+
+
+
+class TemplateManager:
+    def __init__(self):
+        pass
+
+
+
+    def public_fields(self):
+        return Template.public_fields
+
+
+
+
+    def get(self, fields=None, query=None, order=None, offset=None, limit=None, sublvl=0):
+        """
+            Generic method to get analysis metadata according to provided filtering options
+        """
+        if fields is None:
+            fields = Analysis.public_fields
+        if query is None:
+            query = {}
+        if order is None:
+            order = ['-create_date', "name"]
+        if offset is None:
+            offset = 0
+        if limit is None:
+            limit = offset + RANGE_MAX
+        return db_session.query(Template).filter_by(**query).offset(offset).limit(limit).all()
 
 
 
@@ -111,9 +167,6 @@ class AnalysisManager:
 
     def get_from_ids(self, file_ids, sublvl=0, fields=None):
         pass
-
-
-
 
 
 
@@ -215,9 +268,8 @@ class SampleManager:
 
 
         result = []
-        for s in db_session.execute("SELECT sj.id, sj.name, sp.id, sp.name  FROM sample sp LEFT JOIN subject sj ON sj.id = sp.subject_id"):
+        for s in db_session.execute("SELECT sp.id, sp.name  FROM sample sp"):
             result.append({
-                "subject" : {"id" : s[0], "name" : s[1]},
                 "sample"  : {"id" : s[2], "name" : s[3]}
             })
         return result

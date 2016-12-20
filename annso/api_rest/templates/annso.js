@@ -9,6 +9,83 @@ var demo_pirus_displayed_pipe;
 var demo_sample_attributes = []
 var demo_annso_samples = {};
 var demo_annso_sample_displayed = null;
+var demo_analysis_id = -1;
+
+
+
+
+function create_analysis()
+{
+    var analysis_name = $('#modal_new_analysis_name').val();
+    var template_id = -1;
+
+    if (analysis_name != "")
+    {
+        $.ajax(
+        {
+            url: rootURL + "/analysis",
+            type: "POST",
+            data: "{\"name\" : \""+ analysis_name +"\", \"template_id\" : " + template_id + "}"
+        }).fail(function()
+        {
+            alert( "ERROR" );
+        }).done(function(json) 
+        {
+            load_analysis(json);
+        });
+    }
+    else
+    {
+        alert("Thanks to give a name to your analyse.");
+    }    
+}
+
+function start_analysis(id)
+{
+    $.ajax({ url: rootURL + "/analysis/" + id, type: "GET", async: false}).fail(function()
+    {
+        alert( "ERROR" );
+    }).done(function(json) 
+    {
+        load_analysis(json);
+    });
+}
+
+
+
+function load_analysis(json)
+{
+    if (json["success"])
+    {
+        json = json["data"]
+    }
+    else
+    {
+        alert ( "ERROR" );
+        return;
+    }
+
+    // Reset new analysis form
+    $('#modal_new_analysis_name').val("");
+    $('#modal_new_analysis').modal('hide');
+
+    // Set main title
+    $('#analysis_title').html("<i class=\"fa fa-folder-o\" style=\"width:20px; text-align:center;\" aria-hidden=\"true\"></i> &nbsp; " + json["name"]);
+    demo_analysis_id = json["id"];
+
+
+    // Todo : reset samples screen, filters, reports, ...
+    $('#browser_samples').html("<span class=\"maincontent_placeholder\">← Select or import sample(s) you want to analyse.</span>")
+
+    // Automaticaly select the Sample section
+    $('#nav_project_sample')[0].click(function (e) { e.preventDefault(); $(this).tab('show'); })
+}
+
+
+
+
+
+
 
 
 

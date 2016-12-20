@@ -20,6 +20,7 @@ aiohttp_jinja2.setup(app, loader=jinja2.FileSystemLoader(TEMPLATE_DIR))
 websocket = WebsocketHandler()
 website = WebsiteHandler()
 dbHandler = AnnotationDBHandler()
+analysisHandler = AnalysisHandler()
 sampleHandler = SampleHandler()
 variantHandler = VariantHandler()
 reportHandler = ReportHandler()
@@ -45,15 +46,14 @@ app.router.add_route('GET',    "/v1/ws",     websocket.get)
 
 
 app.router.add_route('GET',    "/v1/sample",     sampleHandler.get_samples)
-app.router.add_route('GET',    "/v1/variant",     variantHandler.get_variants)
-
-
+app.router.add_route('GET',    "/v1/variant",    variantHandler.get_variants)
 app.router.add_route('GET',    "/v1/report",     reportHandler.get_html_report)
 
 
 
 # app.router.add_route('GET',    "/v1/analysis",     analysisHandler.get_analyses)
-# app.router.add_route('GET',    "/v1/analysis/{analysis_id}",     analysisHandler.get_analysis)
+app.router.add_route('POST',    "/v1/analysis",  analysisHandler.create_analysis)
+app.router.add_route('GET',    "/v1/analysis/{analysis_id}",  analysisHandler.get_analysis)
 # app.router.add_route('GET',    "/v1/analysis/{analysis_id}/sample",     analysisHandler.get_analyses)
 # app.router.add_route('GET',    "/v1/analysis/{analysis_id}/sample/{sample_id}",     analysisHandler.get_analyses)
 # app.router.add_route('GET',    "/v1/analysis/{analysis_id}/sample/{sample_id}/variant",     analysisHandler.get_analyses)
