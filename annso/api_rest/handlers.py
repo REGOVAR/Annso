@@ -190,6 +190,8 @@ class AnalysisHandler:
         data = await request.json()
         name = data["name"]
         template_id = None # data["template_id"] # TODO
+        # data["samples"] # TODO ?
+        # data["attributes"] # TODO ?
         # Create the project 
         analysis, success = annso.analysis.create(name, template_id)
         print (analysis)

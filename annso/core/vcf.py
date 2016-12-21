@@ -181,11 +181,11 @@ def import_vcf(filepath, db_ref_suffix="_hg19"):
                         transaction1 = sql_head1 + sql_query1[:-1] + sql_tail
                         transaction2 = sql_query2
 
-                        if job_in_progress >= max_job_in_progress:
-                            print ("\nto many job in progress, waiting... (" + datetime.datetime.now().ctime() + ")")
-                        while job_in_progress >= max_job_in_progress:
-                            time.sleep(100)
-                        print ("\nStart new job " + str(job_in_progress) + "/" + str(max_job_in_progress) + " (" + datetime.datetime.now().ctime() + ")")
+                        # if job_in_progress >= max_job_in_progress:
+                        #     print ("\nto many job in progress, waiting... (" + datetime.datetime.now().ctime() + ")")
+                        # while job_in_progress >= max_job_in_progress:
+                        #     time.sleep(100)
+                        # print ("\nStart new job " + str(job_in_progress) + "/" + str(max_job_in_progress) + " (" + datetime.datetime.now().ctime() + ")")
                         #threading.Thread(target=exec_sql_query, args=(transaction1 + transaction2, )).start() # both request cannot be executed in separated thread. sql2 must be executed after sql1
                         pool.apply_async(exec_sql_query, (transaction1 + transaction2, ))
                         sql_query1 = ""
