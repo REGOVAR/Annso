@@ -73,10 +73,7 @@ def export_client_sample(self, fields=None):
     if fields is None:
         fields = Sample.public_fields
     for f in fields:
-        if f == "creation_date" or f == "update_date":
-            result.update({f : eval("self." + f + ".ctime()")})
-        else:
-            result.update({f : eval("self." + f)})
+        result.update({f : eval("self." + f)})
     return result
 
 
@@ -95,6 +92,7 @@ def export_client_analysis(self, fields=None):
 
 
 def new_sample_file_from_tus(filename, file_size):
+    global db_session
     sfile = File()
     sfile.filename = filename
     sfile.type = os.path.splitext(filename)[1][1:].strip().lower()

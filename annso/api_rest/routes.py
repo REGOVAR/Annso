@@ -45,9 +45,10 @@ app.router.add_route('GET',    "/v1/ws",     websocket.get)
 # app.router.add_route('GET',    "/v1/db/{db_name}",     dbHandler.get_db_details)
 
 
-app.router.add_route('GET',    "/v1/sample",     sampleHandler.get_samples)
-app.router.add_route('GET',    "/v1/variant",    variantHandler.get_variants)
-app.router.add_route('GET',    "/v1/report",     reportHandler.get_html_report)
+app.router.add_route('GET',    "/v1/sample",             sampleHandler.get_samples)
+app.router.add_route('GET',    "/v1/sample/{sample_id}", sampleHandler.get_sample)
+app.router.add_route('GET',    "/v1/variant",            variantHandler.get_variants)
+app.router.add_route('GET',    "/v1/report",             reportHandler.get_html_report)
 
 
 

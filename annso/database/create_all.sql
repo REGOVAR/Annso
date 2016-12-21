@@ -57,6 +57,8 @@ CREATE TABLE public.analysis
     template_settings text COLLATE pg_catalog."C.UTF-8",
     creation_date timestamp without time zone,
     update_date timestamp without time zone,
+    total_variants integer DEFAULT 0,
+    total_distinct_variants integer DEFAULT 0,
     CONSTRAINT analysis_pkey PRIMARY KEY (id),
     CONSTRAINT analysis_template_id_fkey FOREIGN KEY (template_id)
         REFERENCES public."template" (id) MATCH SIMPLE

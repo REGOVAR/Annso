@@ -86,6 +86,7 @@ class AnalysisManager:
         """
             Generic method to get analysis metadata according to provided filtering options
         """
+        global db_session
         if fields is None:
             fields = Analysis.public_fields
         if query is None:
@@ -101,12 +102,14 @@ class AnalysisManager:
 
 
     def create(self, name, template_id=None):
+        global db_session
         instance = None
         db_session.begin(nested=True)
         try:
             instance = Analysis(name=name, creation_date=datetime.datetime.now(), update_date=datetime.datetime.now())
             db_session.add(instance)
-            db_session.commit()
+            db_session.commit() # commit the save point into the session (opened by the .begin() before the try:)
+            db_session.commit() # commit into the database.
             return instance.export_client(), True
         except IntegrityError as e:
             db_session.rollback()
@@ -146,6 +149,7 @@ class TemplateManager:
         """
             Generic method to get analysis metadata according to provided filtering options
         """
+        global db_session
         if fields is None:
             fields = Analysis.public_fields
         if query is None:
@@ -197,6 +201,7 @@ class VariantManager:
         """
             Generic method to get files metadata according to provided filtering options
         """
+        global db_session
         if fields is None:
             fields = Sample.public_fields
         if query is None:
@@ -250,11 +255,11 @@ class SampleManager:
         return 3
 
 
-
     def get(self, fields=None, query=None, order=None, offset=None, limit=None, sublvl=0):
         """
             Generic method to get files metadata according to provided filtering options
         """
+        global db_session
         if fields is None:
             fields = Sample.public_fields
         if query is None:
@@ -268,11 +273,16 @@ class SampleManager:
 
 
         result = []
-        for s in db_session.execute("SELECT sp.id, sp.name  FROM sample sp"):
-            result.append({
-                "sample"  : {"id" : s[2], "name" : s[3]}
-            })
+        for s in db_session.execute("SELECT sp.id, sp.name, sp.comments  FROM sample sp"):
+            result.append({"id" : s[0], "name" : s[1], "comments": s[2], "analyses" : []})
         return result
+
+
+
+    def get_from_id(self, sample_id, fields=None):
+        global db_session
+        sample = db_session.query(Sample).filter_by(id=sample_id).first()
+        return sample.export_client()
 
 
 

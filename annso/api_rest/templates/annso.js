@@ -6,12 +6,27 @@ var demo_pirus_displayed_pipe;
 
 
 
-var demo_sample_attributes = []
-var demo_annso_samples = {};
-var demo_annso_sample_displayed = null;
+var demo_sample_attributes = {}
+var demo_samples = {};
 var demo_analysis_id = -1;
+var demo_filter = "";
 
 
+
+function select_tab(tab_name)
+{
+    $('#welcom_toolbar').hide();
+    $('#sample_toolbar').hide();
+    $('#variant_toolbar').hide();
+    $('#result_toolbar').hide();
+    $('#' + tab_name + '_toolbar').show();
+
+    if (tab_name == "variant")
+    {
+        // Try to load variant according to the samples and filter
+        load_variants_array();
+    }
+}
 
 
 function create_analysis()
@@ -25,7 +40,8 @@ function create_analysis()
         {
             url: rootURL + "/analysis",
             type: "POST",
-            data: "{\"name\" : \""+ analysis_name +"\", \"template_id\" : " + template_id + "}"
+            data: "{\"name\" : \""+ analysis_name +"\", \"template_id\" : " + template_id + "}",
+            async: false
         }).fail(function()
         {
             alert( "ERROR" );
@@ -70,18 +86,121 @@ function load_analysis(json)
     $('#modal_new_analysis').modal('hide');
 
     // Set main title
-    $('#analysis_title').html("<i class=\"fa fa-folder-o\" style=\"width:20px; text-align:center;\" aria-hidden=\"true\"></i> &nbsp; " + json["name"]);
+    $('#analysis_title').html("<i class=\"fa fa-folder-o\" style=\"width:20px; text-align:center; margin-right:20px;\" aria-hidden=\"true\"></i>" + json["name"]);
     demo_analysis_id = json["id"];
 
 
     // Todo : reset samples screen, filters, reports, ...
-    $('#browser_samples_side').addClass("collapse");
     $('#browser_samples').html("<span class=\"maincontent_placeholder\">⮤ Import and select sample(s) you want to analyse.</span>")
 
     // Automaticaly select the Sample section
     $('#nav_project_sample')[0].click(function (e) { e.preventDefault(); $(this).tab('show'); })
 }
 
+function load_sample_database()
+{
+    $('#modal_import_sample_db_content').html('<i class="fa fa-refresh fa-spin fa-3x fa-fw" style="margin:200px 250px"></i><span class="sr-only">Loading data from database</span>');
+    $.ajax({ url: rootURL + "/sample", type: "GET", async: false}).fail(function()
+    {
+        alert( "ERROR" );
+    }).done(function(json) 
+    {
+        if (json["success"])
+        {
+            json = json["data"]
+        }
+        else
+        {
+            alert ( "ERROR" );
+            return;
+        }
+        html="<table class=\"table table-striped table-bordered\" cellspacing=\"0\" width=\"100%\" style=\"margin:0\">\
+                    <thead>\
+                        <tr>\
+                            <th style=\"width:20px\"></th>\
+                            <th style=\"width:200px\">Sample</th>\
+                            <th style=\"width:40px\">Comment</th>\
+                            <th style=\"width:100px\">Analyses</th>\
+                        </tr>\
+                    </thead>\
+                    <tbody>\n";
+
+        for (var i=0; i< json.length; i++)
+        {
+            html += "<tr style=\"cursor: pointer;\" onclick=\"javascript:toggle_select_sample({0}, true);\">\
+                            <td><input type=\"checkbox\" value=\"{0}\"/></td>\
+                            <td>{1} </td>\
+                            <td>{2} </td>\
+                            <td>{3} </td>\
+                        </tr>".format(json[i]["id"], json[i]["name"], json[i]["comments"], json[i]["analyses"]);
+        }
+
+        html += "</tbody></table>";
+        $('#modal_import_sample_db_content').html(html);
+
+    });
+}
+
+function toggle_select_sample( id, clean_list=false)
+{
+    // check if need to add the table
+    if (Object.keys(demo_samples).length == 0)
+    {
+        $('#browser_samples').html("<table id=\"browser_samples_table\" class=\"table table-striped table-bordered\" cellspacing=\"0\" width=\"100%\" style=\"margin:0;\"><thead><tr><th style=\"width:30px;\"></th><th>Sample</th></tr></thead><tbody></tbody></table>");
+    }
+
+    // check if id already in the list
+    checked = false;
+    if (id in demo_samples)
+    {
+        // update check status
+        demo_samples[id]["checked"] = !demo_samples[id]["checked"];
+        $('#browser_samples_table_'+id+ " input").prop('checked', demo_samples[id]["checked"]);
+
+        // update model & view
+        if (!demo_samples[id]["checked"] && clean_list)
+        {
+            delete(demo_samples[id]);
+            $('#browser_samples_table_'+id).remove();
+        }
+    }
+    else
+    {
+        sample = null;
+        $.ajax({ url: rootURL + "/sample/" + id, type: "GET", async: false}).done(function(json)
+        {
+            sample = json["data"];
+        });
+        demo_samples[id] = {"name" : sample["name"], "comments" : sample["comments"], "analyses" : "", "nickname" : "", "attributes" : [], "checked" : true};
+        // TODO build row according to existing attributes
+        $('#browser_samples_table tbody').append('<tr id="browser_samples_table_{0}"><td><input type=\"checkbox\" value=\"{0}\" checked/></td><td>{1}</td></tr>'.format(id, sample["name"]));
+    }
+}
+
+
+function load_variants_array()
+{
+    // Init the analysis by creating relation between sample, attributes and the analysis
+    samples = [];
+    $.each(demo_samples, function( key, data ) {
+        if (data["checked"])
+        {
+            samples.push({"id" : key, "attributes" : []});
+        }
+    });
+
+
+    $.ajax({ 
+        url: rootURL + "/analysis/" + demo_analysis_id, 
+        type: "PUT",
+        data: "{\"samples\" : [" + samples + "], \""+ analysis_name +"\", \"template_id\" : " + template_id + "}",
+        async: true}).done(function(json)
+    {
+        sample = json["data"];
+    });
+
+    alert ("Analyse : " + demo_analysis_id + "\nSamples : " + demo_samples + "\nFilter : " + demo_filter);
+}
 
 
 
@@ -144,14 +263,14 @@ function filter_toggle_condition_group(elmt)
 
 
 
-function fake_select_tab(tab_name)
-{
-    $('#welcom_toolbar').hide();
-    $('#sample_toolbar').hide();
-    $('#variant_toolbar').hide();
-    $('#result_toolbar').hide();
-    $('#' + tab_name + '_toolbar').show();
-}
+
+
+
+
+
+
+
+
 
 
 
@@ -222,13 +341,6 @@ function fake_add_sample_attribute()
         i += 1;
     });
 
-    var html = "<li><a href=\"#\"><i class=\"fa fa-tag\" aria-hidden=\"true\" style=\"width:20px; text-align:center;\">&nbsp;</i> Control</a></li>";
-    html    += "<li><a href=\"#\"><i class=\"fa fa-tag\" aria-hidden=\"true\" style=\"width:20px; text-align:center;\">&nbsp;</i> Sex</a></li>";
-
-    $('#samples_panel_attributes').html(html);
-    $('#sample_attributes_count').text(2);
-
-
 }
 
 
@@ -266,94 +378,18 @@ function fake_generate_report()
 }
 
 
-function select_sample(sample_id, swith_input)
-{
-    var input =  $('#sampleEntry-' + sample_id + ' input')[0];
-    var check = !input.checked;
-    var count = Object.keys(demo_annso_samples).length;
-
-    var data = {
-        "id" : sample_id,
-        "name" : $('#sampleEntry-' + sample_id + ' td:nth-child(2)').html(),
-        "nickname" : $('#sampleEntry-' + sample_id + ' td:nth-child(1)').html(),
-        "subject" : $('#sampleEntry-' + sample_id + ' td:nth-child(2)').html()
-    };
-
-   
-    if (check)
-    {
-        if (count == 0) $('#samples_panel_selection').html('');
-        demo_annso_samples[sample_id] = data;
-        var html = '<li id="samples_panel-' + sample_id + "\"><a onclick=\"javascript:show_sample(" + sample_id + ", false)\" href=\"#\">";
-        html += "<i class=\"fa fa-user\" aria-hidden=\"true\" style=\"width:20px; text-align:center;\">&nbsp;</i>" + data["name"] + '</a></li>';
-        $('#samples_panel_selection').append(html);
-
-        if (demo_annso_sample_displayed != null && demo_annso_sample_displayed["id"] == sample_id)
-        {
-            $('#samples_details_select_btn i').removeClass('fa-square-o');
-            $('#samples_details_select_btn i').addClass('fa-check-square-o');
-            $('#samples_details_attributes_details').removeClass('collapse');
-        }
-        count += 1;
-        if (!swith_input) input.checked = true;
-    }
-    else
-    {
-        delete demo_annso_samples[sample_id];
-        $('#samples_panel-' + sample_id).remove();
-        if (count == 1) $('#samples_panel_selection').html('<li class="empty_selection">No sample selected</li>');
-        if (demo_annso_sample_displayed != null && demo_annso_sample_displayed["id"] == sample_id)
-        {
-            $('#samples_details_select_btn i').removeClass('fa-check-square-o');
-            $('#samples_details_select_btn i').addClass('fa-square-o');
-            $('#samples_details_attributes_details').addClass('collapse');
-        }
-        count -= 1;
-        if (!swith_input) input.checked = false;
-    }
-    $('#samples_count').html(count);
-}
 
 
 
 
-function show_sample(sample_id)
-{
-    return;
-    // Display sample details tab
-    $('#browser_samples').addClass("col-md-7");
-    $('#browser_samples').removeClass("col-md-10");
-    $('#samples_details').addClass("col-md-3");
-    $('#samples_details').removeClass("collapse");
-
-    // Get data of the displayed sample
-    demo_annso_sample_displayed = {
-        "id" : sample_id,
-        "name" : $('#sampleEntry-' + sample_id + ' td:nth-child(3)').html(),
-        "nickname" : $('#sampleEntry-' + sample_id + ' td:nth-child(1)').html(),
-        "subject" : $('#sampleEntry-' + sample_id + ' td:nth-child(2)').html()
-    };
 
 
-    // Update view with sample data
-    $('#samples_details_subject').text( demo_annso_sample_displayed["subject"] );
-    $('#samples_details_name').text( demo_annso_sample_displayed["name"] );
-    $('#samples_details_nickname').text( demo_annso_sample_displayed["nickname"] );
-    $('#samples_details_select_btn').attr('onclick', "javascript:select_sample("+ sample_id +");");
 
-    if (sample_id in demo_annso_samples)
-    {
-        $('#samples_details_select_btn i').removeClass('fa-square-o');
-        $('#samples_details_select_btn i').addClass('fa-check-square-o');
-        $('#samples_details_attributes_details').removeClass('collapse');
-    }
-    else
-    {
-        $('#samples_details_select_btn i').removeClass('fa-check-square-o');
-        $('#samples_details_select_btn i').addClass('fa-square-o');
-        $('#samples_details_attributes_details').addClass('collapse');
-    }
-}
+
+
+
+
+
 
 
 

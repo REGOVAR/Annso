@@ -100,11 +100,11 @@
                                     <a class="btn btn-default" href="#modal_import_sample_file" title="Import sample/variant data from local file" data-toggle="modal">
                                         <i class="fa fa-download" style="width:20px; text-align:center;" aria-hidden="true"></i>
                                     </a>
-                                    <a class="btn btn-default" href="#modal_import_sample_db" title="Import sample/variant data from database" data-toggle="modal">
+                                    <a class="btn btn-default" href="#modal_import_sample_db" onclick="javascript:load_sample_database();" title="Import sample/variant data from database" data-toggle="modal">
                                         <i class="fa fa-database" style="width:20px; text-align:center;" aria-hidden="true"></i>
                                     </a>
                                 </div>
-
+                                &nbsp;
                                 <div id="" class="btn-group ">
                                     <a class="btn btn-default" href="#modal_import_local_file" title="Import sample data" data-toggle="modal" onclick="javascript:fake_add_sample_attribute();">
                                         <i class="fa fa-tag" style="width:20px; text-align:center;" aria-hidden="true"></i> New attribute
@@ -195,13 +195,13 @@
                                 <!-- ANALYSIS TAB MENU -->
                                 <!--                   -->
                                 <ul class="nav navbar-nav">
-                                    <li class="active"><a id="nav_project_welcom" data-toggle="tab" href="#welcom_panel" onclick="javascript:fake_select_tab('welcom');">
+                                    <li class="active"><a id="nav_project_welcom" data-toggle="tab" href="#welcom_panel" onclick="javascript:select_tab('welcom');">
                                         <i class="fa fa-folder-open" style="width:20px; text-align:center;" aria-hidden="true"></i> Welcom </a></li>
-                                    <li><a id="nav_project_sample" data-toggle="tab" href="#samples_panel" onclick="javascript:fake_select_tab('sample');">
+                                    <li><a id="nav_project_sample" data-toggle="tab" href="#samples_panel" onclick="javascript:select_tab('sample');">
                                         <i class="fa fa-user" style="width:20px; text-align:center;" aria-hidden="true"></i> Samples </a></li>
-                                    <li><a id="nav_project_variant" data-toggle="tab" href="#filters_panel" onclick="javascript:fake_select_tab('variant');">
-                                        <i class="fa fa-filter" style="width:20px; text-align:center;" aria-hidden="true"></i> Variants</a></li>
-                                    <li><a id="nav_project_selection" data-toggle="tab" href="#selection_panel" onclick="javascript:fake_select_tab('result');">
+                                    <li><a id="nav_project_variant" data-toggle="tab" href="#filters_panel" onclick="javascript:select_tab('variant');">
+                                        <i class="fa fa-filter" style="width:20px; text-align:center;" aria-hidden="true"></i> Filtering</a></li>
+                                    <li><a id="nav_project_selection" data-toggle="tab" href="#selection_panel" onclick="javascript:select_tab('result');">
                                         <i class="fa fa-check-square-o" aria-hidden="true" style="width:20px; text-align:center;">&nbsp;</i> Selection</a></li>
                                 </ul>
                             </div>
@@ -227,7 +227,7 @@
                                     </ul>
 
                                     {% if templates|length > 0 %}
-                                    <h3>New specific analysis</h3>
+                                    <h3>New specific analyses</h3>
                                     <ul>
                                         {% for t in templates %}
                                         <li>
@@ -270,33 +270,11 @@
                         <!--              -->
                         <div id="samples_panel" class="tab-pane fade">
                             <div class="row" style="margin:0; padding-left:75px">
-                                <!--              -->
-                                <!-- SAMPLES MENU -->
-                                <!--              -->
-                                <div id="browser_samples_side" class="col-md-2 browser-panel">
-
-                                    <a class="btn section" style="display:block; text-align:left;">
-                                        <i class="fa fa-users" style="width:20px; text-align:center;" aria-hidden="true"></i> Selected for the analysis 
-                                        <span id="samples_count" class="badge" style="float:right; margin-top:3px">0</span>
-                                    </a>
-                                    <ul id="samples_panel_selection">
-                                        <li class="empty_selection">No sample selected</li>
-                                    </ul>
-
-
-                                    <a class="btn section" style="display:block; text-align:left;">
-                                        <i class="fa fa-tags" style="width:20px; text-align:center;" aria-hidden="true"></i> Samples attributes
-                                        <span id="sample_attributes_count" class="badge" style="float:right; margin-top:3px">0</span>
-                                    </a>
-                                    <ul id="samples_panel_attributes">
-                                        <li class="empty_selection">No attribute</li>
-                                    </ul>
-                                </div>
 
                                 <!--              -->
                                 <!-- SAMPLES LIST -->
                                 <!--              -->
-                                <div id="browser_samples" class="col-md-10" style="height:500px; padding-left:0; padding-right:0; overflow-y: auto;">
+                                <div id="browser_samples" class="col-md-12" style="height:500px; padding-left:0; padding-right:0; overflow-y: auto;">
                                     <table id="browser_samples_table" class="table table-striped table-bordered" cellspacing="0" width="100%" style="margin:0">
                                         <thead>
                                             <tr>
@@ -308,59 +286,6 @@
                                         <tbody>
                                         </tbody>
                                     </table>
-                                </div>
-
-                                <!--                -->
-                                <!-- SAMPLE DETAILS -->
-                                <!--                -->
-                                <div id="samples_details" class="collapse" >
-                                    <h3>
-                                        <a style="display:block; text-align:left;" role="button" data-toggle="collapse" href="#samples_details_sample_details" aria-expanded="false" aria-controls="samples_details_sample_details">
-                                            <i class="fa fa-flask" aria-hidden="true" style="width:20px; text-align:center;">&nbsp;</i> Sample : <span id="samples_details_name"></span>
-                                            <span style="float:right"><i class="fa fa-pencil" aria-hidden="true" style="width:20px; text-align:center;"></i></span>
-                                        </a>
-                                    </h3>
-                                    <div id="samples_details_sample_details" class="row collapse">
-                                        <div class="col-md-6">
-                                            <b>Stats :</b>
-                                            <ul>
-                                                <li><b>Variants :</b> 215</li>
-                                                <li><b>Analyses :</b> 2</li>
-                                            </ul>
-                                        </div>
-                                        <div class="col-md-6">
-                                            <b>Files :</b>
-                                            <ul>
-                                                <li>2016.12.09.vcf</li>
-                                            </ul>
-                                        </div>
-                                    </div>
-
-                                    <hr/>
-                                    <button id="samples_details_select_btn" class="btn btn-default" onclick="javascript:select_sample(-1);">
-                                        <i class="fa fa-square-o" aria-hidden="true" style="width:20px; text-align:center;"></i> Select for this analysis
-                                    </button>
-
-                                    <div id="samples_details_attributes_details" class="row collapse">
-                                        <br/>
-                                        <form class="form-inline" style="margin-left:15px;margin-bottom:10px;">
-                                            <div class="input-group">
-                                                <span class="input-group-addon" title="Optional Nickname of the sample for this analysis"><i class="fa fa-flask" aria-hidden="true"></i></span>
-                                                <input id="samples_details_nickname" type="text" class="form-control" placeholder="Optional nickname" aria-describedby="sizing-addon1" value="" title="Optional nickname">
-                                            </div>
-                                        </form>
-                                        <ul>
-                                            <li style="list-style-type: none;"><b><i class="fa fa-tag" aria-hidden="true" style="width:20px; text-align:center;"></i> Control :</b> Yes
-                                                <span style="float:right"><i class="fa fa-pencil" aria-hidden="true" style="width:20px; text-align:center;"></i></span>
-                                            </li>
-                                            <li style="list-style-type: none;"><b><i class="fa fa-tag" aria-hidden="true" style="width:20px; text-align:center;"></i> Sex :</b> Male 
-                                                <span style="float:right"><i class="fa fa-pencil" aria-hidden="true" style="width:20px; text-align:center;"></i></span>
-                                            </li>
-                                            <li style="list-style-type: none;color:#999; font-style:italic;"><i class="fa fa-plus" aria-hidden="true" style="width:20px; text-align:center;"></i> Add attribute</li>
-                                        </ul>
-                                    </div>
-
-                                    
                                 </div>
                             </div>
                         </div>
@@ -1055,9 +980,9 @@
 
 
 
-            <!--                           -->
-            <!-- MODAL POPUP - File Upload -->
-            <!--                           -->
+            <!--                                   -->
+            <!-- MODAL POPUP - DB Sample selection -->
+            <!--                                   -->
             <div id="modal_import_sample_db" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
                 <div class="modal-dialog" role="document">
                     <div class="modal-content">
@@ -1065,16 +990,13 @@
                             <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
                             <h4 class="modal-title"><i class="fa fa-folder-open-o" aria-hidden="true"></i> Import sample/variant from annso database</h4>
                         </div>
-                        <div class="modal-body">
+                        <div id="modal_import_sample_db_content" class="modal-body" style="height:450px; padding:0;">
+                            <i class="fa fa-refresh fa-spin fa-3x fa-fw" style="margin:200px 250px;"></i><span class="sr-only">Loading data from database</span>
+                            
 
-                            <form class="form">
-                                TODO
-                            </form>
-
-                            <div class="modal-footer">
-                                <button id="modal_new_file_cancel_btn" type="button" class="btn btn-default" data-dismiss="modal">Cancel</button> &nbsp; 
-                                <button id="modal_new_file_start_btn" type="button" class="btn btn-success">Start import !</button>
-                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button id="modal_new_file_cancel_btn" type="button" class="btn btn-default" data-dismiss="modal">Done</button>
                         </div>
                     </div>
                 </div>

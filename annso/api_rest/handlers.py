@@ -150,6 +150,7 @@ class WebsiteHandler:
             "templates" : annso.template.get(), # return by default last 10 templates
             "analysis" : annso.analysis.get(),  # return by default last 10 analyses
         }
+        print (data)
         return data
 
 
@@ -171,7 +172,7 @@ class WebsiteHandler:
 
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
-# SAMPLE HANDLER
+# ANALYSIS HANDLER
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
 class AnalysisHandler:
 
@@ -190,8 +191,9 @@ class AnalysisHandler:
         name = data["name"]
         template_id = None # data["template_id"] # TODO
         # Create the project 
-        analysis = annso.analysis.create(name, template_id)
-        if analysis is None:
+        analysis, success = annso.analysis.create(name, template_id)
+        print (analysis)
+        if not success or analysis is None:
             return rest_error("Unable to create an analsis with provided information.")
         return rest_success(analysis)
 
@@ -246,6 +248,16 @@ class SampleHandler:
         }
         # Return result of the query for PirusFile 
         return rest_success(annso.sample.get(fields, query, order, offset, limit), range_data)
+
+    def get_sample(self, request):
+        # 1- Retrieve request parameters
+        sid = request.match_info.get('sample_id', None)
+        if sid is None:
+            return rest_error("No valid sample id provided")
+        sample = annso.sample.get_from_id(sid)
+        if sample is None:
+            return rest_error("No sample found with id="+str(sid))
+        return rest_success(sample)
 
 
     def get_details(self, request):
