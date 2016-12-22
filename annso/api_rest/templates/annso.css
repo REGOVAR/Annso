@@ -47,8 +47,16 @@
     font-family: monospace;
     text-align: right;
 }
-
-
+.seq, .seq a, .seq a:hover {
+    font-family: monospace;
+    text-decoration: none;
+    color: #000;
+    font-weight: bold;
+}
+.A { color: #3264C8; }
+.T { color: #E6A03C; }
+.G { color: #64C878; }
+.C { color: #C85050; }
 
 
 
@@ -175,10 +183,14 @@ table, th, tr, td
 {
     border: none!important;
 }
+#variants_list_table td
+{
+    border: 1px solid #ccc!important;
+}
 th 
 {
-    border-right: 1px solid #ddd!important;;
-    border-bottom: 1px solid #ddd!important;;
+    border-right: 1px solid #ddd!important;
+    border-bottom: 1px solid #ddd!important;
 }
 thead
 {

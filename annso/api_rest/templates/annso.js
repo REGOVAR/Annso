@@ -94,7 +94,7 @@ function load_analysis(json)
 
 
     // Todo : reset samples screen, filters, reports, ...
-    $('#browser_samples').html("<span class=\"maincontent_placeholder\">⮤ Import and select sample(s) you want to analyse.</span>")
+    $('#browser_samples').html("<span class=\"maincontent_placeholder\">&#11172; Import and select sample(s) you want to analyse.</span>")
 
     // Automaticaly select the Sample section
     $('#nav_project_sample')[0].click(function (e) { e.preventDefault(); $(this).tab('show'); })
@@ -244,11 +244,11 @@ function init_variants_list(json)
             </tr>\
         </thead>\
         <tbody>";
-    var rowhtml = "<tr id=\"variant_{0}\" style=\"cursor: pointer;\"><td><input type=\"checkbox\" value=\"{0}\"/></td><td>{1}</td><td>{2}</td><td class=\"pos\">{3}</td><td>{4}</td><td>{5}</td></tr>";
+    var rowhtml = "<tr id=\"variant_{0}\" style=\"cursor: pointer;\"><td><input type=\"checkbox\" value=\"{0}\"/></td><td>{1}</td><td>{2}</td><td class=\"pos\">{3}</td><td class=\"seq\">{4}</td><td class=\"seq\">{5}</td></tr>";
     
     $.each(json, function( idx, v ) 
     {
-        html += rowhtml.format(v["variant_id"], demo_samples[v["sample_id"]]["name"], v["chr"], format_pos(v["pos"]), v["ref"], v["alt"]);
+        html += rowhtml.format(v["variant_id"], demo_samples[v["sample_id"]]["name"], v["chr"], format_pos(v["pos"]), format_sequence(v["ref"]), format_sequence(v["alt"]));
     });
     $("#variants_list").html(html + "</tbody></table>");
 }
@@ -260,6 +260,25 @@ function format_pos(pos)
         return p<0 || i<p ? ($0+'&nbsp;') : $0;
     });
 }
+
+function format_sequence(seq)
+{
+    map = {'G':'<span class="g">G</span>', 'G':'<span class="g">G</span>', 'G':'<span class="g">G</span>', 'G':'<span class="g">G</span>'}
+    max = 10;
+    size = seq.length;
+    var html = "";
+    for (var i=0; i<Math.min(max, seq.length); i++)
+    {
+        html+='<span class="{0}">{0}</span>'.format(seq[i]);
+    } 
+    if (seq.length > max)
+    {
+        html='<a title="' + seq + '">' + html + '&#8230;</a>';
+    }
+    return html;
+}
+
+
 
 function update_variants_list(json)
 {
