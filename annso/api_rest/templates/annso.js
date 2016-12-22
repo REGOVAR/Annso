@@ -9,7 +9,10 @@ var demo_pirus_displayed_pipe;
 var demo_sample_attributes = {}
 var demo_samples = {};
 var demo_analysis_id = -1;
-var demo_filter = "";
+
+var demo_display = "table";
+var demo_fields = []
+var demo_filter = {};
 
 
 
@@ -77,7 +80,7 @@ function load_analysis(json)
     }
     else
     {
-        alert ( "ERROR" );
+        display_error(json);
         return;
     }
 
@@ -111,7 +114,7 @@ function load_sample_database()
         }
         else
         {
-            alert ( "ERROR" );
+            display_error(json);
             return;
         }
         html="<table class=\"table table-striped table-bordered\" cellspacing=\"0\" width=\"100%\" style=\"margin:0\">\
@@ -136,6 +139,7 @@ function load_sample_database()
         }
 
         html += "</tbody></table>";
+
         $('#modal_import_sample_db_content').html(html);
 
     });
@@ -188,23 +192,95 @@ function load_variants_array()
             samples.push({"id" : key, "attributes" : []});
         }
     });
+    $('#variants_list').html('<i class="fa fa-refresh fa-spin fa-3x fa-fw" style="display:block;margin:auto;margin-top:200px;"></i><span class="sr-only">Loading data from database</span>');
 
 
+    // retrieve list of sample
     $.ajax({ 
-        url: rootURL + "/analysis/" + demo_analysis_id, 
-        type: "PUT",
-        data: "{\"samples\" : [" + samples + "], \""+ analysis_name +"\", \"template_id\" : " + template_id + "}",
-        async: true}).done(function(json)
+        url: rootURL + "/analysis/" + demo_analysis_id + "/filtering", 
+        type: "POST",
+        data: "{\"mode\" : \"table\", \"filter\" : " + JSON.stringify(demo_filter) + ", \"fields\" : " + JSON.stringify(demo_fields) + "}",
+        async: true}).fail(function()
     {
-        sample = json["data"];
-    });
+        display_error();
+    }).done(function(json)
+    {
+        if (json["success"])
+        {
+            json = json["data"]
+        }
+        else
+        {
+            display_error(json);
+            return;
+        }
 
-    alert ("Analyse : " + demo_analysis_id + "\nSamples : " + demo_samples + "\nFilter : " + demo_filter);
+        if (  $("#variants_list_table").length )
+        {
+            update_variants_list(json);
+        }
+        else
+        {
+            init_variants_list(json);
+        }
+    });
 }
 
 
 
 
+function init_variants_list(json)
+{
+    var html = "<table id=\"variants_list_table\" class=\"table table-striped table-bordered\" cellspacing=\"0\" width=\"100%\" style=\"margin:0\">\
+        <thead>\
+            <tr>\
+                <th style=\"width:20px\"></th>\
+                <th style=\"width:200px\">Sample</th>\
+                <th style=\"width:40px\">chr</th>\
+                <th style=\"width:100px\">pos</th>\
+                <th>ref</th>\
+                <th>alt</th>\
+                <th style=\"width:100%\"></th>\
+            </tr>\
+        </thead>\
+        <tbody>";
+    var rowhtml = "<tr id=\"variant_{0}\" style=\"cursor: pointer;\"><td><input type=\"checkbox\" value=\"{0}\"/></td><td>{1}</td><td>{2}</td><td class=\"pos\">{3}</td><td>{4}</td><td>{5}</td></tr>";
+    
+    $.each(json, function( idx, v ) 
+    {
+        html += rowhtml.format(v["variant_id"], demo_samples[v["sample_id"]]["name"], v["chr"], format_pos(v["pos"]), v["ref"], v["alt"]);
+    });
+    $("#variants_list").html(html + "</tbody></table>");
+}
+
+function format_pos(pos)
+{
+    var n = pos.toString(), p = n.indexOf('.');
+    return n.replace(/\d(?=(?:\d{3})+(?:\.|$))/g, function($0, i){
+        return p<0 || i<p ? ($0+'&nbsp;') : $0;
+    });
+}
+
+function update_variants_list(json)
+{
+
+}
+
+
+
+function display_error(json=null)
+{
+    if (json == null)
+    {
+        json = {"error_id" : "-", "error_code" : "-1", "error_url" : "#", "msg" : "Unknow error :/ ... you can spank the dev team."}
+    }
+
+    $('#modal_error_id').text(json["error_id"]);
+    $('#modal_error_code').text(json["error_code"]);
+    $('#modal_error_code').attr('href', json["error_url"]);
+    $('#modal_error_msg').text(json["msg"]);
+    $('#modal_error').modal('show');
+}
 
 
 

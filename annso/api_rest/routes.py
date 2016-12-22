@@ -55,6 +55,7 @@ app.router.add_route('GET',    "/v1/report",             reportHandler.get_html_
 # app.router.add_route('GET',  "/v1/analysis",     analysisHandler.get_analyses)
 app.router.add_route('POST',   "/v1/analysis",  analysisHandler.create_analysis)
 app.router.add_route('GET',    "/v1/analysis/{analysis_id}",  analysisHandler.get_analysis)
+app.router.add_route('POST',    "/v1/analysis/{analysis_id}/filtering",  analysisHandler.filtering)
 # app.router.add_route('GET',  "/v1/analysis/{analysis_id}/sample",     analysisHandler.get_analyses)
 # app.router.add_route('GET',  "/v1/analysis/{analysis_id}/sample/{sample_id}",     analysisHandler.get_analyses)
 # app.router.add_route('GET',  "/v1/analysis/{analysis_id}/sample/{sample_id}/variant",     analysisHandler.get_analyses)

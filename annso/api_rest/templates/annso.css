@@ -43,7 +43,10 @@
 
 
 
-
+.pos {
+    font-family: monospace;
+    text-align: right;
+}
 
 
 

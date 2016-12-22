@@ -199,7 +199,27 @@ class AnalysisHandler:
             return rest_error("Unable to create an analsis with provided information.")
         return rest_success(analysis)
 
+    async def filtering(self, request):
+        # 1- Retrieve data from request
+        data = await request.json()
+        analysis_id = request.match_info.get('analysis_id', -1)
+        filter_json = data["filter"] if "filter" in data else {}
+        fields = data["fields"] if "fields" in data else None
+        limit = data["limit"] if "limit" in data else 100
+        offset = data["offset"] if "offset" in data else 0
+        mode = data["mode"] if "mode" in data else "table"
 
+        # 2- Check parameters
+        if "mode" in data: mode = data["mode"]
+        if limit<0 or limit > RANGE_MAX : limit = 100
+        if offset<0 : offset = 0
+
+        # 3- Execute filtering request
+        try :
+            result = annso.filter.request(analysis_id, mode, filter_json, fields, limit, offset)
+        except Exception as err :
+            return rest_error("Filtering error : " + str(err))
+        return rest_success(result)
 
 
 

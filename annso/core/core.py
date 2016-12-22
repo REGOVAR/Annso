@@ -34,6 +34,7 @@ class Core:
         self.template = TemplateManager()
         self.sample = SampleManager()
         self.variant = VariantManager()
+        self.filter = FilterEngine()
         # self.selection = SelectionManager()
 
         # Todo
@@ -326,6 +327,51 @@ class SampleManager:
         msg = {"action":"file_changed", "data" : [pfile.export_client_data()] }
         pirus.notify_all(json.dumps(msg))
         # TODO : check if run was waiting the end of the upload to start
+
+
+
+
+
+
+
+
+
+
+
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
+# FILTER ENGINE
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
+class FilterEngine:
+    def __init__(self):
+        pass
+
+    # build the sql query according to the annso filtering parameter and return result as json data
+    def request(self, analysis_id, mode, filter_json, fields=None, limit=100, offset=0):
+        # Check parameter
+        if mode not in ["table", "list"]: mode = "table"
+
+
+        query = "SELECT sample_id, variant_id, chr, pos, ref, alt from sample_variant_hg19 where sample_id=1 LIMIT 100"
+
+
+
+
+        result = []
+        for s in db_session.execute(query):
+            result.append({"sample_id" : s[0], "variant_id" : s[1], "chr" : s[2], "pos": s[3], "ref": s[4], "alt": s[5]})
+        return result
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
