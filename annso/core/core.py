@@ -30,6 +30,7 @@ from core.report import *
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
 class Core:
     def __init__(self):
+        self.annotation_db = AnnotationDatabaseManager()
         self.analysis = AnalysisManager()
         self.template = TemplateManager()
         self.sample = SampleManager()
@@ -67,6 +68,29 @@ class Core:
 
 
  
+
+
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
+# ANNOTATION DATABASE MANAGER
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
+class AnnotationDatabaseManager:
+    def __init__(self):
+        pass
+
+    # build the sql query according to the annso filtering parameter and return result as json data
+    def get(self):
+        query = "SELECT d.id, d.name_ui, d.description, a.id, a.name_ui, a.type, a.description FROM annotation_field a LEFT JOIN annotation_database d ON a.database_id=d.id ORDER BY d.name_ui, a.name_ui"
+
+        result = {}
+        for r in db_session.execute(query):
+            if r[0] not in result:
+                result[r[0]] = {"name" : r[1], "description" : r[2], "fields" : []}
+            result[r[0]]["fields"].append({"id" : r[3], "name" : r[4], "type" : r[5], "description" : r[6]})
+        return result
+
+
+
+
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
 # Analysis MANAGER
@@ -126,7 +150,9 @@ class AnalysisManager:
         pass
 
 
-
+    def get_setting(self, analysis_id):
+        analysis = db_session.query(Analysis).filter_by(id=analysis_id).first()
+        return analysis.setting
 
 
 
@@ -350,18 +376,57 @@ class FilterEngine:
         # Check parameter
         if mode not in ["table", "list"]: mode = "table"
 
+        # Get sample ids used for the analysis
+        # TODO : retrieve sample ids with query : "select sample_id from analysis_sample where analysis_id = {0}"
+        sample_ids = [1]
+        reference = "hg19"
+        variant_table = "sample_variant_{0}".format(reference)
 
-        query = "SELECT sample_id, variant_id, chr, pos, ref, alt from sample_variant_hg19 where sample_id=1 LIMIT 100"
+        # Get fields to select
+        if fields is None  or len(fields) == 0: fields = [0]
+        query = "select d.id, d.name, d.jointure, f.id, f.name FROM annotation_field f LEFT JOIN annotation_database d ON d.id = f.database_id WHERE f.id IN ({0})".format(','.join([str(f) for f in fields]))
+        fields = {}
+        for r in db_session.execute(query):
+            if r[0] not in fields:
+                fields[r[0]] = {"join" : r[2], "fields" : [], "name": r[1]}
+            fields[r[0]]["fields"].append({"id" : r[3], "name" : r[4]})
+
+        # Get filter conditions
+        # TODO
 
 
+        for db in fields:
+            fields[db]["join"] = fields[db]["join"].format(reference, variant_table) # TODO FIXME : remove reference in formart() + update sql scripts
 
 
+        # Build SELECT
+        select_fields = [fields[f]["name"] + "." + fn["name"] for f in fields for fn in fields[f]["fields"]]
+
+
+        # Build FROM/JOIN
+        from_table = [variant_table]
+        join = " LEFT JOIN "
+        from_table.extend([join + fields[db]["join"] for db in fields if fields[db]["name"] != variant_table])
+
+
+        # Build WHERE
+        where = variant_table + ".sample_id=1"
+        # TODO add filter conditions
+
+        # build query
+        query = "SELECT {0} FROM {1} WHERE {2} LIMIT {3} OFFSET {4}".format(', '.join(select_fields), ' '.join(from_table), where, limit, offset)
+
+        # Execute query and get result
         result = []
-        for s in db_session.execute(query):
-            result.append({"sample_id" : s[0], "variant_id" : s[1], "chr" : s[2], "pos": s[3], "ref": s[4], "alt": s[5]})
+        for s in db_session.execute(query): 
+            varariant = {}
+            i=0
+            for db_id in fields:
+                for f in fields[db_id]['fields']:
+                    varariant[f["id"]]= s[i] if s[i] is not None else ""
+                    i += 1
+            result.append(varariant)
         return result
-
-
 
 
 

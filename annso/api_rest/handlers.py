@@ -149,8 +149,8 @@ class WebsiteHandler:
             "hostname" : "annso.absolumentg.fr/v1",
             "templates" : annso.template.get(), # return by default last 10 templates
             "analysis" : annso.analysis.get(),  # return by default last 10 analyses
+            "annotations" : annso.annotation_db.get(),
         }
-        print (data)
         return data
 
 
@@ -194,10 +194,34 @@ class AnalysisHandler:
         # data["attributes"] # TODO ?
         # Create the project 
         analysis, success = annso.analysis.create(name, template_id)
-        print (analysis)
         if not success or analysis is None:
             return rest_error("Unable to create an analsis with provided information.")
         return rest_success(analysis)
+
+
+    def get_setting(self, request):
+        # 1- Retrieve data from request
+        analysis_id = request.match_info.get('analysis_id', -1)
+
+        try :
+            settings = annso.analysis.get_setting(analysis_id)
+        except Exception as err :
+            return rest_error("Unable to get analsis settings with provided information. " + str(err))
+        if settings is None : settings = {}
+        return rest_success(settings)
+
+
+    async def set_setting(self, request):
+        # 1- Retrieve data from request
+        analysis_id = request.match_info.get('analysis_id', -1)
+        data = await request.json()
+        try:
+            annso.analysis.set_setting(analysis_id, data)
+        except Exception as err :
+            return rest_error("Error occured when trying to save settings for the analysis with id=" + str(analysis_id) + ". " + str(err))
+        return rest_success(result) 
+
+        
 
     async def filtering(self, request):
         # 1- Retrieve data from request
@@ -220,6 +244,10 @@ class AnalysisHandler:
         except Exception as err :
             return rest_error("Filtering error : " + str(err))
         return rest_success(result)
+
+
+
+
 
 
 
@@ -343,30 +371,23 @@ class VariantHandler:
 
 
 
+
+
+
+
+
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
 # ANNOTATION DATABASES HANDLER
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
 class AnnotationDBHandler:
     def get_db(self, request):
-        # Generic processing of the get query
-        fields, query, order, offset, limit = process_generic_get(request.query_string, annso.annotation.public_fields())
-        # Get range meta data
-        range_data = {
-            "range_offset" : offset,
-            "range_limit"  : limit,
-            "range_total"  : annso.annotation.total(),
-            "range_max"    : RANGE_MAX,
-        }
-        # Return result of the query for PirusFile 
-        return rest_success(annso.annotation.get(fields, query, order, offset, limit), range_data)
+        # Return list of annotation databases and available fields
+        return rest_success(annso.annotation_db.get())
 
-    def get_db_details(self, request):
-        # 1- Retrieve request parameters
-        db_name = request.match_info.get('db_name', None)
-        if db_name is None:
-            return rest_error("No database name provided")
 
-        return rest_success({"database" : db_name})
+
+
+
 
 
 

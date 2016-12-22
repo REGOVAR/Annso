@@ -54,7 +54,7 @@ CREATE TABLE public.analysis
     name character varying(50) COLLATE pg_catalog."C.UTF-8",
     comments text COLLATE pg_catalog."C.UTF-8",
     template_id integer,
-    template_settings text COLLATE pg_catalog."C.UTF-8",
+    settings text COLLATE pg_catalog."C.UTF-8",
     creation_date timestamp without time zone,
     update_date timestamp without time zone,
     total_variants integer DEFAULT 0,
@@ -323,16 +323,23 @@ ALTER TABLE public.annotation_database OWNER TO annso;
 
 
 
+CREATE SEQUENCE public.annotation_field_id_seq
+    INCREMENT 1
+    MINVALUE 1
+    MAXVALUE 9223372036854775807
+    START 1
+    CACHE 1;
+ALTER TABLE public.annotation_field_id_seq OWNER TO annso;
 CREATE TABLE public.annotation_field
 (
-
+    id integer NOT NULL DEFAULT nextval('annotation_field_id_seq'::regclass),
     database_id integer,
     name character varying(255) COLLATE pg_catalog."C.UTF-8" NOT NULL,
     name_ui character varying(255) COLLATE pg_catalog."C.UTF-8",
     description text,
     type field_type,
     unity character varying(20) COLLATE pg_catalog."C.UTF-8" ,
-    CONSTRAINT annotation_field_pkey PRIMARY KEY (database_id, name),
+    CONSTRAINT annotation_field_pkey PRIMARY KEY (id),
     CONSTRAINT annotation_field_database_id_fkey FOREIGN KEY (database_id)
         REFERENCES public."annotation_database" (id) MATCH SIMPLE
         ON UPDATE NO ACTION ON DELETE NO ACTION
@@ -381,8 +388,25 @@ INSERT INTO public."parameter" (key, description, value) VALUES
     ('database_version',          'The current version of the database',           'V1.0.0'),
     ('heavy_client_last_version', 'Oldest complient version of the heavy client',  'V1.0.0'),
     ('backup_date',               'The date of the last database dump',            to_char(current_timestamp, 'YYYY-MM-DD')),
-    ('stats_refresh_date',        'The date of the last refresh of statistics',    to_char(current_timestamp, 'YYYY-MM-DD'))
+    ('stats_refresh_date',        'The date of the last refresh of statistics',    to_char(current_timestamp, 'YYYY-MM-DD'));
 
 
+INSERT INTO public.annotation_database(name, name_ui, description, url, reference_id, update_date, jointure) VALUES
+  ('sample_variant_hg19', 
+  'Variant', 
+  'Basic information about the variant.', 
+  '', 
+  1, 
+  CURRENT_TIMESTAMP, 
+  'sample_variant_hg19');
 
-
+INSERT INTO public.annotation_field(database_id, name, name_ui, type, description) VALUES
+  (1, 'bin',       'bin',    'int',    ''),
+  (1, 'sample_id', 'sample', 'int',    'Sample that have the variant.'),
+  (1, 'variant_id','id',     'int',    'Variant unique id in the database.'),
+  (1, 'chr',       'chr',    'string', 'Chromosome.'),
+  (1, 'pos',       'pos',    'string', 'Position of the variant in the chromosome.'),
+  (1, 'ref',       'ref',    'string', 'Reference sequence.'),
+  (1, 'alt',       'alt',    'string', 'Alternative sequence of the variant.'),
+  (1, 'genotype',  'GT',     'string', 'Genotype. Values can be : 0=ref/ref, 1=alt/alt, 2=ref/alt, 3=alt1/alt2'),
+  (1, 'deepth',    'DP',     'float',  'Deepth.');

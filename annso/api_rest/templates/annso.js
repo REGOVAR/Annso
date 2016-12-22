@@ -11,7 +11,7 @@ var demo_samples = {};
 var demo_analysis_id = -1;
 
 var demo_display = "table";
-var demo_fields = []
+var demo_fields = [2, 4, 5, 6, 7, 8, 9, 11, 22, 16]
 var demo_filter = {};
 
 
@@ -231,24 +231,27 @@ function load_variants_array()
 
 function init_variants_list(json)
 {
-    var html = "<table id=\"variants_list_table\" class=\"table table-striped table-bordered\" cellspacing=\"0\" width=\"100%\" style=\"margin:0\">\
-        <thead>\
-            <tr>\
-                <th style=\"width:20px\"></th>\
-                <th style=\"width:200px\">Sample</th>\
-                <th style=\"width:40px\">chr</th>\
-                <th style=\"width:100px\">pos</th>\
-                <th>ref</th>\
-                <th>alt</th>\
-                <th style=\"width:100%\"></th>\
-            </tr>\
-        </thead>\
-        <tbody>";
-    var rowhtml = "<tr id=\"variant_{0}\" style=\"cursor: pointer;\"><td><input type=\"checkbox\" value=\"{0}\"/></td><td>{1}</td><td>{2}</td><td class=\"pos\">{3}</td><td class=\"seq\">{4}</td><td class=\"seq\">{5}</td></tr>";
+    var html = "<table id=\"variants_list_table\" class=\"table table-striped table-bordered\" cellspacing=\"0\" width=\"100%\" style=\"margin:0\"><thead><tr><th style=\"width:20px\"></th>";
+
+    for (var i=0; i<demo_fields.length; i++)
+    {
+        html += "<th>{0}</th>".format(/*demo_fields_data[i][*/"name");
+    }
+    html += "</tr></thead><tbody>";
+
+
+    var rowhtml = "<tr id=\"variant_{0}\" style=\"cursor: pointer;\"><td><input type=\"checkbox\" value=\"{0}\"/></td>";
+    "<td>{1}</td><td>{2}</td><td class=\"pos\">{3}</td><td class=\"seq\">{4}</td><td class=\"seq\">{5}</td></tr>";
     
     $.each(json, function( idx, v ) 
     {
-        html += rowhtml.format(v["variant_id"], demo_samples[v["sample_id"]]["name"], v["chr"], format_pos(v["pos"]), format_sequence(v["ref"]), format_sequence(v["alt"]));
+
+        html += rowhtml.format(v["variant_id"]);
+        for (var i=0; i<demo_fields.length; i++)
+        {
+            html += "<td>{0}</td>".format(v[demo_fields[i]]); // TODO speial format according to type and some name (ref, alt, )
+        }
+        html += "</tr>";
     });
     $("#variants_list").html(html + "</tbody></table>");
 }

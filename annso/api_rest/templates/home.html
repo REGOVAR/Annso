@@ -438,7 +438,7 @@
                                     </div>
 
                                     <a class="btn section" style="display:block; text-align:left;" role="button" data-toggle="collapse" href="#browserNavFiltersPanelFilters_vrefgen" aria-expanded="false" aria-controls="browserNavFiltersPanelFilters_vrefgen">
-                                        <i class="fa fa-database" style="width:20px; text-align:center;" aria-hidden="true"></i> refGen
+                                        <i class="fa fa-filter" style="width:20px; text-align:center;" aria-hidden="true"></i> refGen
                                         <span style="float:right;">
                                             <span id="selection_count" class="badge"></span>&nbsp;<i class="fa fa-chevron-right" aria-hidden="true" style="width:20px; text-align:center;"></i>
                                         </span>
@@ -453,7 +453,7 @@
                                     </div>
 
                                     <a class="btn section" style="display:block; text-align:left;" role="button" data-toggle="collapse" href="#browserNavFiltersPanelFilters_vrefgenexon    " aria-expanded="false" aria-controls="browserNavFiltersPanelFilters_vrefgenexon">
-                                        <i class="fa fa-database" style="width:20px; text-align:center;" aria-hidden="true"></i> refGen exons
+                                        <i class="fa fa-filter" style="width:20px; text-align:center;" aria-hidden="true"></i> refGen exons
                                         <span style="float:right;">
                                             <span id="selection_count" class="badge"></span>&nbsp;<i class="fa fa-chevron-right" aria-hidden="true" style="width:20px; text-align:center;"></i>
                                         </span>
@@ -642,74 +642,38 @@
                                 <!-- INFO MENU -->
                                 <!--           -->
                                 <div id="filters_panel_menu_info" class="col-md-2 browser-panel collapse">
-                                    <span class="btn section" style="display:block; text-align:left;">
-                                        <i class="fa fa-info" style="width:20px; text-align:center;" aria-hidden="true"></i> Select information you want to display
-                                    </span>
-                                    <form class="form-inline form-navpanel">
+                                    <form class="form-inline" style="margin:10px;">
                                         <div class="input-group">
                                             <span class="input-group-addon"><i class="fa fa-search" aria-hidden="true"></i></span>
                                             <input id="browserNavFieldsPanel_filter_input" type="text" class="form-control" placeholder="Search field" aria-describedby="sizing-addon1">
                                         </div>
                                     </form>
                                     
-                                    <a class="btn section" style="display:block; text-align:left;" role="button" data-toggle="collapse" href="#variant_infos_variant" aria-expanded="false" aria-controls="variant_infos_variant">
-                                        <input type="checkbox"/>  Variant</a>
-                                    </a>
-                                    <div id="variant_infos_variant" class="collapse">
-                                        <ul><li><a href="#"><input type="checkbox" checked/> Chrom
-                                                    <span style="float:right;"><i class="fa fa-info-circle" aria-hidden="true"></i></span>
-                                                </a></li>
-                                            <li><a href="#"><input type="checkbox" checked/> Pos
-                                                    <span style="float:right;"><i class="fa fa-info-circle" aria-hidden="true"></i></span>
-                                                </a></li>
-                                            <li><a href="#"><input type="checkbox" checked/> Ref
-                                                    <span style="float:right;"><i class="fa fa-info-circle" aria-hidden="true"></i></span>
-                                                </a></li>
-                                            <li><a href="#"><input type="checkbox" checked/> Alt
-                                                    <span style="float:right;"><i class="fa fa-info-circle" aria-hidden="true"></i></span>
-                                                </a></li>
-                                            <li><a href="#"><input type="checkbox"/> Bin
-                                                    <span style="float:right;"><i class="fa fa-info-circle" aria-hidden="true"></i></span>
-                                                </a></li>
-                                            <li><a href="#"><input type="checkbox" checked/> Sample
-                                                    <span style="float:right;"><i class="fa fa-info-circle" aria-hidden="true"></i></span>
-                                                </a></li>
-                                            <li><a href="#"><input type="checkbox"/> DP
-                                                    <span style="float:right;"><i class="fa fa-info-circle" aria-hidden="true"></i></span>
-                                                </a></li>
-                                            <li><a href="#"><input type="checkbox"/> GT
-                                                    <span style="float:right;"><i class="fa fa-info-circle" aria-hidden="true"></i></span>
-                                                </a></li>
-                                        </ul>
-                                    </div>
-                                    <a class="btn section" style="display:block; text-align:left;" role="button" data-toggle="collapse" href="#variant_infos_refgene" aria-expanded="false" aria-controls="variant_infos_refgene">
-                                        <input type="checkbox"/>  refGene</a>
-                                    </a>
-                                    <div id="variant_infos_refgene" class="collapse">
-                                        <ul>
-                                            <li><a href="#"><input type="checkbox"/> CDS
-                                                    <span style="float:right;"><i class="fa fa-info-circle" aria-hidden="true"></i></span>
-                                                </a></li>
-                                            <li><a href="#"><input type="checkbox"/> Exon count
-                                                    <span style="float:right;"><i class="fa fa-info-circle" aria-hidden="true"></i></span>
-                                                </a></li>
-                                            <li><a href="#"><input type="checkbox"/> Exon positions
-                                                    <span style="float:right;"><i class="fa fa-info-circle" aria-hidden="true"></i></span>
-                                                </a></li>
-                                            <li><a href="#"><input type="checkbox"/> Name
-                                                    <span style="float:right;"><i class="fa fa-info-circle" aria-hidden="true"></i></span>
-                                                </a></li>
-                                            <li><a href="#"><input type="checkbox"/> Name2
-                                                    <span style="float:right;"><i class="fa fa-info-circle" aria-hidden="true"></i></span>
-                                                </a></li>
-                                            <li><a href="#"><input type="checkbox"/> Score
-                                                    <span style="float:right;"><i class="fa fa-info-circle" aria-hidden="true"></i></span>
-                                                </a></li>
-                                            <li><a href="#"><input type="checkbox"/> Tx
-                                                    <span style="float:right;"><i class="fa fa-info-circle" aria-hidden="true"></i></span>
-                                                </a></li>
-                                        </ul>
-                                    </div>
+
+                                    <ul class="annotation_fields_list">
+                                        {% for db_id, db in annotations.items() %}
+                                        <li class="uncheck">
+                                            <button class="fa toggle minus" onclick="javascript:filter_toggle_condition_group(this);">&nbsp;</button>
+                                            <button onclick="javascript:filter_toggle_field(this);">
+                                                <i class="fa" aria-hidden="true">&nbsp;</i>
+                                                <span>{{db["name"]}}</span>
+                                            </button>
+                                            <b  class="fa fa-info-circle" aria-hidden="true" title="{{db["description"]}}">&nbsp;</b>
+
+                                            <ul>
+                                                {% for f in db["fields"] %}
+                                                <li class="uncheck">
+                                                    <button onclick="javascript:filter_toggle_condition(this);">
+                                                        <i class="fa" aria-hidden="true">&nbsp;</i>
+                                                        <span>{{f["name"]}}</span>
+                                                    </button>
+                                                    <b class="fa fa-info-circle" aria-hidden="true" title="{{f["description"]}}">&nbsp;</b>
+                                                </li>
+                                                {% endfor %}
+                                            </ul>
+                                        </li>
+                                        {% endfor %}
+                                    </ul>
                                 </div>
 
 
@@ -718,37 +682,7 @@
                                 <!-- VARIANT LIST -->
                                 <!--              -->
                                 <div class="col-md-10" style="height:500px; padding-left:0; padding-right:0; overflow-y: auto;">
-                                    <!--                        -->
-                                    <!-- FILTERED VARIANTS LIST -->
-                                    <!--                        -->
-                                    <div id="variants_list">
-                                        <table id="variants_list_table" class="table table-striped table-bordered" cellspacing="0" width="100%" style="margin:0">
-                                            <thead>
-                                                <tr>
-                                                    <th style="width:20px"></th>
-                                                    <th style="width:200px">Sample</th>
-                                                    <th style="width:40px">chr</th>
-                                                    <th style="width:100px">pos</th>
-                                                    <th>ref</th>
-                                                    <th>alt</th>
-                                                    <th style="width:100%"></th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                {% for r in variants %}
-                                                <tr id="fileEntry-{{ r[0] }}" style="cursor: pointer;">
-                                                    <td><input type="checkbox" value="{{ r[0] }}"/></td>
-                                                    <td>{{ r[1] }} </td>
-                                                    <td>{{ r[2] }} </td>
-                                                    <td class="pos">{{ r[3] }} </td>
-                                                    <td>{{ r[4] }} </td>
-                                                    <td>{{ r[5] }} </td>
-                                                    <td></td>
-                                                </tr>
-                                                {% endfor %}
-                                            </tbody>
-                                        </table>
-                                    </div>
+                                    <div id="variants_list"></div>
                                 </div>
                             </div>
                         </div>

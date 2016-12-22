@@ -253,7 +253,7 @@ li.empty_selection
 
 
 
-.complex_filter ul 
+.complex_filter ul
 {
     border-left: 1px solid #999;
 }
@@ -314,17 +314,17 @@ li.empty_selection
 
 
 /* Inline tool button */
-button.edit                { float:right; width: 15px; height: 25px; display: none; }
-button.delete              { float:right; width: 15px; height: 25px; display: none; }
-button.toggle              { float:right; width: 15px; height: 25px; display: none; }
+button.edit                { float:right; width: 15px; height: 25px; visibility: hidden; }
+button.delete              { float:right; width: 15px; height: 25px; visibility: hidden; }
+button.toggle              { float:right; width: 15px; height: 25px; visibility: hidden; }
 button.edit:before         { content: "\f040"; }
 button.delete:before       { content: "\f00d"; }
 button.toggle.plus:before  { content: "\f196"; }
 button.toggle.minus:before { content: "\f147"; }
 
-li:hover>button.edit       { display: block; color: #555; }
-li:hover>button.delete     { display: block; color: #f55; }
-li:hover>button.toggle     { display: block; color: #555; }
+li:hover>button.edit       { visibility: visible; color: #555; }
+li:hover>button.delete     { visibility: visible; color: #f55; }
+li:hover>button.toggle     { visibility: visible; color: #555; }
 
 
 /* New condition button */
@@ -383,6 +383,107 @@ li.addcondition:hover span { display: inline-block; }
     display: block;
     height:150px;
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+/* Demo - Annotation fields selection list
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+/* Indentation */
+/* Indentation - Level 1 */ 
+.annotation_fields_list    { padding-left: 30px!important; }
+.annotation_fields_list ul { margin-left:  30px; margin-bottom: 10px; }
+.annotation_fields_list li { margin-left: -16px; }
+/* Indentation - Level 2 */ 
+
+
+.annotation_fields_list ul
+{
+    border-left: 1px solid #999;
+}
+
+.annotation_fields_list ul li:hover
+{
+    background-color: rgba(0,0,0,0.1); 
+    text-decoration: none; 
+    color:inherit;
+}
+.annotation_fields_list button 
+{
+    border: none;
+    background: none;
+    padding: 0;
+    margin: 0;
+}
+
+.and    { color: blue;  border-color: blue!important; }
+.or     { color: green; border-color: green!important; }
+.xor    { color: red;   border-color: red!important; }
+.and>.check   { color: blue; }
+.or>.check   { color: green; }
+.xor>check   { color: red; }
+.and>.uncheck { color: #788396; }
+.or>.uncheck { color: #788396; }
+.xor>.uncheck { color: #788396; }
+
+
+/* checkbox style and text color of the condition according to the check status */
+.annotation_fields_list .check i, .annotation_fields_list .uncheck i 
+{ 
+    display: inline-block; 
+    width: 15px; 
+    text-align: left; 
+    background-color: #f5f5f4; 
+}
+.annotation_fields_list .check li:hover i:first-child, .annotation_fields_list .uncheck li:hover i:first-child { background-color: #dcdfe1; }
+.annotation_fields_list .check   i:first-child:before { content: "\f046"; }
+.annotation_fields_list .uncheck i:first-child:before { content: "\f096"; }
+
+.annotation_fields_list .check   button span { color: #555; }
+.annotation_fields_list .uncheck button span { color: #788396; }
+
+
+.annotation_fields_list button:first-child
+{
+    padding-left: 10px;
+    padding-right: 10px;
+    height: 25px;
+}
+.annotation_fields_list button:first-child span
+{
+    margin-left: 10px;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

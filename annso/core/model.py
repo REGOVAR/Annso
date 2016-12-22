@@ -53,10 +53,12 @@ Sample = Base.classes.sample
 Variant = Base.classes.variant_hg19
 SampleVariant = Base.classes.sample_variant_hg19
 Selection = Base.classes.selection
-
 Attribute = Base.classes.attribute
-
 File = Base.classes.file
+
+AnnotationDatabase = Base.classes.annotation_database
+AnnotationField = Base.classes.annotation_field
+
 
 
 
