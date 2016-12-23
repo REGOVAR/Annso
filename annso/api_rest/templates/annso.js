@@ -11,8 +11,8 @@ var demo_samples = {};
 var demo_analysis_id = -1;
 
 var demo_display = "table";
-var demo_fields = [2, 4, 5, 6, 7, 8, 9, 11, 22, 16]
-var demo_filter = {};
+var demo_fields = [2, 4, 5, 6, 7, 8, 9, 11, 22, 16];
+var demo_filter = ['AND', [['==',['field',4], ['value', 1]], ['>', ['field', 9], ['value', 50]]]];
 
 
 

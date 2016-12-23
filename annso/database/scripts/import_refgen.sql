@@ -214,7 +214,7 @@ INSERT INTO public.annotation_database(name, name_ui, description, url, referenc
   'http://hgdownload.soe.ucsc.edu/goldenPath/hg19/database/refGene.txt.gz', 
   1, 
   CURRENT_TIMESTAMP, 
-  'refgene_hg19 ON {1}.chr=refgene_hg19.chr AND refgene_hg19.txrange @> int8({1}.pos)'),
+  'refgene_hg19 ON {0}.chr=refgene_hg19.chr AND refgene_hg19.txrange @> int8({0}.pos)'),
 
   ('refgene_exon_hg19', 
   'refGeneExon', 
@@ -222,7 +222,7 @@ INSERT INTO public.annotation_database(name, name_ui, description, url, referenc
   'http://hgdownload.soe.ucsc.edu/goldenPath/hg19/database/refGene.txt.gz', 
   1, 
   CURRENT_TIMESTAMP, 
-  'refgene_exon_hg19 ON {1}.chr=refgene_exon_hg19.chr AND refgene_exon_hg19.exonrange @> int8({1}.pos)');
+  'refgene_exon_hg19 ON {0}.chr=refgene_exon_hg19.chr AND refgene_exon_hg19.exonrange @> int8({0}.pos)');
 
 
 

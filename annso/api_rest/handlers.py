@@ -239,10 +239,10 @@ class AnalysisHandler:
         if offset<0 : offset = 0
 
         # 3- Execute filtering request
-        try :
-            result = annso.filter.request(analysis_id, mode, filter_json, fields, limit, offset)
-        except Exception as err :
-            return rest_error("Filtering error : " + str(err))
+        # try :
+        result = annso.filter.request(int(analysis_id), mode, filter_json, fields, int(limit), int(offset))
+        # except Exception as err :
+        #     return rest_error("Filtering error : " + str(err))
         return rest_success(result)
 
 

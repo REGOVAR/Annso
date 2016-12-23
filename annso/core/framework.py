@@ -131,7 +131,7 @@ def err(msg):
 
 
 
-class PirusException(Exception):
+class AnnsoException(Exception):
     """
         Todo : doc
     """

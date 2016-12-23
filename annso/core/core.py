@@ -334,7 +334,7 @@ class SampleManager:
         # Retrieve file
         pfile = PirusFile.from_id(file_id)
         if pfile == None:
-            raise PirusException("Unable to retrieve the pirus file with the provided id : " + file_id)
+            raise AnnsoException("Unable to retrieve the pirus file with the provided id : " + file_id)
         # Move file
         old_path = pfile.path
         new_path = os.path.join(FILES_DIR, str(uuid.uuid4()))
@@ -369,63 +369,122 @@ class SampleManager:
 # FILTER ENGINE
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
 class FilterEngine:
-    def __init__(self):
-        pass
+    op_map = {'AND' : ' AND ', 'OR': ' OR ', '==' : '=', '!=': '<>', '>':'>', '<':'<', '>=':'>=', '<=':'<='}
 
-    # build the sql query according to the annso filtering parameter and return result as json data
+    def __init__(self, reference=1):
+        """
+            Init Annso Filtering engine. (reference=1 mean "hg19", see database import script)
+            Init mapping collection for annotations databases and fields
+        """
+        refname = db_session.execute("SELECT table_suffix FROM reference WHERE id="+str(reference)).first()["table_suffix"]
+
+
+        self.fields_map = {}
+        self.db_map = {}
+        self.variant_table = "sample_variant_{0}".format(refname)
+        query = "SELECT d.id, d.name, d.jointure, a.id, a.name, a.type FROM annotation_field a LEFT JOIN annotation_database d ON a.database_id=d.id WHERE d.reference_id=" + str(reference)
+        for row in db_session.execute(query):
+            if row[0] not in self.db_map:
+                self.db_map[row[0]] = {"name" : row[1], "join": row[2].format(self.variant_table), "fields" : {}}
+            self.db_map[row[0]]["fields"][row[3]] = {"name" : row[4], "type" : row[5]}
+            self.fields_map[row[3]] = {"name" : row[4], "type" : row[5], "db_id" : row[0], "db_name" : row[1], "join": row[2].format(self.variant_table)}
+
+
+
+
+
     def request(self, analysis_id, mode, filter_json, fields=None, limit=100, offset=0):
+        """
+            Build the sql query according to the annso filtering parameter and return result as json data
+        """
         # Check parameter
+        if type(analysis_id) != int or analysis_id <=0 : raise AnnsoException("FilterEngine.request : Invalid analysis id. ("+str(analysis_id)+")")
         if mode not in ["table", "list"]: mode = "table"
+
+        
+        
+
 
         # Get sample ids used for the analysis
         # TODO : retrieve sample ids with query : "select sample_id from analysis_sample where analysis_id = {0}"
         sample_ids = [1]
-        reference = "hg19"
-        variant_table = "sample_variant_{0}".format(reference)
 
-        # Get fields to select
-        if fields is None  or len(fields) == 0: fields = [0]
-        query = "select d.id, d.name, d.jointure, f.id, f.name FROM annotation_field f LEFT JOIN annotation_database d ON d.id = f.database_id WHERE f.id IN ({0})".format(','.join([str(f) for f in fields]))
-        fields = {}
-        for r in db_session.execute(query):
-            if r[0] not in fields:
-                fields[r[0]] = {"join" : r[2], "fields" : [], "name": r[1]}
-            fields[r[0]]["fields"].append({"id" : r[3], "name" : r[4]})
-
-        # Get filter conditions
-        # TODO
-
-
-        for db in fields:
-            fields[db]["join"] = fields[db]["join"].format(reference, variant_table) # TODO FIXME : remove reference in formart() + update sql scripts
 
 
         # Build SELECT
-        select_fields = [fields[f]["name"] + "." + fn["name"] for f in fields for fn in fields[f]["fields"]]
-
+        q_select = ["{0}.{1}".format(self.fields_map[f_id]["db_name"], self.fields_map[f_id]["name"]) for f_id in fields]
 
         # Build FROM/JOIN
-        from_table = [variant_table]
-        join = " LEFT JOIN "
-        from_table.extend([join + fields[db]["join"] for db in fields if fields[db]["name"] != variant_table])
+        tables_to_import = [1] # 1 is for the sample_variant_{ref} table. We always need this table as it's used for the join with other tables
+        for f_id in fields:
+            if self.fields_map[f_id]["db_id"] not in tables_to_import :
+                tables_to_import.append(self.fields_map[f_id]["db_id"])
+
+        # Build WHERE 
+        def build_filter(json):
+            operator = json[0]
+            if operator in ['AND', 'OR']:
+                return ' (' + FilterEngine.op_map[operator].join([build_filter(f) for f in json[1]]) + ') '
+
+            elif operator in ['==', '!=', '>', '<', '>=', '<=']:
+                if (json[1][0] == 'field') :
+                    t = self.fields_map[json[1][1]]["type"]
+                elif (json[2][0] == 'field') :
+                    t = self.fields_map[json[2][1]]["type"]
+                else:
+                    t = 'string'
+                return '{0}{1}{2}'.format(parse_value(t, json[1]), FilterEngine.op_map[operator], parse_value(t, json[2]))
+
+                
 
 
-        # Build WHERE
-        where = variant_table + ".sample_id=1"
-        # TODO add filter conditions
+        def parse_value(ftype, json):
+            if json[0] == 'field':
+                if self.fields_map[json[1]]["db_id"] not in tables_to_import :
+                    tables_to_import.append(self.fields_map[json[1]]["db_id"])
+
+                if self.fields_map[json[1]]["type"] == ftype :
+                    return "{0}.{1}".format(self.fields_map[json[1]]["db_name"], self.fields_map[json[1]]["name"])
+
+            if json[0] == 'value':
+                if ftype in ['int', 'float']:
+                    return str(json[1])
+                elif ftype == 'string':
+                    return "'{0}'".format(json[1])
+                elif ftype == 'range' and len(json) == 3:
+                    return 'int8range({0}, {1})'.format(json[1], json[2])
+
+            raise AnnsoException("FilterEngine.request : Impossible to compare arguments without same type : {0} ({1}) and {2} ({3})")
+
+
+
+        q_where = ""
+        if len(sample_ids) == 1 :
+            q_where = "{0}.sample_id={1} AND ".format(self.variant_table, sample_ids[0])
+        elif len(sample_ids) > 1:
+            q_where = "{0}.sample_id IN ({1}) AND ".format(self.variant_table, ','.join(sample_ids))
+
+        q_where += build_filter(filter_json)
+
+
+        
+        # Build FROM/JOIN according to the list of used annotations databases
+        q_from = " LEFT JOIN ".join([self.db_map[d_id]["join"] for d_id in tables_to_import])
+
+
 
         # build query
-        query = "SELECT {0} FROM {1} WHERE {2} LIMIT {3} OFFSET {4}".format(', '.join(select_fields), ' '.join(from_table), where, limit, offset)
+        query = "SELECT {0} FROM {1} WHERE {2} LIMIT {3} OFFSET {4}".format(', '.join(q_select), q_from, q_where, limit, offset)
+        print (query)
 
         # Execute query and get result
         result = []
         for s in db_session.execute(query): 
             varariant = {}
             i=0
-            for db_id in fields:
-                for f in fields[db_id]['fields']:
-                    varariant[f["id"]]= FilterEngine.parse_result(s[i])
-                    i += 1
+            for f_id in fields:
+                varariant[f_id]= FilterEngine.parse_result(s[i])
+                i += 1
             result.append(varariant)
         return result
 
