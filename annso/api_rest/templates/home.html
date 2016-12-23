@@ -651,7 +651,7 @@
                                     
 
                                     <ul class="annotation_fields_list">
-                                        {% for db_id, db in annotations.items() %}
+                                        {% for db_id, db in annotations_db.items() %}
                                         <li class="uncheck">
                                             <button class="fa toggle minus" onclick="javascript:filter_toggle_condition_group(this);">&nbsp;</button>
                                             <button onclick="javascript:filter_toggle_field(this);">
@@ -1185,6 +1185,49 @@
 
         var ws = new WebSocket('ws://{{ hostname }}/ws');
         var $message = $('#message');
+
+
+
+
+        // Annotation fields/databases metadata
+        var annotation_fields = {{ annotations_fields }};
+
+        var annotation_fields_formaters = { 
+            2 : annotation_format_sampleid,
+            6: annotation_format_sequence,
+            7: annotation_format_sequence
+        }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

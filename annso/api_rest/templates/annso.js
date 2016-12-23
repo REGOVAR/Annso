@@ -9,7 +9,6 @@ var demo_pirus_displayed_pipe;
 var demo_sample_attributes = {}
 var demo_samples = {};
 var demo_analysis_id = -1;
-
 var demo_display = "table";
 var demo_fields = [2, 4, 5, 6, 7, 8, 9, 11, 22, 16];
 var demo_filter = ['AND', [['==',['field',4], ['value', 1]], ['>', ['field', 9], ['value', 50]]]];
@@ -235,7 +234,7 @@ function init_variants_list(json)
 
     for (var i=0; i<demo_fields.length; i++)
     {
-        html += "<th>{0}</th>".format(/*demo_fields_data[i][*/"name");
+        html += "<th>{0}</th>".format(annotation_fields[demo_fields[i]]["name"]);
     }
     html += "</tr></thead><tbody>";
 
@@ -249,22 +248,39 @@ function init_variants_list(json)
         html += rowhtml.format(v["variant_id"]);
         for (var i=0; i<demo_fields.length; i++)
         {
-            html += "<td>{0}</td>".format(v[demo_fields[i]]); // TODO speial format according to type and some name (ref, alt, )
+            fid   = demo_fields[i];
+            ftype = annotation_fields[fid]["type"];
+
+            if (fid in annotation_fields_formaters)
+            {
+                // use special format method to display this field
+                html += annotation_fields_formaters[fid](v[demo_fields[i]]);
+            }
+            else
+            {
+                // format according to the type
+                if (ftype == "int" || ftype == "float")
+                    html += annotation_format_number(v[fid]);
+                else 
+                    html += "<td>{0}</td>".format(v[fid]);
+            }
         }
         html += "</tr>";
     });
     $("#variants_list").html(html + "</tbody></table>");
 }
 
-function format_pos(pos)
+function annotation_format_number(value)
 {
-    var n = pos.toString(), p = n.indexOf('.');
-    return n.replace(/\d(?=(?:\d{3})+(?:\.|$))/g, function($0, i){
-        return p<0 || i<p ? ($0+'&nbsp;') : $0;
-    });
+    var n = value.toString(), p = n.indexOf('.');
+    return "<td class=\"number\">{0}</td>".format(
+        n.replace(/\d(?=(?:\d{3})+(?:\.|$))/g, function($0, i)
+        {
+            return p<0 || i<p ? ($0+'&nbsp;') : $0;
+        }));
 }
 
-function format_sequence(seq)
+function annotation_format_sequence(seq)
 {
     map = {'G':'<span class="g">G</span>', 'G':'<span class="g">G</span>', 'G':'<span class="g">G</span>', 'G':'<span class="g">G</span>'}
     max = 10;
@@ -272,15 +288,19 @@ function format_sequence(seq)
     var html = "";
     for (var i=0; i<Math.min(max, seq.length); i++)
     {
-        html+='<span class="{0}">{0}</span>'.format(seq[i]);
+        html +='<span class="{0}">{0}</span>'.format(seq[i]);
     } 
     if (seq.length > max)
     {
-        html='<a title="' + seq + '">' + html + '&#8230;</a>';
+        html ='<a title="' + seq + '">' + html + '&#8230;</a>';
     }
-    return html;
+    return "<td class=\"seq\">{0}</td>".format(html);
 }
 
+function annotation_format_sampleid(id)
+{
+    return "<td>Sample {0}</td>".format(id);
+}
 
 
 function update_variants_list(json)
@@ -307,8 +327,20 @@ function display_error(json=null)
 
 
 
-
-
+ 
+function filter_toggle_field(elmt)
+{
+    if ($(elmt).parent().hasClass('check'))
+    {
+        $(elmt).parent().removeClass('check');
+        $(elmt).parent().addClass('uncheck');
+    }
+    else
+    {
+        $(elmt).parent().addClass('check');
+        $(elmt).parent().removeClass('uncheck');
+    }
+}
 
 function filter_toggle_condition(elmt)
 {

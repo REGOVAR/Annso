@@ -405,7 +405,7 @@ INSERT INTO public.annotation_field(database_id, name, name_ui, type, descriptio
   (1, 'sample_id', 'sample', 'int',    'Sample that have the variant.'),
   (1, 'variant_id','id',     'int',    'Variant unique id in the database.'),
   (1, 'chr',       'chr',    'string', 'Chromosome.'),
-  (1, 'pos',       'pos',    'string', 'Position of the variant in the chromosome.'),
+  (1, 'pos',       'pos',    'int',    'Position of the variant in the chromosome.'),
   (1, 'ref',       'ref',    'string', 'Reference sequence.'),
   (1, 'alt',       'alt',    'string', 'Alternative sequence of the variant.'),
   (1, 'genotype',  'GT',     'string', 'Genotype. Values can be : 0=ref/ref, 1=alt/alt, 2=ref/alt, 3=alt1/alt2'),

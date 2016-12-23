@@ -75,19 +75,22 @@ class Core:
 # ANNOTATION DATABASE MANAGER
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
 class AnnotationDatabaseManager:
-    def __init__(self):
-        pass
+    def __init__(self, reference=1):
+        self.fields_map = {}
+        self.db_map = {}
+        query = "SELECT d.id, d.name_ui, d.description, a.id, a.name_ui, a.type, a.description FROM annotation_field a LEFT JOIN annotation_database d ON a.database_id=d.id WHERE d.reference_id={0} ORDER BY d.name_ui, a.name_ui".format(reference)
+        for row in db_session.execute(query):
+            if row[0] not in self.db_map:
+                self.db_map[row[0]] = {"name" : row[1], "description": row[2], "fields" : []}
+            self.db_map[row[0]]["fields"].append({"id" : row[3], "name" : row[4], "type" : row[5]})
+            self.fields_map[row[3]] = {"name" : row[4], "type" : row[5], "db_id" : row[0], "db_name" : row[1], "description": row[6]}
 
     # build the sql query according to the annso filtering parameter and return result as json data
-    def get(self):
-        query = "SELECT d.id, d.name_ui, d.description, a.id, a.name_ui, a.type, a.description FROM annotation_field a LEFT JOIN annotation_database d ON a.database_id=d.id ORDER BY d.name_ui, a.name_ui"
+    def get_databases(self):
+        return self.db_map
 
-        result = {}
-        for r in db_session.execute(query):
-            if r[0] not in result:
-                result[r[0]] = {"name" : r[1], "description" : r[2], "fields" : []}
-            result[r[0]]["fields"].append({"id" : r[3], "name" : r[4], "type" : r[5], "description" : r[6]})
-        return result
+    def get_fields(self):
+        return self.fields_map
 
 
 
@@ -398,7 +401,7 @@ class FilterEngine:
             Build the sql query according to the annso filtering parameter and return result as json data
         """
         # Check parameter
-        if type(analysis_id) != int or analysis_id <=0 : raise AnnsoException("FilterEngine.request : Invalid analysis id. ("+str(analysis_id)+")")
+        if type(analysis_id) != int or analysis_id <=0 : analysis_id = None
         if mode not in ["table", "list"]: mode = "table"
 
         
@@ -406,8 +409,12 @@ class FilterEngine:
 
 
         # Get sample ids used for the analysis
-        # TODO : retrieve sample ids with query : "select sample_id from analysis_sample where analysis_id = {0}"
-        sample_ids = [1]
+        if analysis_id is None : 
+            # No implicit constraint on sample. (filter on all variant in database)
+            sample_ids = []
+        else :
+            # TODO : retrieve sample ids with query : "select sample_id from analysis_sample where analysis_id = {0}"
+            sample_ids = [1]
 
 
 
@@ -421,38 +428,38 @@ class FilterEngine:
                 tables_to_import.append(self.fields_map[f_id]["db_id"])
 
         # Build WHERE 
-        def build_filter(json):
-            operator = json[0]
+        def build_filter(data):
+            operator = data[0]
             if operator in ['AND', 'OR']:
-                return ' (' + FilterEngine.op_map[operator].join([build_filter(f) for f in json[1]]) + ') '
+                return ' (' + FilterEngine.op_map[operator].join([build_filter(f) for f in data[1]]) + ') '
 
             elif operator in ['==', '!=', '>', '<', '>=', '<=']:
-                if (json[1][0] == 'field') :
-                    t = self.fields_map[json[1][1]]["type"]
-                elif (json[2][0] == 'field') :
-                    t = self.fields_map[json[2][1]]["type"]
+                if (data[1][0] == 'field') :
+                    t = self.fields_map[data[1][1]]["type"]
+                elif (data[2][0] == 'field') :
+                    t = self.fields_map[data[2][1]]["type"]
                 else:
                     t = 'string'
-                return '{0}{1}{2}'.format(parse_value(t, json[1]), FilterEngine.op_map[operator], parse_value(t, json[2]))
+                return '{0}{1}{2}'.format(parse_value(t, data[1]), FilterEngine.op_map[operator], parse_value(t, data[2]))
 
                 
 
 
-        def parse_value(ftype, json):
-            if json[0] == 'field':
-                if self.fields_map[json[1]]["db_id"] not in tables_to_import :
-                    tables_to_import.append(self.fields_map[json[1]]["db_id"])
+        def parse_value(ftype, data):
+            if data[0] == 'field':
+                if self.fields_map[data[1]]["db_id"] not in tables_to_import :
+                    tables_to_import.append(self.fields_map[data[1]]["db_id"])
 
-                if self.fields_map[json[1]]["type"] == ftype :
-                    return "{0}.{1}".format(self.fields_map[json[1]]["db_name"], self.fields_map[json[1]]["name"])
+                if self.fields_map[data[1]]["type"] == ftype :
+                    return "{0}.{1}".format(self.fields_map[data[1]]["db_name"], self.fields_map[data[1]]["name"])
 
-            if json[0] == 'value':
+            if data[0] == 'value':
                 if ftype in ['int', 'float']:
-                    return str(json[1])
+                    return str(data[1])
                 elif ftype == 'string':
-                    return "'{0}'".format(json[1])
-                elif ftype == 'range' and len(json) == 3:
-                    return 'int8range({0}, {1})'.format(json[1], json[2])
+                    return "'{0}'".format(data[1])
+                elif ftype == 'range' and len(data) == 3:
+                    return 'int8range({0}, {1})'.format(data[1], data[2])
 
             raise AnnsoException("FilterEngine.request : Impossible to compare arguments without same type : {0} ({1}) and {2} ({3})")
 

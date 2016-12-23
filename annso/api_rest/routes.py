@@ -41,7 +41,8 @@ app.router.add_route('GET',    "/v1/config", website.get_config)
 app.router.add_route('GET',    "/v1/ws",     websocket.get)
 
 
-app.router.add_route('GET',    "/v1/db",           dbHandler.get_db)
+app.router.add_route('GET',    "/v1/db",        dbHandler.get_databases)
+app.router.add_route('GET',    "/v1/db/fields", dbHandler.get_fields)
 
 
 app.router.add_route('GET',    "/v1/sample",             sampleHandler.get_samples)

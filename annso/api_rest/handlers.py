@@ -149,7 +149,8 @@ class WebsiteHandler:
             "hostname" : "annso.absolumentg.fr/v1",
             "templates" : annso.template.get(), # return by default last 10 templates
             "analysis" : annso.analysis.get(),  # return by default last 10 analyses
-            "annotations" : annso.annotation_db.get(),
+            "annotations_db" :     annso.annotation_db.get_databases(),
+            "annotations_fields" : json.dumps(annso.annotation_db.get_fields()),
         }
         return data
 
@@ -166,6 +167,31 @@ class WebsiteHandler:
 
 
  
+
+
+
+
+
+
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
+# ANNOTATION DATABASES HANDLER
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
+class AnnotationDBHandler:
+    def get_databases(self, request):
+        """ 
+            Return list of annotation databases and for each, available fields
+        """
+        return rest_success(annso.annotation_db.get_databases())
+
+    def get_fields(self, request):
+        """
+            Return flat list of all fields with their meta data (description, database id, ...)
+        """
+        return rest_success(annso.annotation_db.get_fields())
+
+
+
+
 
 
 
@@ -370,19 +396,6 @@ class VariantHandler:
         return rest_success({"database" : db_name})
 
 
-
-
-
-
-
-
-# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
-# ANNOTATION DATABASES HANDLER
-# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
-class AnnotationDBHandler:
-    def get_db(self, request):
-        # Return list of annotation databases and available fields
-        return rest_success(annso.annotation_db.get())
 
 
 
