@@ -87,16 +87,38 @@ function load_analysis(json)
     $('#modal_new_analysis_name').val("");
     $('#modal_new_analysis').modal('hide');
 
+
     // Set main title
     $('#analysis_title').html("<i class=\"fa fa-folder-o\" style=\"width:20px; text-align:center; margin-right:20px;\" aria-hidden=\"true\"></i>" + json["name"]);
     demo_analysis_id = json["id"];
 
+    // Apply analysis settings
+    // TODO load from json["setting"]
+    demo_sample_attributes = {}
+    demo_samples = {1:{"name":"B00H79Q.HC", "nickname":"Olivier"}};
+    demo_fields = [2, 4, 5, 6, 7, 8, 9, 11, 22, 16];
+    demo_filter = ['AND', [['==',['field',4], ['value', 1]], ['>', ['field', 9], ['value', 50]]]];
+
 
     // Todo : reset samples screen, filters, reports, ...
     $('#browser_samples').html("<span class=\"maincontent_placeholder\">&#11172; Import and select sample(s) you want to analyse.</span>")
-
     // Automaticaly select the Sample section
     $('#nav_project_sample')[0].click(function (e) { e.preventDefault(); $(this).tab('show'); })
+
+
+    // Reset 
+    $('#annotation_fields_list li').each(function(idx) {
+        $(this).removeClass('check');
+        $(this).addClass('uncheck');
+    });
+    $.each(demo_fields, function(idx, fid) 
+    {
+        db_id = '#annotation_fields_db_'+ annotation_fields[fid]['db_id'];
+        $(db_id).removeClass('uncheck');
+        $(db_id).addClass('check');
+        $('#annotation_fields_field_'+fid).removeClass('uncheck');
+        $('#annotation_fields_field_'+fid).addClass('check');
+    });
 }
 
 function load_sample_database()
@@ -328,19 +350,41 @@ function display_error(json=null)
 
 
  
-function filter_toggle_field(elmt)
+function filter_toggle_field(elmt, f_id)
 {
     if ($(elmt).parent().hasClass('check'))
     {
         $(elmt).parent().removeClass('check');
         $(elmt).parent().addClass('uncheck');
+
+        demo_fields.splice(a.indexOf(f_id),1);
     }
     else
     {
         $(elmt).parent().addClass('check');
         $(elmt).parent().removeClass('uncheck');
+
+        demo_fields.push(f_id);
+    }
+
+    load_variants_array();
+}
+function filter_toggle_field_group(elmt)
+{
+    if ($(elmt).hasClass('minus'))
+    {
+        $(elmt).next().next().next().addClass('collapse');
+        $(elmt).removeClass('minus');
+        $(elmt).addClass('plus');
+    }
+    else
+    {
+        $(elmt).next().next().next().removeClass('collapse');
+        $(elmt).removeClass('plus');
+        $(elmt).addClass('minus');
     }
 }
+
 
 function filter_toggle_condition(elmt)
 {

@@ -409,16 +409,11 @@ li.addcondition:hover span { display: inline-block; }
 
 /* Indentation */
 /* Indentation - Level 1 */ 
-.annotation_fields_list    { padding-left: 30px!important; }
-.annotation_fields_list ul { margin-left:  30px; margin-bottom: 10px; }
-.annotation_fields_list li { margin-left: -16px; }
+.annotation_fields_list { margin-right: 5px;}
+.annotation_fields_list ul { margin-left:  15px; margin-bottom: 10px; }
+.annotation_fields_list li { margin-left:  10px; }
 /* Indentation - Level 2 */ 
 
-
-.annotation_fields_list ul
-{
-    border-left: 1px solid #999;
-}
 
 .annotation_fields_list ul li:hover
 {
@@ -434,15 +429,13 @@ li.addcondition:hover span { display: inline-block; }
     margin: 0;
 }
 
-.and    { color: blue;  border-color: blue!important; }
-.or     { color: green; border-color: green!important; }
-.xor    { color: red;   border-color: red!important; }
-.and>.check   { color: blue; }
-.or>.check   { color: green; }
-.xor>check   { color: red; }
-.and>.uncheck { color: #788396; }
-.or>.uncheck { color: #788396; }
-.xor>.uncheck { color: #788396; }
+
+.annotation_fields_list .check { color: #333; }
+.annotation_fields_list .uncheck { color: #788396; }
+
+button.info        { float:right; width: 15px; height: 25px; visibility: hidden; }
+button.info:before { content: "\f05a"; }
+.annotation_fields_list ul li:hover button.info { visibility: visible;}
 
 
 /* checkbox style and text color of the condition according to the check status */
@@ -457,8 +450,6 @@ li.addcondition:hover span { display: inline-block; }
 .annotation_fields_list .check   i:first-child:before { content: "\f046"; }
 .annotation_fields_list .uncheck i:first-child:before { content: "\f096"; }
 
-.annotation_fields_list .check   button span { color: #555; }
-.annotation_fields_list .uncheck button span { color: #788396; }
 
 
 .annotation_fields_list button:first-child

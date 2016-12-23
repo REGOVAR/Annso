@@ -652,22 +652,22 @@
 
                                     <ul class="annotation_fields_list">
                                         {% for db_id, db in annotations_db.items() %}
-                                        <li class="uncheck">
-                                            <button class="fa toggle minus" onclick="javascript:filter_toggle_condition_group(this);">&nbsp;</button>
+                                        <li id="annotation_fields_db_{{db_id}}" class="uncheck">
+                                            <button class="fa toggle minus" onclick="javascript:filter_toggle_field_group(this, {{db_id}});">&nbsp;</button>
+                                            <button class="fa info" title="{{db["description"]}}" data-toggle="tooltip" data-placement="left">&nbsp;</button>
                                             <button onclick="javascript:filter_toggle_field(this);">
                                                 <i class="fa" aria-hidden="true">&nbsp;</i>
                                                 <span>{{db["name"]}}</span>
                                             </button>
-                                            <b  class="fa fa-info-circle" aria-hidden="true" title="{{db["description"]}}">&nbsp;</b>
 
                                             <ul>
                                                 {% for f in db["fields"] %}
-                                                <li class="uncheck">
-                                                    <button onclick="javascript:filter_toggle_condition(this);">
+                                                <li id="annotation_fields_field_{{f["id"]}}" class="uncheck">
+                                                    <button class="fa info" title="{{f["description"]}}" data-toggle="tooltip" data-placement="left">&nbsp;</button>
+                                                    <button onclick="javascript:filter_toggle_field(this, {{f["id"]}});">
                                                         <i class="fa" aria-hidden="true">&nbsp;</i>
                                                         <span>{{f["name"]}}</span>
                                                     </button>
-                                                    <b class="fa fa-info-circle" aria-hidden="true" title="{{f["description"]}}">&nbsp;</b>
                                                 </li>
                                                 {% endfor %}
                                             </ul>
@@ -1263,6 +1263,8 @@
             });
 
             //$("#browser_files_table").tablesorter(); 
+
+            $('[data-toggle="tooltip"]').tooltip();
 
         });
 
