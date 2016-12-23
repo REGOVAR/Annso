@@ -11,6 +11,7 @@ import time
 import uuid
 import subprocess
 import requests
+import psycopg2
 
 
 from core.framework import *
@@ -423,13 +424,20 @@ class FilterEngine:
             i=0
             for db_id in fields:
                 for f in fields[db_id]['fields']:
-                    varariant[f["id"]]= s[i] if s[i] is not None else ""
+                    varariant[f["id"]]= FilterEngine.parse_result(s[i])
                     i += 1
             result.append(varariant)
         return result
 
 
 
+    @staticmethod
+    def parse_result(value):
+        if value is None:
+            return ""
+        if type(value) == psycopg2._range.NumericRange:
+            return (value.lower, value.upper)
+        return value
 
 
 

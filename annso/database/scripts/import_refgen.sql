@@ -143,6 +143,8 @@ UPDATE public.refgene_exon_hg19 SET
   exonrange=int8range(CAST(coalesce(i_exonstart, '0') AS integer), CAST(coalesce(i_exonend, '0') AS integer)) ;
 
 
+UPDATE public.refgene_hg19 SET chr=substring(chr from 4)
+
 
 ALTER TABLE public.refgene_exon_hg19 DROP COLUMN i_exonstart;
 ALTER TABLE public.refgene_exon_hg19 DROP COLUMN i_exonend;
