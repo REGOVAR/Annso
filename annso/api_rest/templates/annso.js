@@ -336,7 +336,7 @@ function display_error(json=null)
 {
     if (json == null)
     {
-        json = {"error_id" : "-", "error_code" : "-1", "error_url" : "#", "msg" : "Unknow error :/ ... you can spank the dev team."}
+        json = {"error_id" : "-", "error_code" : "-1", "error_url" : "#", "msg" : "Unknow error ...."}
     }
 
     $('#modal_error_id').text(json["error_id"]);
@@ -357,7 +357,7 @@ function filter_toggle_field(elmt, f_id)
         $(elmt).parent().removeClass('check');
         $(elmt).parent().addClass('uncheck');
 
-        demo_fields.splice(a.indexOf(f_id),1);
+        demo_fields.splice(demo_fields.indexOf(f_id),1);
     }
     else
     {

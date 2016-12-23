@@ -482,7 +482,7 @@ class FilterEngine:
 
         # build query
         query = "SELECT {0} FROM {1} WHERE {2} LIMIT {3} OFFSET {4}".format(', '.join(q_select), q_from, q_where, limit, offset)
-        print (query)
+
 
         # Execute query and get result
         result = []
