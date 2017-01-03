@@ -16,6 +16,7 @@ var filter_condition_template = "<li class=\"condition {0}\">\
     </button>\
     <button class=\"fa delete\">&nbsp;</button>\
     <button class=\"fa edit\">&nbsp;</button>\
+    <input type=\"hidden\" value='{2}'' />\
 </li>";
 
 // filter_group_template.format('check', 'or', '', 'checked', '', '...');
@@ -26,9 +27,9 @@ var filter_group_template = "<li class=\"condition {0}\">\
     <button class=\"fa delete\">&nbsp;</button>\
     <button class=\"fa toggle minus\" onclick=\"javascript:filter_toggle_condition_group(this);\">&nbsp;</button>\
     <select name=\"select\" class=\"{1}\" onmouseup=\"javascript:filter_switch_operator(this);\">\
-        <option value=\"value1\" {2}>AND</option> \
-        <option value=\"value2\" {3}>OR</option>\
-        <option value=\"value3\" {4}>XOR</option>\
+        <option value=\"AND\" {2}>AND</option> \
+        <option value=\"OR\" {3}>OR</option>\
+        <option value=\"XOR\" {4}>XOR</option>\
     </select>\
     <ul class=\"{1}\">\
         {5}\

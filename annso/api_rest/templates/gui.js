@@ -227,8 +227,7 @@ function build_filter_ui(json)
     }
     else if (['==', '!=', '>', '>=', '<', '<='].includes(json[0]))
     {
-
-        return filter_condition_template.format('check', "{0} {1} {2}".format(build_filter_ui(json[1]), filter_operator_display_map[json[0]], build_filter_ui(json[2])));
+        return filter_condition_template.format('check', "{0} {1} {2}".format(build_filter_ui(json[1]), filter_operator_display_map[json[0]], build_filter_ui(json[2])), JSON.stringify(json));
     }
     else
     {
@@ -269,12 +268,49 @@ function add_filter_ui(operator)
 
 
 
+function build_filter_json(root_elmt)
+{
+
+    // take in account only checked filter condition
+    if ($(root_elmt).hasClass("check"))
+    {
+        if ($(root_elmt).has("select").length == 1)
+        {
+            var json = [$(root_elmt).find(":selected").val(), []];
+
+            $(root_elmt).find("> ul > li").each(function( index ) 
+            {
+
+                var data = build_filter_json($( this ));
+                if (data != null)
+                {
+                    json[1].push(data);
+                }
+            });
+
+            return json;
+        }
+        else
+        {
+            return JSON.parse($(root_elmt).find("> input[type='hidden']").val());
+        }
+    }
+
+    return null;
+}
 
 
 
 
 
+function apply_filter()
+{
+    demo_filter = build_filter_json($('#filters_panel_menu_filter_c > ul > li'));
+    console.debug(demo_filter);
 
+    load_variants_array();
+
+}
 
 
 
