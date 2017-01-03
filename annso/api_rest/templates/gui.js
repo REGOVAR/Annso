@@ -1,17 +1,92 @@
 
-var demo_pirus_displayed_run;
-var demo_pirus_displayed_run_pipename;
-var demo_pirus_displayed_file;
-var demo_pirus_displayed_pipe;
+
+
+// ------------------------------------------------------------------
+// DISPLAY error for the user
+function error(json=null)
+{
+    if (json == null)
+    {
+        json = {"error_id" : "-", "error_code" : "-1", "error_url" : "#", "msg" : "Unknow error ...."}
+    }
+
+    $('#modal_error_id').text(json["error_id"]);
+    $('#modal_error_code').text(json["error_code"]);
+    $('#modal_error_code').attr('href', json["error_url"]);
+    $('#modal_error_msg').text(json["msg"]);
+    $('#modal_error').modal('show');
+}
 
 
 
-var demo_sample_attributes = {}
-var demo_samples = {};
-var demo_analysis_id = -1;
-var demo_display = "table";
-var demo_fields = [2, 4, 5, 6, 7, 8, 9, 11, 22, 16];
-var demo_filter = ['AND', [['==',['field',4], ['value', 1]], ['>', ['field', 9], ['value', 50]]]];
+
+
+function AnnsoControler () {
+    this.model = "";
+    this.selected_tab = "welcom_toolbar";
+
+
+
+
+
+
+    // ------------------------------------------------------------------
+    // MODEL CREATE a new empty analysis
+    this.new_empty = function ()
+    {
+        error({"msg" : "not yet implemented"});
+    }
+
+
+
+
+    // ------------------------------------------------------------------
+    // MODEL CREATE a new analysis based on a template id
+    this.new_from_template = function (template_id)
+    {
+
+    }
+
+
+    // ------------------------------------------------------------------
+    // MODEL LOAD an analysis from server
+    this.load = function (id)
+    {
+        $.ajax({ url: rootURL + "/analysis/" + id, type: "GET", async: false}).fail(function()
+        {
+            this.error();
+        }).done(function(json) 
+        {
+            if (json["success"])
+            {
+                this.analysis = new Analysis(json["data"]);
+            }
+            else
+            {
+                error(json);
+            }
+        });
+    }
+}
+
+
+
+
+
+
+
+var controler = new AnnsoControler;
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -47,7 +122,7 @@ function create_analysis()
         }).fail(function()
         {
             alert( "ERROR" );
-        }).done(function(json) 
+        }).done(function(json)
         {
             load_analysis(json);
         });
@@ -55,7 +130,7 @@ function create_analysis()
     else
     {
         alert("Thanks to give a name to your analyse.");
-    }    
+    }
 }
 
 function start_analysis(id)
@@ -89,7 +164,7 @@ function load_analysis(json)
 
 
     // Set main title
-    $('#analysis_title').html("<i class=\"fa fa-folder-o\" style=\"width:20px; text-align:center; margin-right:20px;\" aria-hidden=\"true\"></i>" + json["name"]);
+    $('#analysis_title').html(analysis_title_template.format(json["name"]));
     demo_analysis_id = json["id"];
 
     // Apply analysis settings
@@ -106,7 +181,7 @@ function load_analysis(json)
     $('#nav_project_sample')[0].click(function (e) { e.preventDefault(); $(this).tab('show'); })
 
 
-    // Reset 
+    // Reset UI field list
     $('#annotation_fields_list li').each(function(idx) {
         $(this).removeClass('check');
         $(this).addClass('uncheck');
@@ -119,7 +194,153 @@ function load_analysis(json)
         $('#annotation_fields_field_'+fid).removeClass('uncheck');
         $('#annotation_fields_field_'+fid).addClass('check');
     });
+
+    // Reset UI filter
+    $('#filters_panel_menu_filter_c > ul').html(build_filter_ui(demo_filter));
 }
+
+function build_filter_ui(json)
+{
+    if (["AND", "OR", "XOR"].includes(json[0]))
+    {
+        var operand_html = "";
+        $.each(json[1], function(idx, operand) 
+        {
+            operand_html += build_filter_ui(operand);
+        });
+
+
+        if (json[0] == "AND")
+            return filter_group_template.format('check', 'and', 'selected', '', '', operand_html);
+        if (json[0] == "OR")
+            return filter_group_template.format('check', 'or', '', 'selected', '', operand_html);
+        if (json[0] == "XOR")
+            return filter_group_template.format('check', 'xor', '', '', 'selected', operand_html);
+    }
+    else if (json[0] == 'field')
+    {
+        return annotation_fields[json[1]]['name'];
+    }
+    else if (json[0] == 'value')
+    {
+        return json[1];
+    }
+    else if (['==', '!=', '>', '>=', '<', '<='].includes(json[0]))
+    {
+
+        return filter_condition_template.format('check', "{0} {1} {2}".format(build_filter_ui(json[1]), filter_operator_display_map[json[0]], build_filter_ui(json[2])));
+    }
+    else
+    {
+        return "TO BE implemented";
+    }
+}
+
+var filter_operator_display_map = {'==' : '=', '!=' : "&#8800;", '>' : "&gt;", '>=' : "&#8805;", '<' : "&lt;", '<=' : "&#8804;"};
+var add_filter_ui_parent_elmt;
+function add_filter_ui(operator)
+{
+    var json;
+    if (["AND", "OR", "XOR"].includes(operator))
+    {
+        json = [operator, []];
+    }
+    else 
+    {
+        // retrieve operator
+        var operator = $('#modal_filter_field_operator').find(":selected").val();
+
+        // retrieve field
+        f_id = annotation_fields_autocomplete_info[annotation_fields_autocomplete.indexOf($('#modal_filter_field_name').val())]["id"];
+        var op1 = ['field', f_id];
+        
+        // retrieve value
+        var op2 = ['value', $('#modal_filter_field_value').val()];
+
+        json = [operator, op1, op2];
+    }
+
+
+    console.debug(json);
+
+    $(build_filter_ui(json)).insertBefore(add_filter_ui_parent_elmt);
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+var substringMatcher = function(strs) 
+{
+    return function findMatches(q, cb) 
+    {
+        var matches, substringRegex;
+
+        // an array that will be populated with substring matches
+        matches = [];
+
+        // regex used to determine if a string contains the substring `q`
+        substrRegex = new RegExp(q, 'i');
+
+        // iterate through the pool of strings and for any string that
+        // contains the substring `q`, add it to the `matches` array
+        $.each(strs, function(i, str) 
+        {
+            if (substrRegex.test(str)) 
+            {
+                matches.push(str);
+            }
+        });
+
+        cb(matches);
+    };
+};
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 function load_sample_database()
 {
@@ -332,19 +553,28 @@ function update_variants_list(json)
 
 
 
-function display_error(json=null)
-{
-    if (json == null)
-    {
-        json = {"error_id" : "-", "error_code" : "-1", "error_url" : "#", "msg" : "Unknow error ...."}
-    }
 
-    $('#modal_error_id').text(json["error_id"]);
-    $('#modal_error_code').text(json["error_code"]);
-    $('#modal_error_code').attr('href', json["error_url"]);
-    $('#modal_error_msg').text(json["msg"]);
-    $('#modal_error').modal('show');
+function filter_build_tree(json)
+{
+
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -442,36 +672,6 @@ function filter_toggle_condition_group(elmt)
 
 
 
-
-
-
-
-
-
-function fake_add_samples()
-{
-    i=0;
-    data = [[1, "CGH0157"],
-            [2, "CGH0413"],
-            [3, "CGH0542"]]
-    
-
-    var html = "<tr id=\"sampleEntry-{0}\" style=\"cursor: pointer;\" onclick=\"javascript:select_sample('{0}');\">";
-    html    += "<td><input type=\"checkbox\" value=\"{0}\"/></td>";
-    html    += "<td class=\"collapse\">{1} </td>";
-    html    += "<td>";
-    html    += "<i class=\"fa fa-pencil\" aria-hidden=\"true\" style=\"width:20px; text-align:center;\" onclick=\"javascript:fake_rename_sample();return;\">&nbsp;</i> {1} </td></tr>";
-
-    for (var i=0; i< 3; i++)
-    {
-        $('#browser_samples_table tbody').append(html.format(data[i][0], data[i][1]));
-    };
-
-
-
-
-
-}
 
 
 function fake_rename_sample()

@@ -21,7 +21,10 @@
     <link rel="stylesheet" href='/assets/brutusin/css/brutusin-json-forms.min.css'/>
     <script src="/assets/brutusin/js/brutusin-json-forms.min.js"></script>
 
-    <!-- Pirus specific -->
+    <!-- Autocomplete input -->
+    <script type="text/javascript" src="/assets/typeahead.js"></script>
+
+    <!-- Annso specific -->
     <link rel="stylesheet" href="/assets/annso.css"/>
     <link rel="stylesheet" href="/assets/font-awesome-4.6.3/css/font-awesome.min.css"/>
 </head>
@@ -512,128 +515,7 @@
                                         </span>
                                     </a>
                                     <div id="filters_panel_menu_filter_c" class="complex_filter check">
-                                        <button class="fa delete">&nbsp;</button>
-                                        <button class="fa toggle minus" onclick="javascript:filter_toggle_condition_group(this);">&nbsp;</button>
-                                        <select name="select" class="and" onmouseup="javascript:filter_switch_operator(this);">
-                                            <option value="value1" selected>AND</option> 
-                                            <option value="value2">OR</option>
-                                            <option value="value3">XOR</option>
-                                        </select>
-                                        <ul class="and">
-                                            <li class="condition check">
-                                                <button onclick="javascript:filter_toggle_condition(this);">
-                                                    <i class="fa" aria-hidden="true">&nbsp;</i>
-                                                    <span>Not in : <b class="fa fa-tag" aria-hidden="true"></b> Control-Yes</span>
-                                                </button>
-                                                <button class="fa delete">&nbsp;</button>
-                                                <button class="fa edit">&nbsp;</button>
-                                            </li>
-                                            <li class="condition uncheck">
-                                                <button onclick="javascript:filter_toggle_condition(this);">
-                                                    <i class="fa" aria-hidden="true">&nbsp;</i>
-                                                    <span>In : <b class="fa fa-cube" aria-hidden="true"></b> X link</span>
-                                                </button>
-                                                <button class="fa delete">&nbsp;</button>
-                                                <button class="fa edit">&nbsp;</button>
-                                            </li>
-                                            <li class="condition check">
-                                                <button onclick="javascript:filter_toggle_condition(this);">
-                                                    <i class="fa" aria-hidden="true">&nbsp;</i> 
-                                                    <span>DP &lt; 400</span>
-                                                </button>
-                                                <button class="fa delete">&nbsp;</button>
-                                                <button class="fa edit">&nbsp;</button>
-                                            </li>
-
-
-                                            <li class="condition check">
-                                                <button onclick="javascript:filter_toggle_condition(this);">
-                                                    <i class="fa" aria-hidden="true">&nbsp;</i> 
-                                                </button>
-                                                <button class="fa delete">&nbsp;</button>
-                                                <button class="fa toggle minus" onclick="javascript:filter_toggle_condition_group(this);">&nbsp;</button>
-                                                <select name="select" class="or" onmouseup="javascript:filter_switch_operator(this);">
-                                                    <option value="value1">AND</option> 
-                                                    <option value="value2" selected>OR</option>
-                                                    <option value="value3">XOR</option>
-                                                </select>
-                                                <ul class="or">
-                                                    <li class="condition uncheck">
-                                                        <button onclick="javascript:filter_toggle_condition(this);">
-                                                            <i class="fa" aria-hidden="true">&nbsp;</i>
-                                                            <span>In : <b class="fa fa-cube" aria-hidden="true"></b> X link</span>
-                                                        </button>
-                                                        <button class="fa delete">&nbsp;</button>
-                                                        <button class="fa edit">&nbsp;</button>
-                                                    </li>
-                                                    <li class="condition check">
-                                                        <button onclick="javascript:filter_toggle_condition(this);">
-                                                            <i class="fa" aria-hidden="true">&nbsp;</i> 
-                                                            <span>DP &lt; 400</span>
-                                                        </button>
-                                                        <button class="fa delete">&nbsp;</button>
-                                                        <button class="fa edit">&nbsp;</button>
-                                                    </li>
-
-                                                    <li style="condition check">
-                                                        <button onclick="javascript:filter_toggle_condition(this);">
-                                                            <i class="fa" aria-hidden="true">&nbsp;</i>
-                                                        </button>
-                                                        <button class="fa delete">&nbsp;</button>
-                                                        <button class="fa toggle minus" onclick="javascript:filter_toggle_condition_group(this);">&nbsp;</button>
-                                                        <select name="select" class="xor" onmouseup="javascript:filter_switch_operator(this);">
-                                                            <option value="value1">AND</option> 
-                                                            <option value="value2">OR</option>
-                                                            <option value="value3" selected>XOR</option>
-                                                        </select>
-                                                        <ul class="xor">
-                                                            <li class="condition uncheck">
-                                                                <button onclick="javascript:filter_toggle_condition(this);">
-                                                                    <i class="fa" aria-hidden="true">&nbsp;</i>
-                                                                    <span>In : <b class="fa fa-cube" aria-hidden="true"></b> X link</span>
-                                                                </button>
-                                                                <button class="fa delete">&nbsp;</button>
-                                                                <button class="fa edit">&nbsp;</button>
-                                                            </li>
-                                                            <li class="condition check">
-                                                                <button onclick="javascript:filter_toggle_condition(this);">
-                                                                    <i class="fa" aria-hidden="true">&nbsp;</i> 
-                                                                    <span>DP &lt; 400</span>
-                                                                </button>
-                                                                <button class="fa delete">&nbsp;</button>
-                                                                <button class="fa edit">&nbsp;</button>
-                                                            </li>
-                                                            <li class="addcondition">
-                                                                <button href="#modal_filter_add_condition" data-toggle="modal">
-                                                                    <b class="fa fa-plus" aria-hidden="true">&nbsp;</b>
-                                                                    <span>Add new condition</span>
-                                                                </button>
-                                                            </li>
-                                                        </ul>
-                                                    </li>
-                                                    <li class="addcondition">
-                                                        <button href="#modal_filter_add_condition" data-toggle="modal">
-                                                            <b class="fa fa-plus" aria-hidden="true">&nbsp;</b>
-                                                            <span>Add new condition</span>
-                                                        </button>
-                                                    </li>
-                                                </ul>
-                                            </li>
-                                            <li class="condition check">
-                                                <button onclick="javascript:filter_toggle_condition(this);">
-                                                    <i class="fa" aria-hidden="true">&nbsp;</i> 
-                                                    <span>Deletion</span>
-                                                </button>
-                                                <button class="fa delete">&nbsp;</button>
-                                                <button class="fa edit">&nbsp;</button>
-                                            </li>
-                                            <li class="addcondition">
-                                                <button href="#modal_filter_add_condition" data-toggle="modal">
-                                                    <b class="fa fa-plus" aria-hidden="true">&nbsp;</b>
-                                                    <span>Add new condition</span>
-                                                </button>
-                                            </li>
-                                        </ul>
+                                        <ul></ul>
                                     </div>
                                 </div>
 
@@ -1004,23 +886,16 @@
 
 
                         <!--                      -->
-                        <!-- NEW FILTER - LEVEL 1 -->
+                        <!-- NEW FILTER - TAB     -->
                         <!--                      -->
                         <div class="new_cond_tree">
                             <ul class="nav navbar-nav">
-                                <li><i class="fa fa-map-marker" style="width:20px; text-align:center;" aria-hidden="true"></i>Variant <br/>
-                                    <span style="font-size: 0.7em; margin-left:-15px;">(chr-pos-ref-alt)</span>
-                                    
-                                    
-                                </li>
-                                <li><i class="fa fa-map-marker" style="width:20px; text-align:center;" aria-hidden="true"></i>Variant <br/>
-                                    <span style="font-size: 0.7em;">(chr-pos)</span>
-
-                                </li>
-                                <li><a data-toggle="tab" href="#modal_filter_add_condition_vfield">
-                                    <i class="fa fa-search" style="width:20px; text-align:center;" aria-hidden="true"></i>Variant <br/><span style="font-size: 0.7em;">(field)</span></a></li>
                                 <li><a data-toggle="tab" href="#modal_filter_add_condition_logicals">
                                     <i class="fa fa-indent" style="width:20px; text-align:center;" aria-hidden="true"></i>Logical</a></li>
+                                <li><a data-toggle="tab" href="#modal_filter_add_condition_vfield">
+                                    <i class="fa fa-map-marker" style="width:20px; text-align:center;" aria-hidden="true"></i>Field</a></li>
+                                <li><a data-toggle="tab" href="#modal_filter_add_condition_variant">
+                                    <i class="fa fa-search" style="width:20px; text-align:center;" aria-hidden="true"></i>Variant</a></li>
                             </ul>
                         </div>
 
@@ -1029,16 +904,21 @@
                             <div class="tab-pane fade in active" style="height:500px; padding: 50px;">
                                 <i class="fa fa-arrow-left" aria-hidden="true"></i> Build Your test step by step from the left to the right !
                             </div>
+
+
+                            <!--                      -->
+                            <!-- NEW FILTER - LOGICAL -->
+                            <!--                      -->
                             <div id="modal_filter_add_condition_logicals" class="tab-pane fade" style="height:500px;">
                                 <div class="runConfigTabDescription">Click on the conditionnal block that you want to add</div>
                                 
-                                <button type="button" class="btn btn-primary" style="display: block; width: 70px; text-align:left; margin: 10px 20px;">
+                                <button type="button" class="btn btn-primary" style="display: block; width: 70px; text-align:left; margin: 10px 20px;" onclick="javascript:add_filter_ui('AND');">
                                     AND <i class="fa fa-chevron-right" aria-hidden="true"></i>
                                 </button>
-                                <button type="button" class="btn btn-success" style="display: block; width: 70px; text-align:left; margin: 10px 20px;">
+                                <button type="button" class="btn btn-success" style="display: block; width: 70px; text-align:left; margin: 10px 20px;" onclick="javascript:add_filter_ui('OR');">
                                     OR <i class="fa fa-chevron-right" aria-hidden="true"></i>
                                 </button>
-                                <button type="button" class="btn btn-danger" style="display: block; width: 70px; text-align:left; margin: 10px 20px;">
+                                <button type="button" class="btn btn-danger" style="display: block; width: 70px; text-align:left; margin: 10px 20px;" onclick="javascript:add_filter_ui('XOR');">
                                     XOR <i class="fa fa-chevron-right" aria-hidden="true"></i>
                                 </button>
                             </div>
@@ -1046,90 +926,32 @@
 
 
                             <!--                        -->
-                            <!-- NEW FILTER - LEVEL 1.1 -->
+                            <!-- NEW FILTER - VARIANT   -->
                             <!--                        -->
                             <div id="modal_filter_add_condition_variant" class="tab-pane fade" style="height:500px;">
-
-                                 <div class="new_cond_tree" style="">
-                                    <nav class="navbar navbar-default" style="">
-                                        <div class="navbar-collapse collapse" aria-expanded="false" style="height: 1px; padding:0;">
-                                            <ul class="nav navbar-nav">
-                                                <li><a data-toggle="tab" href="#">
-                                                    <i class="fa fa-circle" style="width:20px; text-align:center;" aria-hidden="true"></i>IN</a></li>
-                                                <li><a data-toggle="tab" href="#">
-                                                    <i class="fa fa-circle-o" style="width:20px; text-align:center;" aria-hidden="true"></i>NOT IN</a></li>
-                                                <li><a data-toggle="tab" href="#">
-                                                    <i class="fa fa-map-marker" style="width:20px; text-align:center;" aria-hidden="true"></i>Test Field</a></li>
-                                            </ul>
-                                        </div>
-                                    </nav>
-                                </div>
-
-                                <div class="tab-content" style="margin-left: 75px; background-color: rgba(0,0,0,0.1);">
-                                    <div class="tab-pane fade in active" style="height:500px;">
-                                        <- Select what you want to do in the left panel
-                                    </div>
-                                    <div id="modal_filter_add_condition_logicals" class="tab-pane fade" style="height:500px;">
-                                        <div class="runConfigTabDescription">Click on the conditionnal block that you want to add</div>
-                                        
-                                        <button type="button" class="btn btn-primary" style="display: block; width: 70px; text-align:left; margin: 10px 20px;">
-                                            AND <i class="fa fa-chevron-right" aria-hidden="true"></i>
-                                        </button>
-                                        <button type="button" class="btn btn-success" style="display: block; width: 70px; text-align:left; margin: 10px 20px;">
-                                            OR <i class="fa fa-chevron-right" aria-hidden="true"></i>
-                                        </button>
-                                        <button type="button" class="btn btn-danger" style="display: block; width: 70px; text-align:left; margin: 10px 20px;">
-                                            XOR <i class="fa fa-chevron-right" aria-hidden="true"></i>
-                                        </button>
-                                    </div>
-
-                                    <div class="runConfigTabDescription">Click on the conditionnal block that you want to add</div>
-
-                                    <input type="text" id="modal_sample_attribute_name" placeholder="Attribute name"/>
-                                    <input type="text" id="modal_sample_attribute_value" placeholder="Attribute value"/>
-
-                                    <div class="modal-footer">
-                                        <button type="button" class="btn btn-primary" onclick="javascript:filter_add_condition()">Add</button>
-                                        <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
-                                    </div>
-                                    <div class="runConfigTabDescription">Configure the run</div>
-                                    <div id="runConfigContainer"></div>
-                                    <p style="margin-top: 20px; text-align:right;"> 
-                                        <button type="button" class="btn btn-primary" data-toggle="tab" href="#runConfigInputsTab"><i class="fa fa-chevron-left" aria-hidden="true"></i>&nbsp; Previous</button> &nbsp; 
-                                        <button type="button" class="btn btn-primary" data-toggle="tab" href="#runConfigConfirmTab" onclick="javascript:run_config_step_3();">Next &nbsp;<i class="fa fa-chevron-right" aria-hidden="true"></i></button>
-                                    </p>
-                                </div>
-
-                            <div id="modal_filter_add_condition_vpos" class="tab-pane fade" style="height:500px;">
-                                <input type="text" id="modal_sample_attribute_name" placeholder="Attribute name"/>
-                                <input type="text" id="modal_sample_attribute_value" placeholder="Attribute value"/>
-
-                                <div class="modal-footer">
-                                    <button type="button" class="btn btn-primary" onclick="javascript:filter_add_condition()">Add</button>
-                                    <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
-                                </div>
-                                <div class="runConfigTabDescription">Configure the run</div>
-                                <div id="runConfigContainer"></div>
-                                <p style="margin-top: 20px; text-align:right;"> 
-                                    <button type="button" class="btn btn-primary" data-toggle="tab" href="#runConfigInputsTab"><i class="fa fa-chevron-left" aria-hidden="true"></i>&nbsp; Previous</button> &nbsp; 
-                                    <button type="button" class="btn btn-primary" data-toggle="tab" href="#runConfigConfirmTab" onclick="javascript:run_config_step_3();">Next &nbsp;<i class="fa fa-chevron-right" aria-hidden="true"></i></button>
-                                </p>
+                                TODO
                             </div>
 
+                            <!--                      -->
+                            <!-- NEW FILTER - FIELDS  -->
+                            <!--                      -->
                             <div id="modal_filter_add_condition_vfield" class="tab-pane fade" style="height:500px;">
-                                <input type="text" id="modal_sample_attribute_name" placeholder="Attribute name"/>
-                                <input type="text" id="modal_sample_attribute_value" placeholder="Attribute value"/>
+                                <input type="text" id="modal_filter_field_name" placeholder="Field to test"/>
+
+                                <select name="select" id="modal_filter_field_operator">
+                                    <option value="==">=</option> 
+                                    <option value="!=">&#8800;</option>
+                                    <option value="<">&lt;</option>
+                                    <option value="<=">&#8804;</option>
+                                    <option value=">=">&#8805;</option>
+                                    <option value=">">&gt;</option>
+                                </select>
+                                <input type="text" id="modal_filter_field_value" placeholder="Field value"/>
 
                                 <div class="modal-footer">
-                                    <button type="button" class="btn btn-primary" onclick="javascript:filter_add_condition()">Add</button>
+                                    <button type="button" class="btn btn-primary" onclick="javascript:add_filter_ui()">Add</button>
                                     <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
                                 </div>
-                                <div class="runConfigTabDescription">Configure the run</div>
-                                <div id="runConfigContainer"></div>
-                                <p style="margin-top: 20px; text-align:right;"> 
-                                    <button type="button" class="btn btn-primary" data-toggle="tab" href="#runConfigInputsTab"><i class="fa fa-chevron-left" aria-hidden="true"></i>&nbsp; Previous</button> &nbsp; 
-                                    <button type="button" class="btn btn-primary" data-toggle="tab" href="#runConfigConfirmTab" onclick="javascript:run_config_step_3();">Next &nbsp;<i class="fa fa-chevron-right" aria-hidden="true"></i></button>
-                                </p>
                             </div>
                         </div>
                     </div>
@@ -1179,7 +1001,9 @@
     </div>
 
 
-    <script src="/assets/annso.js"></script>
+    <script src="/assets/html_snippets.js"></script>
+    <script src="/assets/model.js"></script>
+    <script src="/assets/gui.js"></script>
     <script>
         var rootURL = "http://{{ hostname }}";
 
@@ -1199,13 +1023,22 @@
         }
 
 
+        var annotation_fields_autocomplete = [{% for db_id, db in annotations_db.items() %}{% for f in db["fields"] %}"{{db["name"]}}.{{f["name"]}}",{% endfor %}{% endfor %}];
+        var annotation_fields_autocomplete_info = [{% for db_id, db in annotations_db.items() %}{% for f in db["fields"] %}{"db_id" :  {{db_id}}, "id" : {{f["id"]}} },{% endfor %}{% endfor %}];
 
 
 
 
 
-
-
+        $('#modal_filter_field_name').typeahead({
+            hint: true,
+            highlight: true,
+            minLength: 1
+        },
+        {
+            name: 'fields',
+            source: substringMatcher(annotation_fields_autocomplete)
+        });
 
 
 
