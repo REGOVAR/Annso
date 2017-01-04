@@ -103,13 +103,13 @@
                                     <a class="btn btn-default" href="#modal_import_sample_file" title="Import sample/variant data from local file" data-toggle="modal">
                                         <i class="fa fa-download" style="width:20px; text-align:center;" aria-hidden="true"></i>
                                     </a>
-                                    <a class="btn btn-default" href="#modal_import_sample_db" onclick="javascript:load_sample_database();" title="Import sample/variant data from database" data-toggle="modal">
+                                    <a class="btn btn-default" href="#modal_import_sample_db" onclick="javascript:ui.load_sample_database();" title="Import sample/variant data from database" data-toggle="modal">
                                         <i class="fa fa-database" style="width:20px; text-align:center;" aria-hidden="true"></i>
                                     </a>
                                 </div>
                                 &nbsp;
                                 <div id="" class="btn-group ">
-                                    <a class="btn btn-default" href="#modal_import_local_file" title="Import sample data" data-toggle="modal" onclick="javascript:fake_add_sample_attribute();">
+                                    <a class="btn btn-default" href="#modal_import_local_file" title="Import sample data" data-toggle="modal" onclick="javascript:ui.new_attribute();">
                                         <i class="fa fa-tag" style="width:20px; text-align:center;" aria-hidden="true"></i> New attribute
                                     </a>
                                 </div>
@@ -130,34 +130,34 @@
                             </form>
                             <div style="padding:10px; margin-left:75px; border-left: 1px solid #ddd;">
                                 <div class="btn-group" data-toggle="buttons">
-                                    <label class="btn btn-default active" onclick="javascript:fake_select_variant_submenu('quick');">
-                                        <input type="radio" name="options" id="optionA1" checked>  <i class="fa fa-bolt" aria-hidden="true"></i>
+                                    <label class="btn btn-default active" onclick="javascript:ui.select_submenu('quick');">
+                                        <input type="radio" checked>  <i class="fa fa-bolt" aria-hidden="true"></i>
                                     </label>
-                                    <label class="btn btn-default" onclick="javascript:fake_select_variant_submenu('filter');">
-                                        <input type="radio" name="options" id="optionA2">  <i class="fa fa-filter" aria-hidden="true"></i>
+                                    <label class="btn btn-default" onclick="javascript:ui.select_submenu('filter');">
+                                        <input type="radio">  <i class="fa fa-filter" aria-hidden="true"></i>
                                     </label>
-                                        <!-- <label class="btn btn-default" onclick="javascript:fake_select_variant_submenu('expert');">
-                                            <input type="radio" name="options" id="optionA3">  <i class="fa fa-code" aria-hidden="true"></i>
+                                        <!-- <label class="btn btn-default" onclick="javascript:ui.select_submenu('expert');">
+                                            <input type="radio">  <i class="fa fa-code" aria-hidden="true"></i>
                                         </label> -->
-                                    <label class="btn btn-default" onclick="javascript:fake_select_variant_submenu('info');">
-                                        <input type="radio" name="options" id="optionI">  <i class="fa fa-info" aria-hidden="true"></i>
+                                    <label class="btn btn-default" onclick="javascript:ui.select_submenu('info');">
+                                        <input type="radio" >  <i class="fa fa-info" aria-hidden="true"></i>
                                     </label>
                                 </div>
                                 &nbsp;
                                 <div class="btn-group" data-toggle="buttons">
-                                    <label class="btn btn-default active" onclick="javascript:fake_switch_variant_display('unique');">
-                                        <input type="radio" name="options" id="optionB1" checked>  <i class="fa fa-table" aria-hidden="true"></i>
+                                    <label class="btn btn-default active" onclick="javascript:ui.variant_display('table');">
+                                        <input type="radio" checked>  <i class="fa fa-table" aria-hidden="true"></i>
                                     </label>
-                                    <label class="btn btn-default" onclick="javascript:fake_switch_variant_display('bypos');">
-                                        <input type="radio" name="options" id="optionB2">  <i class="fa fa-list" aria-hidden="true"></i>
+                                    <label class="btn btn-default" onclick="javascript:ui.variant_display('list');">
+                                        <input type="radio">  <i class="fa fa-list" aria-hidden="true"></i>
                                     </label>
                                 </div>
                                 &nbsp;
                                 <div class="btn-group">
-                                    <button class="btn btn-default" title="Reset filter (display all variants)" style="">
+                                    <button class="btn btn-default" title="Reset filter (display all variants)"  onclick="javascript:ui.reset_filter();">
                                         <i class="fa fa-ban" aria-hidden="true">&nbsp;</i>   
                                     </button>
-                                    <button class="btn btn-default" title="Apply current filter" onclick="javascript:apply_filter();">
+                                    <button class="btn btn-default" title="Apply current filter" onclick="javascript:ui.apply_filter();">
                                         <i class="fa fa-play" aria-hidden="true">&nbsp;</i>   
                                     </button>
                                     <button class="btn btn-default" title="Create a selection for this filter and continue with a new filter" style="">
@@ -174,14 +174,14 @@
                         <div id="result_toolbar" class="collapse">
                             <div style="padding:10px; margin-left:75px; border-left: 1px solid #ddd;">
                                 <div class="btn-group" data-toggle="buttons">
-                                    <label class="btn btn-default active" onclick="javascript:fake_select_select_submenu('info');">
-                                        <input type="radio" name="options" id="option1" checked>  <i class="fa fa-list" aria-hidden="true"></i>
+                                    <label class="btn btn-default active" onclick="javascript:ui.select_submenu('info');">
+                                        <input type="radio" checked>  <i class="fa fa-list" aria-hidden="true"></i>
                                     </label>
-                                    <label class="btn btn-default" onclick="javascript:fake_select_select_submenu('export');">
-                                        <input type="radio" name="options" id="option2">  <i class="fa fa-share-square-o" aria-hidden="true"></i>
+                                    <label class="btn btn-default" onclick="javascript:ui.select_submenu('export');">
+                                        <input type="radio">  <i class="fa fa-share-square-o" aria-hidden="true"></i>
                                     </label>
-                                    <label class="btn btn-default" onclick="javascript:fake_select_select_submenu('report');">
-                                        <input type="radio" name="options" id="option2">  <i class="fa fa-print" aria-hidden="true"></i>
+                                    <label class="btn btn-default" onclick="javascript:ui.select_submenu('report');">
+                                        <input type="radio">  <i class="fa fa-print" aria-hidden="true"></i>
                                     </label>
                                 </div>
                             </div>
@@ -198,13 +198,13 @@
                                 <!-- ANALYSIS TAB MENU -->
                                 <!--                   -->
                                 <ul class="nav navbar-nav">
-                                    <li class="active"><a id="nav_project_welcom" data-toggle="tab" href="#welcom_panel" onclick="javascript:select_tab('welcom');">
+                                    <li class="active"><a id="nav_project_welcom" data-toggle="tab" href="#welcom_panel" onclick="javascript:ui.select_tab('welcom');">
                                         <i class="fa fa-folder-open" style="width:20px; text-align:center;" aria-hidden="true"></i> Welcom </a></li>
-                                    <li><a id="nav_project_sample" data-toggle="tab" href="#samples_panel" onclick="javascript:select_tab('sample');">
+                                    <li><a id="nav_project_sample" data-toggle="tab" href="#samples_panel" onclick="javascript:ui.select_tab('sample');">
                                         <i class="fa fa-user" style="width:20px; text-align:center;" aria-hidden="true"></i> Samples </a></li>
-                                    <li><a id="nav_project_variant" data-toggle="tab" href="#filters_panel" onclick="javascript:select_tab('variant');">
+                                    <li><a id="nav_project_variant" data-toggle="tab" href="#filters_panel" onclick="javascript:ui.select_tab('variant');">
                                         <i class="fa fa-filter" style="width:20px; text-align:center;" aria-hidden="true"></i> Filtering</a></li>
-                                    <li><a id="nav_project_selection" data-toggle="tab" href="#selection_panel" onclick="javascript:select_tab('result');">
+                                    <li><a id="nav_project_selection" data-toggle="tab" href="#selection_panel" onclick="javascript:ui.select_tab('result');">
                                         <i class="fa fa-check-square-o" aria-hidden="true" style="width:20px; text-align:center;">&nbsp;</i> Selection</a></li>
                                 </ul>
                             </div>
@@ -234,7 +234,7 @@
                                     <ul>
                                         {% for t in templates %}
                                         <li>
-                                            <a class="btn btn-default" onclick="javascript:start_analysis({{t["id"]}});" title="Start a new analysis with {{t["name"]}} filters predifined">
+                                            <a class="btn btn-default" onclick="javascript:ui.set_template({{t["id"]}});" title="Start a new analysis with {{t["name"]}} filters predifined">
                                                 <i class="fa fa-filter" style="width:20px; text-align:center;" aria-hidden="true"></i> Start {{ t["name"] }} analysis
                                             </a>
                                         </li>
@@ -257,7 +257,7 @@
                                     <ul>
                                         {% for a in analysis %}
                                         <li>
-                                            <a class="btn btn-default" onclick="javascript:start_analysis({{a["id"]}});" title="Open " data-toggle="modal">
+                                            <a class="btn btn-default" onclick="javascript:analysis.load_analysis({{a["id"]}});" title="Open " data-toggle="modal">
                                                 <i class="fa fa-folder-o" style="width:20px; text-align:center;" aria-hidden="true"></i> {{ a["name"] }}
                                             </a>
                                         </li>
@@ -889,18 +889,18 @@
                         <!-- NEW FILTER - TAB     -->
                         <!--                      -->
                         <div class="new_cond_tree">
-                            <ul class="nav navbar-nav">
+                            <ul class="nav navbar navbar-nav">
                                 <li><a data-toggle="tab" href="#modal_filter_add_condition_logicals">
-                                    <i class="fa fa-indent" style="width:20px; text-align:center;" aria-hidden="true"></i>Logical</a></li>
+                                    <i class="fa fa-indent" style="width:20px; text-align:center;" aria-hidden="true"></i>Logical block</a></li>
                                 <li><a data-toggle="tab" href="#modal_filter_add_condition_vfield">
-                                    <i class="fa fa-map-marker" style="width:20px; text-align:center;" aria-hidden="true"></i>Field</a></li>
+                                    <i class="fa fa-map-marker" style="width:20px; text-align:center;" aria-hidden="true"></i>Field test</a></li>
                                 <li><a data-toggle="tab" href="#modal_filter_add_condition_variant">
                                     <i class="fa fa-search" style="width:20px; text-align:center;" aria-hidden="true"></i>Variant</a></li>
                             </ul>
                         </div>
 
 
-                        <div class="tab-content" style="background-color: rgba(0,0,0,0.1);">
+                        <div class="tab-content" style="padding-left:150px; border-right:1px solid #aaa;">
                             <div class="tab-pane fade in active" style="height:500px; padding: 50px;">
                                 <i class="fa fa-arrow-left" aria-hidden="true"></i> Build Your test step by step from the left to the right !
                             </div>
@@ -950,7 +950,7 @@
 
                                 <div class="modal-footer">
                                     <button type="button" class="btn btn-primary" onclick="javascript:add_filter_ui()">Add</button>
-                                    <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
                                 </div>
                             </div>
                         </div>

@@ -146,8 +146,42 @@ class AnalysisManager:
         
 
     def get_from_id(self, analysis_id):
-        analysis = db_session.query(Analysis).filter_by(id=analysis_id).first()
-        return analysis.export_client()
+
+        analysis = db_session.execute("SELECT a.id, a.name, a.update_date, a.creation_date, a.setting, t.name AS t_name, t.id AS t_id FROM analysis a LEFT JOIN template t ON a.template_id = t.id WHERE a.id = {0}".format(analysis_id)).first()
+        result = {
+            "id" : analysis.id, 
+            "name" : analysis.name, 
+            "update_date" : analysis.update_date.ctime(),
+            "creation_date" : analysis.creation_date.ctime(),
+            "template_id" : analysis.t_id,
+            "template_name" : analysis.t_name,
+            "setting" : analysis.setting,
+            "samples" : [],
+            "attributes" : []}
+
+
+        QUERY = "SELECT s.id, s.name, s.comments, s.is_mosaic, asp.nickname, f.id as f_id, f.filename, f.import_date \
+            FROM analysis_sample asp \
+            LEFT JOIN sample s ON asp.sample_id = s.id \
+            LEFT JOIN sample_file sf ON s.id = sf.sample_id \
+            LEFT JOIN file f ON f.id = sf.file_id \
+            WHERE asp.analysis_id = {0}"
+
+
+        for r in db_engine.execute(QUERY.format(analysis_id)):
+
+
+            result["samples"].append({ 
+                "id" : r.id, 
+                "name" : r.name, 
+                "comments" : r.comments, 
+                "is_mosaic" : r.is_mosaic, 
+                "nickname" : r.nickname, 
+                "file_id" : r.f_id, 
+                "filename" : r.filename,
+                "import_date" : r.import_date})
+
+        return result
 
 
     def get_from_ids(self, file_ids, sublvl=0, fields=None):
@@ -409,13 +443,13 @@ class FilterEngine:
 
 
         # Get sample ids used for the analysis
-        if analysis_id is None : 
-            # No implicit constraint on sample. (filter on all variant in database)
-            sample_ids = []
-        else :
-            # TODO : retrieve sample ids with query : "select sample_id from analysis_sample where analysis_id = {0}"
-            sample_ids = [1]
+        sample_ids = []
+        if analysis_id is not None : 
+            # Retrieve sample ids for the analysis 
+            for row in db_session.execute("select sample_id from analysis_sample where analysis_id = {0}".format(analysis_id)):
+                sample_ids.append(str(row.sample_id))
 
+            print ("{} : {}".format(analysis_id, sample_ids))
 
 
         # Build SELECT
@@ -483,7 +517,7 @@ class FilterEngine:
         # build query
         query = "SELECT {0} FROM {1} WHERE {2} LIMIT {3} OFFSET {4}".format(', '.join(q_select), q_from, q_where, limit, offset)
 
-
+        print (query)
         # Execute query and get result
         result = []
         for s in db_session.execute(query): 

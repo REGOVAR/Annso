@@ -314,9 +314,9 @@ li.empty_selection
 
 
 /* Inline tool button */
-button.edit                { float:right; width: 15px; height: 25px; visibility: hidden; }
-button.delete              { float:right; width: 15px; height: 25px; visibility: hidden; }
-button.toggle              { float:right; width: 15px; height: 25px; visibility: hidden; }
+button.edit                { float:right; width: 25px; height: 25px; visibility: hidden; }
+button.delete              { float:right; width: 25px; height: 25px; visibility: hidden; }
+button.toggle              { float:right; width: 25px; height: 25px; visibility: hidden; }
 button.edit:before         { content: "\f040"; }
 button.delete:before       { content: "\f00d"; }
 button.toggle.plus:before  { content: "\f196"; }
@@ -325,7 +325,9 @@ button.toggle.minus:before { content: "\f147"; }
 li:hover>button.edit       { visibility: visible; color: #555; }
 li:hover>button.delete     { visibility: visible; color: #f55; }
 li:hover>button.toggle     { visibility: visible; color: #555; }
-
+tr button.edit             { visibility: visible; color: #555; background: none; border: none; }
+tr button.delete           { visibility: visible; color: #f55; background: none; border: none; }
+tr button.toggle           { visibility: visible; color: #555; background: none; border: none; }
 
 /* New condition button */
 li.addcondition>i { background : #f5f5f4; }
@@ -363,7 +365,7 @@ li.addcondition:hover span { display: inline-block; }
     display: block;
     width: 150px;
     height:500px;
-    padding-left: 10px;
+    padding-left: 0;
 }
 
 .new_cond_tree .navbar
@@ -386,13 +388,14 @@ li.addcondition:hover span { display: inline-block; }
     display: block;
     height:75px;
     width: 150px;
+    text-align: left;
 }
 .new_cond_tree .navbar li a 
 {
     padding-top: 12px;
     padding-bottom: 12px;
     display: block;
-    height:150px;
+    line-height: 75px;
 }
 
 

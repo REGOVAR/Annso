@@ -70,27 +70,27 @@ ALTER TABLE public.analysis OWNER TO annso;
 
 
 
-CREATE SEQUENCE public.selection_id_seq
+CREATE SEQUENCE public.filter_id_seq
     INCREMENT 1
     MINVALUE 1
     MAXVALUE 9223372036854775807
     START 1
     CACHE 1;
-ALTER TABLE public.selection_id_seq OWNER TO annso;
-CREATE TABLE public.selection
+ALTER TABLE public.filter_id_seq OWNER TO annso;
+CREATE TABLE public.filter
 (
-    id integer NOT NULL DEFAULT nextval('selection_id_seq'::regclass),
+    id integer NOT NULL DEFAULT nextval('filter_id_seq'::regclass),
     analysis_id integer,
     name character varying(50) COLLATE pg_catalog."C.UTF-8",
     description text COLLATE pg_catalog."C.UTF-8",
     filter text COLLATE pg_catalog."C.UTF-8",
-    CONSTRAINT selection_pkey PRIMARY KEY (id),
-    CONSTRAINT selection_analysis_id_fkey FOREIGN KEY (analysis_id)
+    CONSTRAINT filter_pkey PRIMARY KEY (id),
+    CONSTRAINT filter_analysis_id_fkey FOREIGN KEY (analysis_id)
         REFERENCES public."analysis" (id) MATCH SIMPLE
         ON UPDATE NO ACTION ON DELETE NO ACTION
 )
 WITH ( OIDS=FALSE );
-ALTER TABLE public.selection OWNER TO annso;
+ALTER TABLE public.filter OWNER TO annso;
 
 
 
