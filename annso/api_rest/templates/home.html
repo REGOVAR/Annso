@@ -160,7 +160,7 @@
                                     <button class="btn btn-default" title="Apply current filter" onclick="javascript:ui.apply_filter();">
                                         <i class="fa fa-play" aria-hidden="true">&nbsp;</i>   
                                     </button>
-                                    <button class="btn btn-default" title="Create a selection for this filter and continue with a new filter" style="">
+                                    <button class="btn btn-default" title="Create a selection for this filter and continue with a new filter" href="#modal_save_filter" data-toggle="modal">
                                         <i class="fa fa-floppy-o" aria-hidden="true"></i> Save filter
                                     </button>
                                 </div>
@@ -845,6 +845,30 @@
                 </div>
             </div>
 
+
+
+            <!--                           -->
+            <!-- MODAL POPUP - Save Filter -->
+            <!--                           -->
+            <div id="modal_save_filter" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+                <div class="modal-dialog" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                            <h4 class="modal-title"><i class="fa fa-save" aria-hidden="true"></i> Save the current filter</h4>
+                        </div>
+                        <div  class="modal-body" style="height:450px; padding:0;">
+                            <input type="text" id="modal_save_filter_name" placeholder="Filter name"/>
+                            
+
+                        </div>
+                        <div class="modal-footer">
+                            <button id="modal_new_file_cancel_btn" type="button" class="btn btn-success" onclick="javascript:ui.save_filter();" >Save</button>
+                            <button id="modal_new_file_cancel_btn" type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
 
 

@@ -52,7 +52,7 @@ Template = Base.classes.template
 Sample = Base.classes.sample
 Variant = Base.classes.variant_hg19
 SampleVariant = Base.classes.sample_variant_hg19
-Selection = Base.classes.selection
+Filter = Base.classes.filter
 Attribute = Base.classes.attribute
 File = Base.classes.file
 

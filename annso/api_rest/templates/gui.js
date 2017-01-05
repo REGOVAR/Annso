@@ -251,6 +251,18 @@ function AnnsoUIContoler ()
         load_variants_array();
     };
 
+    this.save_filter = function ()
+    {
+        filter_name = $('#modal_save_filter_name').val();
+
+        // Update data
+        analysis.analysis.save_filter(filter_name);
+
+        // Refresh ui
+        // TODO
+    };
+
+
 
     this.load_sample_database = function ()
     {
@@ -800,7 +812,11 @@ function annotation_format_sequence(seq)
 
 function annotation_format_sampleid(id)
 {
-    return "<td>Sample {0}</td>".format(id);
+    name = analysis.analysis.samples[id]["nickname"];
+    if (name == null)
+        name = analysis.analysis.samples[id]["name"];
+
+    return "<td>{0}</td>".format(name);
 }
 
 
