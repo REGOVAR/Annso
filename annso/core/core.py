@@ -406,7 +406,11 @@ class SampleManager:
 # FILTER ENGINE
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
 class FilterEngine:
-    op_map = {'AND' : ' AND ', 'OR': ' OR ', '==' : '=', '!=': '<>', '>':'>', '<':'<', '>=':'>=', '<=':'<='}
+    op_map = {'AND' : ' AND ', 'OR': ' OR ', '==' : '=', '!=': '<>', '>':'>', '<':'<', '>=':'>=', '<=':'<=', 
+        'IN-site'       : '{0}.chr={1}.chr AND {0}.pos={1}.pos',
+        'NOTIN-site'    : '{0}.chr<>{1}.chr OR {0}.pos<>{1}.pos',
+        'IN-variant'    : '{0}.chr={1}.chr AND {0}.pos={1}.pos AND {0}.ref={1}.ref AND {0}.alt={1}.alt',
+        'NOTIN-variant' : '{0}.chr<>{1}.chr OR {0}.pos<>{1}.pos OR {0}.ref<>{1}.ref OR {0}.alt<>{1}.alt' }
 
     def __init__(self, reference=1):
         """
@@ -415,7 +419,7 @@ class FilterEngine:
         """
         refname = db_session.execute("SELECT table_suffix FROM reference WHERE id="+str(reference)).first()["table_suffix"]
 
-
+        self.reference = reference
         self.fields_map = {}
         self.db_map = {}
         self.variant_table = "sample_variant_{0}".format(refname)
@@ -440,8 +444,6 @@ class FilterEngine:
 
         
         
-
-
         # Get sample ids used for the analysis
         sample_ids = []
         if analysis_id is not None : 
@@ -462,13 +464,16 @@ class FilterEngine:
                 tables_to_import.append(self.fields_map[f_id]["db_id"])
 
         # Build WHERE 
+        temporary_to_import = {}
+
         def build_filter(data):
+            """ Recursive method that build the query from the filter json data at operator level """
             operator = data[0]
             if operator in ['AND', 'OR']:
                 return ' (' + FilterEngine.op_map[operator].join([build_filter(f) for f in data[1]]) + ') '
 
             elif operator in ['==', '!=', '>', '<', '>=', '<=']:
-                if (data[1][0] == 'field') :
+                if data[1][0] == 'field' :
                     t = self.fields_map[data[1][1]]["type"]
                 elif (data[2][0] == 'field') :
                     t = self.fields_map[data[2][1]]["type"]
@@ -476,7 +481,62 @@ class FilterEngine:
                     t = 'string'
                 return '{0}{1}{2}'.format(parse_value(t, data[1]), FilterEngine.op_map[operator], parse_value(t, data[2]))
 
+
+            elif operator in ['IN', 'NOTIN']:
                 
+
+                tmp_table = get_tmp_table(data[1][0], data[2])
+
+
+                if data[1][0] == 'site' :
+                    t_from  = " LEFT JOIN {1} ON {0}.chr={1}.chr AND {0}.pos={1}.pos".format(self.fields_map[1]["db_name"], t)
+                    t_where = FilterEngine.op_map[operator+'-site'].format(tmp_table, self.fields_map[1]["db_name"])
+                elif data[1][0] == 'variant' :
+                    t_where = FilterEngine.op_map[operator+'-variant'].format(tmp_table, self.fields_map[1]["db_name"])
+                    t_from  = " LEFT JOIN {1} ON {0}.chr={1}.chr AND {0}.pos={1}.pos AND {0}.ref={1}.ref AND {0}.alt={1}.alt".format(self.fields_map[1]["db_name"], tmp_table)
+                
+                temporary_to_import[tmp_table]['from'] = t_from
+                temporary_to_import[tmp_table]['where'] = t_where
+                return t_where
+
+
+        
+        def get_tmp_table(mode, data):
+            """ 
+                Parse json data to build temp table for ensemblist operation IN/NOTIN 
+                    mode : site or variant
+                    data : json data about the temp table to create
+            """
+            ttable_quer_map = "CREATE TEMP TABLE {0} WITH (OIDS) ON COMMIT DROP AS {1};\n";
+
+
+            if data[0] == 'sample' :
+                tmp_table_name    = "tmp_sample_{0}_{1}".format(data[1], mode)
+                if mode == 'site':
+                    tmp_table_query = ttable_quer_map.format(tmp_table_name, "SELECT DISTINCT({0}.chr, {0}.pos) FROM {0} WHERE {0}.sample_id={1}".format(self.variant_table, data[1]))
+                else : # if mode = 'variant' :
+                    tmp_table_query = ttable_quer_map.format(tmp_table_name, "SELECT DISTINCT({0}.chr, {0}.pos, {0}.ref, {0}.alt) FROM {0} WHERE {0}.sample_id={1}".format(self.variant_table, data[1]))
+
+
+            elif (data[0] == 'filter') :
+                tmp_table_name  = "tmp_filter_{0}".format(data[1])
+                tmp_table_query = ttable_quer_map.format(tmp_table_name, "#Retrieve query in database" ) 
+                
+
+            elif (data[0] == 'attribute') :
+                key, value = data[1].split('-')
+                tmp_table_name    = "tmp_attribute_{0}_{1}_{2}_{3}".format(analysis_id, key, value, mode)
+                if mode == 'site':
+                    tmp_table_query = ttable_quer_map.format(tmp_table_name, "SELECT DISTINCT({0}.chr, {0}.pos) FROM {0} INNER JOIN {1} ON {0}.sample_id={1}.sample_id AND {1}.analysis_id={2} AND {1}.name={3} AND {1}.value={4}".format(self.variant_table, 'attribute', analysis_id, key, value))
+                else : # if mode = 'variant' :
+                    tmp_table_query = ttable_quer_map.format(tmp_table_name, "SELECT DISTINCT({0}.chr, {0}.pos, {0}.ref, {0}.alt) FROM {0} INNER JOIN {1} ON {0}.sample_id={1}.sample_id AND {1}.analysis_id={2} AND {1}.name={3} AND {1}.value={4}".format(self.variant_table, 'attribute', analysis_id, key, value))
+
+
+            temporary_to_import[tmp_table_name] = {'query' : tmp_table_query}
+            return tmp_table_id
+
+
+
 
 
         def parse_value(ftype, data):
@@ -510,12 +570,12 @@ class FilterEngine:
 
         
         # Build FROM/JOIN according to the list of used annotations databases
-        q_from = " LEFT JOIN ".join([self.db_map[d_id]["join"] for d_id in tables_to_import])
-
-
+        q_from  = " LEFT JOIN ".join([self.db_map[d_id]["join"] for d_id in tables_to_import])
+        q_from += " " + " ".join([t['from'] for t in temporary_to_import.values()])
+        
 
         # build query
-        query = "SELECT {0} FROM {1} WHERE {2} LIMIT {3} OFFSET {4}".format(', '.join(q_select), q_from, q_where, limit, offset)
+        query = "SELECT DISTINCT({0}) FROM {1} WHERE {2} LIMIT {3} OFFSET {4};".format(', '.join(q_select), q_from, q_where, limit, offset)
 
         print (query)
         # Execute query and get result
