@@ -154,6 +154,38 @@ function AnnsoControler () {
 
     };
 
+    this.save_filter = function (name)
+    {
+        if (this.filter_mode == "quick")
+        {
+
+        }
+        else
+        {
+
+        }
+
+        $.ajax({ url: "{0}/analysis/{1}/savefilter".format(rootURL, id), type: "GET", async: false}).fail(function() { alert("TODO : network error"); })
+        .done(function(json)
+        {
+            if (json["success"])
+            {
+                // Init model
+                analysis.analysis = new Analysis(json["data"]);
+                analysis.filter_mode = "advanced";
+                analysis.qfilter = [];
+
+
+                // Update view
+                ui.start_analysis();
+            }
+            else
+            {
+                error(json);
+            }
+        });
+    };
+
 
     this.switch_variant = function (id)
     {
@@ -455,6 +487,10 @@ function build_filter_ui(json)
     {
         return filter_condition_template.format('check', "{0} {1} {2}".format(build_filter_ui(json[1]), filter_operator_display_map[json[0]], build_filter_ui(json[2])), JSON.stringify(json));
     }
+    else if (["IN", "NOTIN"].includes(json[0]))
+    {
+        return filter_set_template.format('check', "{0} {1}".format(json[1], json[0]), json[2][0], json[2][1], JSON.stringify(json));
+    }
     else
     {
         return "TO BE implemented";
@@ -482,6 +518,17 @@ function add_filter_ui(operator)
 
         json = [operator, op1, op2];
     }
+    $(build_filter_ui(json)).insertBefore(add_filter_ui_parent_elmt);
+}
+function add_filter_ui2(operator)
+{
+    // retrieve operator
+    var operator = $('#modal_filter_variant_operator').find(":selected").val();
+    var type = $('#modal_filter_variant_type').find(":selected").val();
+    var set = $('#modal_filter_variant_set').find(":selected").val();
+
+    json = [operator, type, [set, $('#modal_filter_variant_setid').val()]];
+    
 
 
     console.debug(json);

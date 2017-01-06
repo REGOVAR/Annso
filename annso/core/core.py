@@ -167,6 +167,7 @@ class AnalysisManager:
             LEFT JOIN file f ON f.id = sf.file_id \
             WHERE asp.analysis_id = {0}"
 
+        print(QUERY.format(analysis_id))
 
         for r in db_engine.execute(QUERY.format(analysis_id)):
 
@@ -470,6 +471,8 @@ class FilterEngine:
             """ Recursive method that build the query from the filter json data at operator level """
             operator = data[0]
             if operator in ['AND', 'OR']:
+                if len(data[1]) == 0 :
+                    return ''
                 return ' (' + FilterEngine.op_map[operator].join([build_filter(f) for f in data[1]]) + ') '
 
             elif operator in ['==', '!=', '>', '<', '>=', '<=']:
@@ -485,19 +488,16 @@ class FilterEngine:
             elif operator in ['IN', 'NOTIN']:
                 
 
-                tmp_table = get_tmp_table(data[1][0], data[2])
+                tmp_table = get_tmp_table(data[1], data[2])
 
+                if data[1] == 'site' :
+                    temporary_to_import[tmp_table]['from']  = " LEFT JOIN {1} ON {0}.chr={1}.chr AND {0}.pos={1}.pos".format(self.fields_map[1]["db_name"], t)
+                    temporary_to_import[tmp_table]['where'] = FilterEngine.op_map[operator+'-site'].format(tmp_table, self.fields_map[1]["db_name"])
+                elif data[1] == 'variant' :
+                    temporary_to_import[tmp_table]['where'] = FilterEngine.op_map[operator+'-variant'].format(tmp_table, self.fields_map[1]["db_name"])
+                    temporary_to_import[tmp_table]['from']  = " LEFT JOIN {1} ON {0}.chr={1}.chr AND {0}.pos={1}.pos AND {0}.ref={1}.ref AND {0}.alt={1}.alt".format(self.fields_map[1]["db_name"], tmp_table)
 
-                if data[1][0] == 'site' :
-                    t_from  = " LEFT JOIN {1} ON {0}.chr={1}.chr AND {0}.pos={1}.pos".format(self.fields_map[1]["db_name"], t)
-                    t_where = FilterEngine.op_map[operator+'-site'].format(tmp_table, self.fields_map[1]["db_name"])
-                elif data[1][0] == 'variant' :
-                    t_where = FilterEngine.op_map[operator+'-variant'].format(tmp_table, self.fields_map[1]["db_name"])
-                    t_from  = " LEFT JOIN {1} ON {0}.chr={1}.chr AND {0}.pos={1}.pos AND {0}.ref={1}.ref AND {0}.alt={1}.alt".format(self.fields_map[1]["db_name"], tmp_table)
-                
-                temporary_to_import[tmp_table]['from'] = t_from
-                temporary_to_import[tmp_table]['where'] = t_where
-                return t_where
+                return temporary_to_import[tmp_table]['where']
 
 
         
@@ -507,15 +507,15 @@ class FilterEngine:
                     mode : site or variant
                     data : json data about the temp table to create
             """
-            ttable_quer_map = "CREATE TEMP TABLE {0} WITH (OIDS) ON COMMIT DROP AS {1};\n";
+            ttable_quer_map = "CREATE TEMP TABLE {0} WITH (OIDS) ON COMMIT DROP AS {1}; "
 
 
             if data[0] == 'sample' :
                 tmp_table_name    = "tmp_sample_{0}_{1}".format(data[1], mode)
                 if mode == 'site':
-                    tmp_table_query = ttable_quer_map.format(tmp_table_name, "SELECT DISTINCT({0}.chr, {0}.pos) FROM {0} WHERE {0}.sample_id={1}".format(self.variant_table, data[1]))
+                    tmp_table_query = ttable_quer_map.format(tmp_table_name, "SELECT DISTINCT {0}.chr, {0}.pos FROM {0} WHERE {0}.sample_id={1}".format(self.variant_table, data[1]))
                 else : # if mode = 'variant' :
-                    tmp_table_query = ttable_quer_map.format(tmp_table_name, "SELECT DISTINCT({0}.chr, {0}.pos, {0}.ref, {0}.alt) FROM {0} WHERE {0}.sample_id={1}".format(self.variant_table, data[1]))
+                    tmp_table_query = ttable_quer_map.format(tmp_table_name, "SELECT DISTINCT {0}.chr, {0}.pos, {0}.ref, {0}.alt FROM {0} WHERE {0}.sample_id={1}".format(self.variant_table, data[1]))
 
 
             elif (data[0] == 'filter') :
@@ -527,13 +527,13 @@ class FilterEngine:
                 key, value = data[1].split('-')
                 tmp_table_name    = "tmp_attribute_{0}_{1}_{2}_{3}".format(analysis_id, key, value, mode)
                 if mode == 'site':
-                    tmp_table_query = ttable_quer_map.format(tmp_table_name, "SELECT DISTINCT({0}.chr, {0}.pos) FROM {0} INNER JOIN {1} ON {0}.sample_id={1}.sample_id AND {1}.analysis_id={2} AND {1}.name={3} AND {1}.value={4}".format(self.variant_table, 'attribute', analysis_id, key, value))
+                    tmp_table_query = ttable_quer_map.format(tmp_table_name, "SELECT DISTINCT {0}.chr, {0}.pos FROM {0} INNER JOIN {1} ON {0}.sample_id={1}.sample_id AND {1}.analysis_id={2} AND {1}.name={3} AND {1}.value={4}".format(self.variant_table, 'attribute', analysis_id, key, value))
                 else : # if mode = 'variant' :
-                    tmp_table_query = ttable_quer_map.format(tmp_table_name, "SELECT DISTINCT({0}.chr, {0}.pos, {0}.ref, {0}.alt) FROM {0} INNER JOIN {1} ON {0}.sample_id={1}.sample_id AND {1}.analysis_id={2} AND {1}.name={3} AND {1}.value={4}".format(self.variant_table, 'attribute', analysis_id, key, value))
+                    tmp_table_query = ttable_quer_map.format(tmp_table_name, "SELECT DISTINCT {0}.chr, {0}.pos, {0}.ref, {0}.alt FROM {0} INNER JOIN {1} ON {0}.sample_id={1}.sample_id AND {1}.analysis_id={2} AND {1}.name={3} AND {1}.value={4}".format(self.variant_table, 'attribute', analysis_id, key, value))
 
 
             temporary_to_import[tmp_table_name] = {'query' : tmp_table_query}
-            return tmp_table_id
+            return tmp_table_name
 
 
 
@@ -561,11 +561,13 @@ class FilterEngine:
 
         q_where = ""
         if len(sample_ids) == 1 :
-            q_where = "{0}.sample_id={1} AND ".format(self.variant_table, sample_ids[0])
+            q_where = "{0}.sample_id={1}".format(self.variant_table, sample_ids[0])
         elif len(sample_ids) > 1:
-            q_where = "{0}.sample_id IN ({1}) AND ".format(self.variant_table, ','.join(sample_ids))
+            q_where = "{0}.sample_id IN ({1})".format(self.variant_table, ','.join(sample_ids))
 
-        q_where += build_filter(filter_json)
+        q_where2 = build_filter(filter_json)
+        if  len(q_where2.strip()) > 0:
+            q_where += " AND " + q_where2
 
 
         
@@ -575,18 +577,23 @@ class FilterEngine:
         
 
         # build query
-        query = "SELECT DISTINCT({0}) FROM {1} WHERE {2} LIMIT {3} OFFSET {4};".format(', '.join(q_select), q_from, q_where, limit, offset)
+        print (temporary_to_import);
+        query = "".join([t['query'] for t in temporary_to_import.values()])
+        query += "SELECT {0} FROM {1} WHERE {2} LIMIT {3} OFFSET {4};".format(', '.join(q_select), q_from, q_where, limit, offset)
 
         print (query)
         # Execute query and get result
         result = []
         for s in db_session.execute(query): 
-            varariant = {}
+            #ipdb.set_trace()
+            variant = {}
+            print (s)
             i=0
             for f_id in fields:
-                varariant[f_id]= FilterEngine.parse_result(s[i])
+                print ("\t" + str(i) + " : " + str(f_id) + ", " + str(s[i]))
+                variant[f_id]= FilterEngine.parse_result(s[i])
                 i += 1
-            result.append(varariant)
+            result.append(variant)
         return result
 
 

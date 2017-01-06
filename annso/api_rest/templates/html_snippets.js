@@ -24,6 +24,18 @@ var filter_condition_template = "<li class=\"condition {0}\">\
     <input type=\"hidden\" value='{2}'' />\
 </li>";
 
+
+var filter_set_template = "<li class=\"condition {0}\">\
+    <button onclick=\"javascript:filter_toggle_condition(this);\">\
+        <i class=\"fa\" aria-hidden=\"true\">&nbsp;</i>\
+        <span>{1} <b class=\"fa {2}\" aria-hidden=\"true\">{3}</b></span>\
+    </button>\
+    <button class=\"fa delete\" onclick=\"javascript:ui.remove_afilter_condition(this);\">&nbsp;</button>\
+    <button class=\"fa edit\" onclick=\"javascript:ui.edit_afilter_condition(this);\">&nbsp;</button>\
+    <input type=\"hidden\" value='{4}'' />\
+</li>";
+
+
 // filter_group_template.format('check', 'or', '', 'checked', '', '...');
 var filter_group_template = "<li class=\"condition {0}\">\
     <button onclick=\"javascript:filter_toggle_condition(this);\">\
