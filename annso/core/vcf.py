@@ -79,11 +79,11 @@ def normalize_gt(infos):
             if infos['GT'][0] in [None, 0] : 
                 return 0
             # Homozyot alt
-            return '2'
+            return '1'
         else :
             if 0 in infos['GT'] :
                 # Hetero ref
-                return '1'
+                return '2'
             else :
                 return '3'
         print ("unknow : " + str(infos['GT']) )

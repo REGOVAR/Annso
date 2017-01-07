@@ -866,6 +866,15 @@ function annotation_format_sampleid(id)
     return "<td>{0}</td>".format(name);
 }
 
+function annotation_format_gt(gt)
+{
+    return "<td class=\"seq\">{0}</td>".format(['Ref/Ref Homo', 'Alt/Alt Homo', 'Ref/Alt Hetero', 'Alt1/Aly2 Hetero'][gt]);
+}
+
+
+
+
+
 
 function update_variants_list(json)
 {
