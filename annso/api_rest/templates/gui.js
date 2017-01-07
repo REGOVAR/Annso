@@ -17,6 +17,17 @@ function error(json=null)
     $('#modal_error').modal('show');
 }
 
+function display_error(msg)
+{
+    $('#modal_error_id').text("");
+    $('#modal_error_code').text("");
+    $('#modal_error_code').attr('href', "#");
+    $('#modal_error_msg').text(msg);
+    $('#modal_error').modal('show');
+}
+
+
+
 var selected_tab = "welcom_toolbar";
 
 
@@ -50,7 +61,7 @@ function AnnsoControler () {
             type: "POST",
             data: "{\"name\" : \""+ analysis_name +"\", \"template_id\" : " + template_id + "}",
             async: false
-        }).fail(function() { alert("TODO : network error"); })
+        }).fail(function() { display_error("TODO : network error"); })
         .done(function(data)
         {
             analysis.load_analysis(data);
@@ -62,7 +73,7 @@ function AnnsoControler () {
     // Load an analysis from server
     this.load_analysis = function (id)
     {
-        $.ajax({ url: rootURL + "/analysis/" + id, type: "GET", async: false}).fail(function() { alert("TODO : network error"); })
+        $.ajax({ url: rootURL + "/analysis/" + id, type: "GET", async: false}).fail(function() { display_error("TODO : network error"); })
         .done(function(json)
         {
             if (json["success"])
@@ -89,7 +100,7 @@ function AnnsoControler () {
     // Settings = samples, attributes, fields, filter, selection
     this.save_analysis = function ()
     {
-        alert("TODO : Save current analysis to the server");
+        display_error("TODO : Save current analysis to the server");
     };
 
 
@@ -98,20 +109,7 @@ function AnnsoControler () {
 
     };
 
-    this.remove_sample = function (id)
-    {
-
-    };
-
-    this.set_sample_nickname = function (id, nickname)
-    {
-
-    };
-
-    this.set_sample_comments = function (id, comments)
-    {
-
-    };
+    
 
     this.select_field = function (id, position)
     {
@@ -150,7 +148,7 @@ function AnnsoControler () {
 
         }
 
-        $.ajax({ url: "{0}/analysis/{1}/savefilter".format(rootURL, id), type: "GET", async: false}).fail(function() { alert("TODO : network error"); })
+        $.ajax({ url: "{0}/analysis/{1}/savefilter".format(rootURL, id), type: "GET", async: false}).fail(function() { display_error("TODO : network error"); })
         .done(function(json)
         {
             if (json["success"])
@@ -198,7 +196,7 @@ var analysis = new AnnsoControler;
 
 
 
-function AnnsoUIContoler ()
+function AnnsoUIControler ()
 {
 
     this.current_tab = "welcom";
@@ -255,9 +253,21 @@ function AnnsoUIContoler ()
     };
 
 
-    this.reset_filter = function ()
+    this.reset_filter = function (id)
     {
+        if (id == null || !id in analysis.analysis.filters)
+        {
+            // Empty filter
+            $('#filters_panel_menu_filter_c > ul').html(filter_group_template.format('check', 'and', 'checked', '', '', ''));
+        }
+        else
+        {
+            // Load the saved filter
+            analysis.analysis.filter = analysis.analysis.filters[id]['filter'];
+            $('#filters_panel_menu_filter_c > ul').html(build_filter_ui(analysis.analysis.filter));
+        }
 
+        ui.apply_filter();
     };
 
     this.apply_filter = function ()
@@ -303,16 +313,15 @@ function AnnsoUIContoler ()
 
     this.validate_attribute = function (elmt)
     {
-        var value = $(elmt).val();
-        if (!/^[a-z0-9]+$/i.test(value))
+        var value = $(elmt).val().trim();
+        $(elmt).val(value);
+        if (value != "" && !/^[a-z0-9]+$/i.test(value))
         {
-            alert('Input is not alphanumeric');
-            $(elmt).removeClass("success");
+            display_error('Only alphanumeric characters (0...9 and Aa...Zz) are allowed.');
             $(elmt).addClass("error");
         }
         else
         {
-            $(elmt).addClass("success");
             $(elmt).removeClass("error");
         }
 
@@ -372,14 +381,9 @@ function AnnsoUIContoler ()
                 {
                     attr_html += sample_selection_table_attribute.format("td", "Attribute value", attr['samples_value'][sp_id]);
                 });
-                if (sp.nickname == null)
-                {
-                    html += sample_selection_table_row.format(id, sp.name, attr_html);
-                }
-                else
-                {
-                    html += sample_selection_table_row_nick.format(id, sp.name, sp.nickname, attr_html);
-                }
+
+                sp.nickname = (sp.nickname == null) ? "" : sp.nickname;
+                html += sample_selection_table_row.format(id, sp.name, sp.nickname, attr_html);
             });
             $('#browser_samples_table tbody').append(html);
         }
@@ -407,8 +411,29 @@ function AnnsoUIContoler ()
 
         // Reset UI filter
         $('#filters_panel_menu_filter_c > ul').html(build_filter_ui(analysis.analysis.filter));
+        // Reset UI saved filters
+        var html = "";
+        if (Object.keys(analysis.analysis.filters).length == 0)
+        {
+            html = filter_save_filter_empty;
+        }
+        else
+        {
+            $.each(analysis.analysis.filters, function(fid, f) 
+            {
+                html += filter_save_filter_row.format(fid, f['name']);
+            });
+        }
+
+        $('#filters_panel_menu_quick_f > ul').html(html);
+        $('#filters_panel_menu_filter_f > ul').html(html);
     };
 
+
+    this.remove_sample = function (elmt)
+    {
+        $(elmt).parent().parent().remove();
+    };
 
 
     this.remove_afilter_condition = function(elmt)
@@ -439,7 +464,7 @@ function AnnsoUIContoler ()
     };
 
 }
-var ui = new AnnsoUIContoler;
+var ui = new AnnsoUIControler;
 
 
 
@@ -693,7 +718,7 @@ function load_sample_database()
         }
         else
         {
-            display_error(json);
+            error(json);
             return;
         }
         html="<table class=\"table table-striped table-bordered\" cellspacing=\"0\" width=\"100%\" style=\"margin:0\">\
@@ -788,7 +813,7 @@ function load_variants_array()
         data: "{\"mode\" : \"table\", \"filter\" : " + JSON.stringify(analysis.analysis.filter) + ", \"fields\" : " + JSON.stringify(analysis.analysis.fields) + "}",
         async: true}).fail(function()
     {
-        display_error();
+        display_error("Unknow error in 'load_variants_array' request");
     }).done(function(json)
     {
         if (json["success"])

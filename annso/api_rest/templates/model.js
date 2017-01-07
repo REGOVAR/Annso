@@ -24,6 +24,7 @@ function Analysis(json)
     this.samples = {};
     this.fields = [];
     this.filter = [];
+    this.filters = json["filters"];
     this.creation_date = json["creation_date"];
     this.update_date = json["update_date"];
     this.attributes = json["attributes"];

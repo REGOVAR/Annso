@@ -2,9 +2,8 @@
 
 
 
-var sample_selection_table_header    = "<table id=\"browser_samples_table\" class=\"table table-striped table-bordered\" cellspacing=\"0\" width=\"100%\" style=\"margin:0;\"><thead><tr><th style=\"width:75px;\"></th><th>Sample</th>{0}</tr></thead><tbody></tbody></table>";
-var sample_selection_table_row       = "<tr id=\"browser_samples_table_{0}\"><td><input type=\"checkbox\" value=\"{0}\" checked/></td><td>{1}</td>{2}</tr>";
-var sample_selection_table_row_nick = "<tr id=\"browser_samples_table_{0}\"><td><button class=\"fa edit\">&nbsp;</button> &nbsp; <button class=\"fa delete\">&nbsp;</button></td><td>{2} - <span style=\"color:#999; font-style:italic;\">{1}</span></td>{3}</tr>";
+var sample_selection_table_header    = "<table id=\"browser_samples_table\" class=\"table table-striped table-bordered\" cellspacing=\"0\" width=\"100%\" style=\"margin:0;\"><thead><tr><th style=\"width:30px;\"></th><th>Sample</th>{0}</tr></thead><tbody></tbody></table>";
+var sample_selection_table_row       = "<tr id=\"browser_samples_table_{0}\"><td><button class=\"fa delete\" onclick=\"javascript:ui.remove_sample(this);\"> </button></td><td><input type=\"text\" placeholder=\"{1}\" value=\"{2}\"/></td>{3}</tr>";
 var sample_selection_table_attribute = "<{0}><input type=\"text\" placeholder=\"{1}\" value=\"{2}\" onchange=\"javascript:ui.validate_attribute(this);\"/></{0}>";
 
 
@@ -61,3 +60,6 @@ var filter_group_template = "<li class=\"condition {0}\">\
         </li>\
     </ul>\
 </li>";
+
+var filter_save_filter_empty = "<li class=\"empty_selection\">No filter saved</li>";
+var filter_save_filter_row = "<li><a href=\"javascript:ui.reset_filter({0});\"><i class=\"fa fa-cube\" aria-hidden=\"true\" style=\"width:20px; text-align:center;\">&nbsp;</i>{1}</a></li>";

@@ -157,7 +157,13 @@ class AnalysisManager:
             "template_name" : analysis.t_name,
             "setting" : json.loads(analysis.setting),
             "samples" : [],
-            "attributes" : []}
+            "attributes" : [],
+            "filters" : {}}
+
+        # Get predefined filters set for this analysis
+        query = "SELECT * FROM filter WHERE analysis_id = {0} ORDER BY name ASC;"
+        for f in db_engine.execute(query.format(analysis_id)):
+            result["filters"][f.id] = { "name" : f.name, "description" : f.description, "filter": json.loads(f.filter)}
 
 
         # Get attributes used for this analysis
@@ -537,7 +543,7 @@ class FilterEngine:
                 
 
             elif (data[0] == 'attribute') :
-                key, value = data[1].split('-')
+                key, value = data[1].split(':')
                 tmp_table_name    = "tmp_attribute_{0}_{1}_{2}_{3}".format(analysis_id, key, value, mode)
                 if mode == 'site':
                     tmp_table_query = ttable_quer_map.format(tmp_table_name, "SELECT DISTINCT {0}.chr, {0}.pos FROM {0} INNER JOIN {1} ON {0}.sample_id={1}.sample_id AND {1}.analysis_id={2} AND {1}.name='{3}' AND {1}.value='{4}'".format(self.variant_table, 'attribute', analysis_id, key, value))
