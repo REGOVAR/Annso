@@ -345,8 +345,16 @@ li.addcondition span { display: none; }
 li.addcondition:hover span { display: inline-block; }
 
 
-
-
+input.error
+{
+    color: #a94442;
+    border-color : #a94442;
+}
+input.success
+{
+    color: #3c763d;
+    border-color : #3c763d;
+}
 
 /* Special style for the first ul element of the filter list */
 #filters_panel_menu_filter_c > ul:first-child

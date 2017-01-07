@@ -38,7 +38,7 @@ function Analysis(json)
     this.samples = samples;
 
     // settings
-    settings = JSON.parse(json["setting"])
+    settings = json["setting"]
     this.filter_mode = "table";
     this.fields = settings["fields"];
     this.filter = settings["filter"];

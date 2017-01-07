@@ -155,23 +155,34 @@ class AnalysisManager:
             "creation_date" : analysis.creation_date.ctime(),
             "template_id" : analysis.t_id,
             "template_name" : analysis.t_name,
-            "setting" : analysis.setting,
+            "setting" : json.loads(analysis.setting),
             "samples" : [],
             "attributes" : []}
 
 
-        QUERY = "SELECT s.id, s.name, s.comments, s.is_mosaic, asp.nickname, f.id as f_id, f.filename, f.import_date \
+        # Get attributes used for this analysis
+        query = "SELECT a.sample_id, a.name, a.value \
+            FROM attribute a \
+            WHERE a.analysis_id = {0}\
+            ORDER BY a.name ASC, a.sample_id ASC"
+
+        current_attribute = None;
+        for r in db_engine.execute(query.format(analysis_id)):
+            if current_attribute == None or current_attribute != r.name:
+                current_attribute = r.name
+                result["attributes"].append({ "name" : r.name, "samples_value" : {r.sample_id : r.value} })
+            else:
+                result["attributes"][-1]["samples_value"][r.sample_id] = r.value
+
+
+        # Get Samples used for this analysis
+        query = "SELECT s.id, s.name, s.comments, s.is_mosaic, asp.nickname, f.id as f_id, f.filename, f.import_date \
             FROM analysis_sample asp \
             LEFT JOIN sample s ON asp.sample_id = s.id \
             LEFT JOIN sample_file sf ON s.id = sf.sample_id \
             LEFT JOIN file f ON f.id = sf.file_id \
             WHERE asp.analysis_id = {0}"
-
-        print(QUERY.format(analysis_id))
-
-        for r in db_engine.execute(QUERY.format(analysis_id)):
-
-
+        for r in db_engine.execute(query.format(analysis_id)):
             result["samples"].append({ 
                 "id" : r.id, 
                 "name" : r.name, 
@@ -180,13 +191,16 @@ class AnalysisManager:
                 "nickname" : r.nickname, 
                 "file_id" : r.f_id, 
                 "filename" : r.filename,
-                "import_date" : r.import_date})
+                "import_date" : r.import_date,
+                "attributes" : {}})
 
+            for a in result["attributes"]:
+                if r.id in a["samples_value"].keys():
+                    result["samples"][-1]["attributes"][a['name']] = a["samples_value"][r.id]
+                else :
+                    result["samples"][-1]["attributes"][a['name']] = ""
         return result
 
-
-    def get_from_ids(self, file_ids, sublvl=0, fields=None):
-        pass
 
 
     def get_setting(self, analysis_id):
@@ -584,7 +598,6 @@ class FilterEngine:
         # Execute query and get result
         result = []
         for s in db_session.execute(query): 
-            #ipdb.set_trace()
             variant = {}
             print (s)
             i=0

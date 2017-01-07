@@ -113,21 +113,6 @@ function AnnsoControler () {
 
     };
 
-    this.new_attribute = function(name, samples_values)
-    {
-
-    };
-
-    this.remove_attribute = function (name)
-    {
-
-    };
-
-    this.set_attribute = function (name, sample_id, value)
-    {
-
-    };
-
     this.select_field = function (id, position)
     {
 
@@ -302,8 +287,34 @@ function AnnsoUIContoler ()
     };
 
 
-    this.new_attribute = function ()
+    
+
+    this.new_attribute = function(name, samples_values)
     {
+        var i = 0;
+        $('#browser_samples_table tr').each(function()
+        {
+            td = (i == 0) ? "th" : "td";
+            ph = (i == 0) ? "Attribute name" : "Attribute value";
+            $(this).append(sample_selection_table_attribute.format(td, ph, ""));
+            i += 1;
+        });
+    };
+
+    this.validate_attribute = function (elmt)
+    {
+        var value = $(elmt).val();
+        if (!/^[a-z0-9]+$/i.test(value))
+        {
+            alert('Input is not alphanumeric');
+            $(elmt).removeClass("success");
+            $(elmt).addClass("error");
+        }
+        else
+        {
+            $(elmt).addClass("success");
+            $(elmt).removeClass("error");
+        }
 
     };
 
@@ -341,17 +352,33 @@ function AnnsoUIContoler ()
         }
         else
         {
+            
+            // tHeader
             var html = "";
+            $.each(analysis.analysis.attributes, function(id, attr) 
+            {
+                html += sample_selection_table_attribute.format("th", "Attribute name", attr['name']);
+            });
+            $('#browser_samples').html(sample_selection_table_header.format(html));
+
+
+            // tBody (samples values)
+            html = "";
             $.each(analysis.analysis.samples, function(id, sp) 
             {
-                $('#browser_samples').html(sample_selection_table_header);
+                var attr_html = "";
+                var sp_id = id;
+                $.each(analysis.analysis.attributes, function(id, attr) 
+                {
+                    attr_html += sample_selection_table_attribute.format("td", "Attribute value", attr['samples_value'][sp_id]);
+                });
                 if (sp.nickname == null)
                 {
-                    html += sample_selection_table_row.format(id, sp.name);
+                    html += sample_selection_table_row.format(id, sp.name, attr_html);
                 }
                 else
                 {
-                    html += sample_selection_table_row_nick.format(id, sp.name, sp.nickname);
+                    html += sample_selection_table_row_nick.format(id, sp.name, sp.nickname, attr_html);
                 }
             });
             $('#browser_samples_table tbody').append(html);
@@ -868,7 +895,7 @@ function annotation_format_sampleid(id)
 
 function annotation_format_gt(gt)
 {
-    return "<td class=\"seq\">{0}</td>".format(['Ref/Ref Homo', 'Alt/Alt Homo', 'Ref/Alt Hetero', 'Alt1/Aly2 Hetero'][gt]);
+    return "<td class=\"seq\">{0}</td>".format(['Ref/Ref <span style="font-weight:100">Homo</span>', 'Alt/Alt <span style="font-weight:100">Homo</span>', 'Ref/Alt <span style="font-weight:100">Hetero</span>', 'Alt1/Aly2 <span style="font-weight:100">Hetero</span>'][gt]);
 }
 
 
@@ -1011,25 +1038,6 @@ function fake_rename_sample()
     });
 }
 
-
-
-function fake_add_sample_attribute()
-{
-    i=0;
-    data = [["<i class=\"fa fa-tag\" aria-hidden=\"true\" style=\"width:20px; text-align:center;\">&nbsp;</i> Control", "<i class=\"fa fa-tag\" aria-hidden=\"true\" style=\"width:20px; text-align:center;\">&nbsp;</i> Sex"],
-     ["Yes", "Male"], 
-     ["Yes", "Female"], 
-     ["No", "Male"]];
-    
-
-    $('#browser_samples_table tr').each(function()
-    {
-        td = (i == 0) ? "th style=\"width:200px\"" : "td";
-        $(this).append('<{0}>{1}</{0}><{0}>{2}</{0}>'.format(td, data[i][0], data[i][1]));
-        i += 1;
-    });
-
-}
 
 
 
