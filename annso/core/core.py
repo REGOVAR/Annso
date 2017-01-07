@@ -408,10 +408,10 @@ class SampleManager:
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
 class FilterEngine:
     op_map = {'AND' : ' AND ', 'OR': ' OR ', '==' : '=', '!=': '<>', '>':'>', '<':'<', '>=':'>=', '<=':'<=', 
-        'IN-site'       : '{0}.chr={1}.chr AND {0}.pos={1}.pos',
-        'NOTIN-site'    : '{0}.chr<>{1}.chr OR {0}.pos<>{1}.pos',
-        'IN-variant'    : '{0}.chr={1}.chr AND {0}.pos={1}.pos AND {0}.ref={1}.ref AND {0}.alt={1}.alt',
-        'NOTIN-variant' : '{0}.chr<>{1}.chr OR {0}.pos<>{1}.pos OR {0}.ref<>{1}.ref OR {0}.alt<>{1}.alt' }
+        # As a left join will be done on the chr+pos or chr+pos+ref+alt according to the type of the set operation (by site or by variant)
+        # We just need to test if one of the "joined" field is set or not
+        'IN'       : '{0}.chr is not null', 
+        'NOTIN'    : '{0}.chr is null'}
 
     def __init__(self, reference=1):
         """
@@ -489,12 +489,11 @@ class FilterEngine:
                 
 
                 tmp_table = get_tmp_table(data[1], data[2])
+                temporary_to_import[tmp_table]['where'] = FilterEngine.op_map[operator].format(tmp_table, self.fields_map[1]["db_name"])
 
                 if data[1] == 'site' :
-                    temporary_to_import[tmp_table]['from']  = " LEFT JOIN {1} ON {0}.chr={1}.chr AND {0}.pos={1}.pos".format(self.fields_map[1]["db_name"], t)
-                    temporary_to_import[tmp_table]['where'] = FilterEngine.op_map[operator+'-site'].format(tmp_table, self.fields_map[1]["db_name"])
-                elif data[1] == 'variant' :
-                    temporary_to_import[tmp_table]['where'] = FilterEngine.op_map[operator+'-variant'].format(tmp_table, self.fields_map[1]["db_name"])
+                    temporary_to_import[tmp_table]['from']  = " LEFT JOIN {1} ON {0}.chr={1}.chr AND {0}.pos={1}.pos".format(self.fields_map[1]["db_name"], tmp_table)
+                else: #if data[1] == 'variant' :
                     temporary_to_import[tmp_table]['from']  = " LEFT JOIN {1} ON {0}.chr={1}.chr AND {0}.pos={1}.pos AND {0}.ref={1}.ref AND {0}.alt={1}.alt".format(self.fields_map[1]["db_name"], tmp_table)
 
                 return temporary_to_import[tmp_table]['where']
@@ -527,9 +526,9 @@ class FilterEngine:
                 key, value = data[1].split('-')
                 tmp_table_name    = "tmp_attribute_{0}_{1}_{2}_{3}".format(analysis_id, key, value, mode)
                 if mode == 'site':
-                    tmp_table_query = ttable_quer_map.format(tmp_table_name, "SELECT DISTINCT {0}.chr, {0}.pos FROM {0} INNER JOIN {1} ON {0}.sample_id={1}.sample_id AND {1}.analysis_id={2} AND {1}.name={3} AND {1}.value={4}".format(self.variant_table, 'attribute', analysis_id, key, value))
+                    tmp_table_query = ttable_quer_map.format(tmp_table_name, "SELECT DISTINCT {0}.chr, {0}.pos FROM {0} INNER JOIN {1} ON {0}.sample_id={1}.sample_id AND {1}.analysis_id={2} AND {1}.name='{3}' AND {1}.value='{4}'".format(self.variant_table, 'attribute', analysis_id, key, value))
                 else : # if mode = 'variant' :
-                    tmp_table_query = ttable_quer_map.format(tmp_table_name, "SELECT DISTINCT {0}.chr, {0}.pos, {0}.ref, {0}.alt FROM {0} INNER JOIN {1} ON {0}.sample_id={1}.sample_id AND {1}.analysis_id={2} AND {1}.name={3} AND {1}.value={4}".format(self.variant_table, 'attribute', analysis_id, key, value))
+                    tmp_table_query = ttable_quer_map.format(tmp_table_name, "SELECT DISTINCT {0}.chr, {0}.pos, {0}.ref, {0}.alt FROM {0} INNER JOIN {1} ON {0}.sample_id={1}.sample_id AND {1}.analysis_id={2} AND {1}.name='{3}' AND {1}.value='{4}'".format(self.variant_table, 'attribute', analysis_id, key, value))
 
 
             temporary_to_import[tmp_table_name] = {'query' : tmp_table_query}
