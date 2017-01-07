@@ -272,7 +272,8 @@ class AnalysisHandler:
         return rest_success(result)
 
 
-
+    async def save_filter(self, request):
+        pass
 
 
 

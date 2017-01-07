@@ -58,6 +58,7 @@ app.router.add_route('GET',    "/v1/analysis/{analysis_id}",  analysisHandler.ge
 app.router.add_route('GET',    "/v1/analysis/{analysis_id}/setting",  analysisHandler.get_setting) # TODO
 app.router.add_route('POST',   "/v1/analysis/{analysis_id}/setting",  analysisHandler.set_setting) # TODO
 app.router.add_route('POST',   "/v1/analysis/{analysis_id}/filtering",  analysisHandler.filtering)
+app.router.add_route('POST',   "/v1/analysis/{analysis_id}/savefilter",  analysisHandler.save_filter)
 
 
 

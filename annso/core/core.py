@@ -507,7 +507,7 @@ class FilterEngine:
                     mode : site or variant
                     data : json data about the temp table to create
             """
-            ttable_quer_map = "CREATE TEMP TABLE {0} WITH (OIDS) ON COMMIT DROP AS {1}; "
+            ttable_quer_map = "CREATE TEMP TABLE IF NOT EXISTS {0} WITH (OIDS) ON COMMIT DROP AS {1}; "
 
 
             if data[0] == 'sample' :

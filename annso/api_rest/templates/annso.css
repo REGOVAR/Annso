@@ -322,6 +322,10 @@ button.delete:before       { content: "\f00d"; }
 button.toggle.plus:before  { content: "\f196"; }
 button.toggle.minus:before { content: "\f147"; }
 
+b.sample:before { content: "\f007"; }
+b.filter:before { content: "\f1b2"; }
+b.attribute:before { content: "\f02b"; }
+
 li:hover>button.edit       { visibility: visible; color: #555; }
 li:hover>button.delete     { visibility: visible; color: #f55; }
 li:hover>button.toggle     { visibility: visible; color: #555; }
