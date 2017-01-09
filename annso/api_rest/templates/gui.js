@@ -100,15 +100,52 @@ function AnnsoControler () {
     // Settings = samples, attributes, fields, filter, selection
     this.save_analysis = function ()
     {
-        display_error("TODO : Save current analysis to the server");
+        var samples = [];
+        $.each(analysis.analysis.samples, function(sid, s) 
+        {
+            samples.push(s);
+        });
+        var attributes = [];
+        $.each(analysis.analysis.attributes, function(aid, a) 
+        {
+            attributes.push(a);
+        });
+
+        $.ajax({ 
+            url: rootURL + "/analysis/" + analysis.analysis.id, 
+            type: "PUT", 
+            data: JSON.stringify({
+                "samples" : samples,
+                "attributes" : attributes,
+                "fields" : analysis.analysis.fields,
+                "filter" : analysis.analysis.filter
+            }),
+            async: false}).fail(function() { display_error("TODO : network error"); })
+        .done(function(json)
+        {
+            if (!json["success"])
+            {
+                error(json);
+            }
+        });
     };
 
 
     this.add_sample = function (id)
     {
-
+        var sample = null;
+        $.ajax({ url: rootURL + "/sample/" + id, type: "GET", async: false}).done(function(json)
+        {
+            sample = json["data"];
+        });
+        analysis.analysis.samples[id] = {"id" : id, "name" : sample["name"], "comments" : sample["comments"], "analyses" : "", "nickname" : "", "attributes" : []};
+        return sample;
     };
 
+    this.remove_sample = function (id)
+    {
+        delete(analysis.analysis.samples[id]);
+    };
     
 
     this.select_field = function (id, position)
@@ -215,6 +252,9 @@ function AnnsoUIControler ()
 
         if (tab_name == "variant")
         {
+            // Save analysis parameters
+            analysis.save_analysis();
+
             // Force refresh of the variant array
             load_variants_array();
         }
@@ -293,9 +333,66 @@ function AnnsoUIControler ()
 
     this.load_sample_database = function ()
     {
+        $('#modal_import_sample_db_content').html('<i class="fa fa-refresh fa-spin fa-3x fa-fw" style="margin:200px 250px"></i><span class="sr-only">Loading data from database</span>');
+        $.ajax({ url: rootURL + "/sample", type: "GET", async: false}).fail(function()
+        {
+            alert( "ERROR" );
+        }).done(function(json) 
+        {
+            if (json["success"])
+            {
+                json = json["data"]
+            }
+            else
+            {
+                error(json);
+                return;
+            }
+            html="<table class=\"table table-striped table-bordered\" cellspacing=\"0\" width=\"100%\" style=\"margin:0\">\
+                        <thead>\
+                            <tr>\
+                                <th style=\"width:20px\"></th>\
+                                <th style=\"width:200px\">Sample</th>\
+                                <th style=\"width:40px\">Comment</th>\
+                                <th style=\"width:100px\">Analyses</th>\
+                            </tr>\
+                        </thead>\
+                        <tbody>\n";
 
+            for (var i=0; i< json.length; i++)
+            {
+                html += "<tr style=\"cursor: pointer;\" onclick=\"javascript:toggle_select_sample({0}, true);\">\
+                                <td><input type=\"checkbox\" value=\"{0}\"/></td>\
+                                <td>{1} </td>\
+                                <td>{2} </td>\
+                                <td>{3} </td>\
+                            </tr>".format(json[i]["id"], json[i]["name"], json[i]["comments"], json[i]["analyses"]);
+            }
+
+            html += "</tbody></table>";
+
+            $('#modal_import_sample_db_content').html(html);
+
+        });
     };
 
+
+    this.update_sample_nickname = function (id, elmt)
+    {
+        var value = $(elmt).val().trim();
+        $(elmt).val(value);
+        if (value != "" && !/^[a-z0-9 ]+$/i.test(value))
+        {
+            display_error('Only alphanumeric characters (0...9 and Aa...Zz) are allowed.');
+            $(elmt).addClass("error");
+        }
+        else
+        {
+            $(elmt).removeClass("error");
+        }
+
+        analysis.analysis.samples[id]["nickname"] = value;
+    };
 
     
 
@@ -355,21 +452,15 @@ function AnnsoUIControler ()
 
 
         // Reset samples screen
-        if (analysis.analysis.samples.length == 0)
+        if (Object.keys(analysis.analysis.samples).length == 0)
         {
-            $('#browser_samples').html("<span class=\"maincontent_placeholder\">&#11172; Import and select sample(s) you want to analyse.</span>")
+            this.display_sample_header(false);
         }
         else
         {
             
             // tHeader
-            var html = "";
-            $.each(analysis.analysis.attributes, function(id, attr) 
-            {
-                html += sample_selection_table_attribute.format("th", "Attribute name", attr['name']);
-            });
-            $('#browser_samples').html(sample_selection_table_header.format(html));
-
+            this.display_sample_header(true);
 
             // tBody (samples values)
             html = "";
@@ -391,6 +482,9 @@ function AnnsoUIControler ()
 
 
         // Automaticaly select the Sample section
+        $('#nav_project_sample').removeClass("hidden");
+        $('#nav_project_variant').removeClass("hidden");
+        $('#nav_project_selection').removeClass("hidden");
         $('#nav_project_sample')[0].click(function (e) { e.preventDefault(); $(this).tab('show'); })
 
 
@@ -430,8 +524,30 @@ function AnnsoUIControler ()
     };
 
 
+
+    this.display_sample_header = function(flag)
+    {
+        if (!flag)
+        {
+            $('#browser_samples').html("<span class=\"maincontent_placeholder\">&#11172; Import and select sample(s) you want to analyse.</span>");
+        }
+        else
+        {
+            var html = "";
+            $.each(analysis.analysis.attributes, function(id, attr) 
+            {
+                html += sample_selection_table_attribute.format("th", "Attribute name", attr['name']);
+            });
+            $('#browser_samples').html(sample_selection_table_header.format(html));
+        }
+    }
+
+
+
     this.remove_sample = function (elmt)
     {
+        id = $(elmt).parent().parent().attr("id").split('_')[3];
+        analysis.remove_sample(id);
         $(elmt).parent().parent().remove();
     };
 
@@ -704,51 +820,6 @@ var substringMatcher = function(strs)
 
 
 
-function load_sample_database()
-{
-    $('#modal_import_sample_db_content').html('<i class="fa fa-refresh fa-spin fa-3x fa-fw" style="margin:200px 250px"></i><span class="sr-only">Loading data from database</span>');
-    $.ajax({ url: rootURL + "/sample", type: "GET", async: false}).fail(function()
-    {
-        alert( "ERROR" );
-    }).done(function(json) 
-    {
-        if (json["success"])
-        {
-            json = json["data"]
-        }
-        else
-        {
-            error(json);
-            return;
-        }
-        html="<table class=\"table table-striped table-bordered\" cellspacing=\"0\" width=\"100%\" style=\"margin:0\">\
-                    <thead>\
-                        <tr>\
-                            <th style=\"width:20px\"></th>\
-                            <th style=\"width:200px\">Sample</th>\
-                            <th style=\"width:40px\">Comment</th>\
-                            <th style=\"width:100px\">Analyses</th>\
-                        </tr>\
-                    </thead>\
-                    <tbody>\n";
-
-        for (var i=0; i< json.length; i++)
-        {
-            html += "<tr style=\"cursor: pointer;\" onclick=\"javascript:toggle_select_sample({0}, true);\">\
-                            <td><input type=\"checkbox\" value=\"{0}\"/></td>\
-                            <td>{1} </td>\
-                            <td>{2} </td>\
-                            <td>{3} </td>\
-                        </tr>".format(json[i]["id"], json[i]["name"], json[i]["comments"], json[i]["analyses"]);
-        }
-
-        html += "</tbody></table>";
-
-        $('#modal_import_sample_db_content').html(html);
-
-    });
-}
-
 
 function add_sample_to_analysis(sample)
 {
@@ -761,34 +832,31 @@ function toggle_select_sample( id, clean_list=false)
     // check if need to add the table
     if (Object.keys(analysis.analysis.samples).length == 0)
     {
-        $('#browser_samples').html(sample_selection_table_header);
+        ui.display_sample_header(true);
     }
 
-    // check if id already in the list
-    checked = false;
+    // Update check status in the popup
+    // TODO : $('#browser_samples_table_'+id+ " input").prop('checked', analysis.analysis.samples[id]["checked"]);
+
+    // update model & view
     if (id in analysis.analysis.samples)
     {
-        // update check status
-        analysis.analysis.samples[id]["checked"] = !analysis.analysis.samples[id]["checked"];
-        $('#browser_samples_table_'+id+ " input").prop('checked', analysis.analysis.samples[id]["checked"]);
-
-        // update model & view
-        if (!analysis.analysis.samples[id]["checked"] && clean_list)
-        {
-            delete(analysis.analysis.samples[id]);
-            $('#browser_samples_table_'+id).remove();
-        }
+        // remove sample
+        analysis.remove_sample(id);
+        $('#browser_samples_table_'+id).remove();
     }
     else
     {
-        sample = null;
-        $.ajax({ url: rootURL + "/sample/" + id, type: "GET", async: false}).done(function(json)
+        // retrieve sample data and add it
+        var sample = analysis.add_sample(id);
+        
+
+        var attr_html = "";
+        $.each(analysis.analysis.attributes, function(id, attr) 
         {
-            sample = json["data"];
+            attr_html += sample_selection_table_attribute.format("td", "Attribute value", "");
         });
-        analysis.analysis.samples[id] = {"name" : sample["name"], "comments" : sample["comments"], "analyses" : "", "nickname" : "", "attributes" : [], "checked" : true};
-        // TODO build row according to existing attributes
-        $('#browser_samples_table tbody').append('<tr id="browser_samples_table_{0}"><td><input type=\"checkbox\" value=\"{0}\" checked/></td><td>{1}</td></tr>'.format(id, sample["name"]));
+        $('#browser_samples_table tbody').append(sample_selection_table_row.format(id, sample['name'], "", attr_html));
     }
 }
 

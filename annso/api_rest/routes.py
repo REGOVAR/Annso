@@ -55,10 +55,11 @@ app.router.add_route('GET',    "/v1/report",             reportHandler.get_html_
 # app.router.add_route('GET',  "/v1/analysis",     analysisHandler.get_analyses)
 app.router.add_route('POST',   "/v1/analysis",  analysisHandler.create_analysis)
 app.router.add_route('GET',    "/v1/analysis/{analysis_id}",  analysisHandler.get_analysis)
+app.router.add_route('PUT',    "/v1/analysis/{analysis_id}",  analysisHandler.set_analysis)
 app.router.add_route('GET',    "/v1/analysis/{analysis_id}/setting",  analysisHandler.get_setting) # TODO
-app.router.add_route('POST',   "/v1/analysis/{analysis_id}/setting",  analysisHandler.set_setting) # TODO
 app.router.add_route('POST',   "/v1/analysis/{analysis_id}/filtering",  analysisHandler.filtering)
-app.router.add_route('POST',   "/v1/analysis/{analysis_id}/savefilter",  analysisHandler.save_filter)
+app.router.add_route('POST',   "/v1/analysis/{analysis_id}/savefilter",  analysisHandler.set_filter)
+app.router.add_route('DELETE', "/v1/filter/{filter_id}",  analysisHandler.delete_filter)
 
 
 

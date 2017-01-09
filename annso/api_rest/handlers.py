@@ -237,15 +237,15 @@ class AnalysisHandler:
         return rest_success(settings)
 
 
-    async def set_setting(self, request):
+    async def set_analysis(self, request):
         # 1- Retrieve data from request
         analysis_id = request.match_info.get('analysis_id', -1)
         data = await request.json()
         try:
-            annso.analysis.set_setting(analysis_id, data)
+            annso.analysis.set_analysis(analysis_id, data)
         except Exception as err :
             return rest_error("Error occured when trying to save settings for the analysis with id=" + str(analysis_id) + ". " + str(err))
-        return rest_success(result) 
+        return rest_success() 
 
         
 
@@ -272,8 +272,15 @@ class AnalysisHandler:
         return rest_success(result)
 
 
-    async def save_filter(self, request):
+    def set_filter(self, request):
+        analysis_id = request.match_info.get('analysis_id', -1)
+        annso.filter.set_filter()
         pass
+
+    def delete_filter(self, request):
+        filter_id = request.match_info.get('filter_id', -1)
+        annso.delete_filter(filter_id)
+        return rest_success()
 
 
 

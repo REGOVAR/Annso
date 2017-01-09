@@ -101,10 +101,10 @@
                             <div style="padding:10px; margin-left:75px; border-left: 1px solid #ddd;">
                                 <div class="btn-group ">
                                     <a class="btn btn-default" href="#modal_import_sample_file" title="Import sample/variant data from local file" data-toggle="modal">
-                                        <i class="fa fa-download" style="width:20px; text-align:center;" aria-hidden="true"></i>
+                                        <i class="fa fa-download" style="width:20px; text-align:center;" aria-hidden="true"></i> VCF
                                     </a>
                                     <a class="btn btn-default" href="#modal_import_sample_db" onclick="javascript:ui.load_sample_database();" title="Import sample/variant data from database" data-toggle="modal">
-                                        <i class="fa fa-database" style="width:20px; text-align:center;" aria-hidden="true"></i>
+                                        <i class="fa fa-database" style="width:20px; text-align:center;" aria-hidden="true"></i> Database
                                     </a>
                                 </div>
                                 &nbsp;
@@ -200,11 +200,11 @@
                                 <ul class="nav navbar-nav">
                                     <li class="active"><a id="nav_project_welcom" data-toggle="tab" href="#welcom_panel" onclick="javascript:ui.select_tab('welcom');">
                                         <i class="fa fa-folder-open" style="width:20px; text-align:center;" aria-hidden="true"></i> Welcom </a></li>
-                                    <li><a id="nav_project_sample" data-toggle="tab" href="#samples_panel" onclick="javascript:ui.select_tab('sample');">
+                                    <li><a id="nav_project_sample" class="hidden" data-toggle="tab" href="#samples_panel" onclick="javascript:ui.select_tab('sample');">
                                         <i class="fa fa-user" style="width:20px; text-align:center;" aria-hidden="true"></i> Samples </a></li>
-                                    <li><a id="nav_project_variant" data-toggle="tab" href="#filters_panel" onclick="javascript:ui.select_tab('variant');">
+                                    <li><a id="nav_project_variant" class="hidden" data-toggle="tab" href="#filters_panel" onclick="javascript:ui.select_tab('variant');">
                                         <i class="fa fa-filter" style="width:20px; text-align:center;" aria-hidden="true"></i> Filtering</a></li>
-                                    <li><a id="nav_project_selection" data-toggle="tab" href="#selection_panel" onclick="javascript:ui.select_tab('result');">
+                                    <li><a id="nav_project_selection" class="hidden" data-toggle="tab" href="#selection_panel" onclick="javascript:ui.select_tab('result');">
                                         <i class="fa fa-check-square-o" aria-hidden="true" style="width:20px; text-align:center;">&nbsp;</i> Selection</a></li>
                                 </ul>
                             </div>

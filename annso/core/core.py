@@ -216,6 +216,89 @@ class AnalysisManager:
 
 
 
+    def set_analysis(self, analysis_id, data):
+        """ Update analysis with provided data. Data that are not provided are not updated (ignored) """
+        update_query = ""
+        # BASICS SETTINGS (current filter and displayed fields)
+        if "fields" in data.keys() or "filter" in data.keys() or "selection" in data.keys():
+            #retrieved current settings from database
+            setting = {}
+            try : 
+                setting = json.loads(db_engine.execute("SELECT setting FROM analysis WHERE id={}".format(analysis_id)).first().setting)
+            except : 
+                # TODO : log error
+                setting = {}
+            if "fields" in data.keys():
+                setting["fields"] = data["fields"]
+            if "filter" in data.keys():
+                setting["filter"] = data["filter"]
+            if "selection" in data.keys():
+                setting["selection"] = data["selection"]
+            # update database
+            main_query = "setting='{0}', ".format(json.dumps(setting))
+
+
+
+        # saved filters
+        if "filters" in data.keys():
+            # delete old filters
+            db_engine.execute("DELETE FROM filter WHERE analysis_id={}".format(analysis_id))
+            # create new associations
+            query    = "INSERT INTO filter (analysis_id, name, filter) VALUES "
+            subquery = "({0}, '{1}', '{2}'')"
+            query = query + ', '.join([subquery.format(analysis_id, f['name'], f['filter']) for f in data["filters"]])
+            db_engine.execute(query)
+
+        
+        # samples + nickname
+        if "samples" in data.keys():
+            # create new associations
+            pattern = "({0}, {1}, {2})"
+            query   = ', '.join([pattern.format(analysis_id, s['id'], "'{0}'".format(s['nickname']) if 'nickname' in s.keys() else 'NULL') for s in data["samples"]])
+            # check if query seems good then apply change
+            if query != "":
+                # delete old analysis sample associations
+                db_engine.execute("DELETE FROM analysis_sample WHERE analysis_id={}".format(analysis_id))
+                db_engine.execute("INSERT INTO analysis_sample (analysis_id, sample_id, nickname) VALUES " + query)
+            else:
+                # TODO : log error
+                pass
+
+        # attributes + values
+        if "attributes" in data.keys():
+            # create new attributes
+            pattern = "({0}, {1}, '{2}', '{3}')"
+            query   = ', '.join([pattern.format(analysis_id, sid, att['name'], att['samples_value'][sid]) for att in data['attributes'] for sid in att['samples_value']])
+            # check if query seems good then apply change
+            if query != "":
+                db_engine.execute("DELETE FROM attribute WHERE analysis_id={}".format(analysis_id))
+                db_engine.execute("INSERT INTO attribute (analysis_id, sample_id, name, value) VALUES " + query)
+            else:
+                # TODO : log error
+                pass
+
+        # analysis name, ...
+        if "name" in data.keys():
+            main_query += "name='{0}', ".format(data["name"])
+
+        # update analysis
+        db_engine.execute("UPDATE analysis SET {0}update_date=CURRENT_TIMESTAMP WHERE id={1}".format(main_query, analysis_id))
+
+
+
+    def set_filter(self, analysis_id, name, filter_json):
+        # delete old filters
+            
+            # create new associations
+            query    = "INSERT INTO filter (analysis_id, name, filter) VALUES "
+            subquery = "({0}, '{1}', '{2}'')"
+            query = query + ', '.join([subquery.format(analysis_id, f['name'], f['filter']) for f in data["filters"]])
+            db_engine.execute(query)
+        db_engine.execute("UPDATE analysis SET {0}update_date=CURRENT_TIMESTAMP WHERE id={1}".format("setting='{0}', ".format(json.dumps(setting)), analysis_id))
+
+
+    def delete_filter(self, filter_id):
+        db_engine.execute("DELETE FROM filter WHERE id={}".format(filter_id))
 
 
 
@@ -472,8 +555,6 @@ class FilterEngine:
             for row in db_session.execute("select sample_id from analysis_sample where analysis_id = {0}".format(analysis_id)):
                 sample_ids.append(str(row.sample_id))
 
-            print ("{} : {}".format(analysis_id, sample_ids))
-
 
         # Build SELECT
         q_select = ["{0}.{1}".format(self.fields_map[f_id]["db_name"], self.fields_map[f_id]["name"]) for f_id in fields]
@@ -596,19 +677,29 @@ class FilterEngine:
         
 
         # build query
-        print (temporary_to_import);
         query = "".join([t['query'] for t in temporary_to_import.values()])
         query += "SELECT {0} FROM {1} WHERE {2} LIMIT {3} OFFSET {4};".format(', '.join(q_select), q_from, q_where, limit, offset)
 
-        print (query)
+        
+
+        # Save filter in analysis setting
+        if (analysis_id > 0):
+            setting = {}
+            try : 
+                setting = json.loads(db_engine.execute("SELECT setting FROM analysis WHERE id={}".format(analysis_id)).first().setting)
+                setting["filter"] = filter_json
+                db_engine.execute("UPDATE analysis SET {0}update_date=CURRENT_TIMESTAMP WHERE id={1}".format("setting='{0}', ".format(json.dumps(setting)), analysis_id))
+            except : 
+                # TODO : log error
+                print ("Not able to save current filter")        
+
         # Execute query and get result
+        print (query)
         result = []
         for s in db_session.execute(query): 
             variant = {}
-            print (s)
             i=0
             for f_id in fields:
-                print ("\t" + str(i) + " : " + str(f_id) + ", " + str(s[i]))
                 variant[f_id]= FilterEngine.parse_result(s[i])
                 i += 1
             result.append(variant)

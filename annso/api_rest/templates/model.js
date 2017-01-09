@@ -7,7 +7,6 @@ function Sample(json)
     this.name = json["name"];
     this.comments = json["comments"];
     this.nickname = json["nickname"];
-    this.attributes = {};
     this.file_id = json["file_id"];
     this.file_name = json["filename"];
     this.file_import_date = json["import_date"];

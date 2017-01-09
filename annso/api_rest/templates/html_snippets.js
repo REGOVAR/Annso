@@ -3,7 +3,7 @@
 
 
 var sample_selection_table_header    = "<table id=\"browser_samples_table\" class=\"table table-striped table-bordered\" cellspacing=\"0\" width=\"100%\" style=\"margin:0;\"><thead><tr><th style=\"width:30px;\"></th><th>Sample</th>{0}</tr></thead><tbody></tbody></table>";
-var sample_selection_table_row       = "<tr id=\"browser_samples_table_{0}\"><td><button class=\"fa delete\" onclick=\"javascript:ui.remove_sample(this);\"> </button></td><td><input type=\"text\" placeholder=\"{1}\" value=\"{2}\"/></td>{3}</tr>";
+var sample_selection_table_row       = "<tr id=\"browser_samples_table_{0}\"><td><button class=\"fa delete\" onclick=\"javascript:ui.remove_sample(this);\"> </button></td><td><input type=\"text\" placeholder=\"{1}\" value=\"{2}\" onchange=\"javascript:ui.update_sample_nickname({0}, this);\"/></td>{3}</tr>";
 var sample_selection_table_attribute = "<{0}><input type=\"text\" placeholder=\"{1}\" value=\"{2}\" onchange=\"javascript:ui.validate_attribute(this);\"/></{0}>";
 
 
