@@ -289,11 +289,11 @@ class AnalysisManager:
     def set_filter(self, analysis_id, name, filter_json):
         # delete old filters
             
-            # create new associations
-            query    = "INSERT INTO filter (analysis_id, name, filter) VALUES "
-            subquery = "({0}, '{1}', '{2}'')"
-            query = query + ', '.join([subquery.format(analysis_id, f['name'], f['filter']) for f in data["filters"]])
-            db_engine.execute(query)
+        # create new associations
+        query    = "INSERT INTO filter (analysis_id, name, filter) VALUES "
+        subquery = "({0}, '{1}', '{2}'')"
+        query = query + ', '.join([subquery.format(analysis_id, f['name'], f['filter']) for f in data["filters"]])
+        db_engine.execute(query)
         db_engine.execute("UPDATE analysis SET {0}update_date=CURRENT_TIMESTAMP WHERE id={1}".format("setting='{0}', ".format(json.dumps(setting)), analysis_id))
 
 

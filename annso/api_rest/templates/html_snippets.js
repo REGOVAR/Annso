@@ -30,7 +30,7 @@ var filter_condition_template = "<li class=\"condition {0}\">\
 var filter_set_template = "<li class=\"condition {0}\">\
     <button onclick=\"javascript:filter_toggle_condition(this);\">\
         <i class=\"fa\" aria-hidden=\"true\">&nbsp;</i>\
-        <span>{1} <b class=\"fa {2}\" aria-hidden=\"true\">{3}</b></span>\
+        <span>{1} <b class=\"fa {2}\" aria-hidden=\"true\"></b> {3}</span>\
     </button>\
     <button class=\"fa delete\" onclick=\"javascript:ui.remove_afilter_condition(this);\">&nbsp;</button>\
     <button class=\"fa edit\" onclick=\"javascript:ui.edit_afilter_condition(this);\">&nbsp;</button>\

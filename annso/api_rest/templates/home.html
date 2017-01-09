@@ -130,10 +130,10 @@
                             </form>
                             <div style="padding:10px; margin-left:75px; border-left: 1px solid #ddd;">
                                 <div class="btn-group" data-toggle="buttons">
-                                    <label class="btn btn-default active" onclick="javascript:ui.select_submenu('quick');">
+                                    <label class="btn btn-default" onclick="javascript:ui.select_submenu('quick');">
                                         <input type="radio" checked>  <i class="fa fa-bolt" aria-hidden="true"></i>
                                     </label>
-                                    <label class="btn btn-default" onclick="javascript:ui.select_submenu('filter');">
+                                    <label class="btn btn-default active" onclick="javascript:ui.select_submenu('filter');">
                                         <input type="radio">  <i class="fa fa-filter" aria-hidden="true"></i>
                                     </label>
                                         <!-- <label class="btn btn-default" onclick="javascript:ui.select_submenu('expert');">
@@ -304,7 +304,7 @@
                                 <!--                    -->
                                 <!-- QUICK FILTERS MENU -->
                                 <!--                    -->
-                                <div id="filters_panel_menu_quick" class="col-md-2 browser-panel">
+                                <div id="filters_panel_menu_quick" class="col-md-2 browser-panel collapse">
                                     <a class="btn section" style="display:block; text-align:left;" role="button" data-toggle="collapse" href="#filters_panel_menu_quick_f" aria-expanded="false" aria-controls="filters_panel_menu_quick_f">
                                         <i class="fa fa-cubes" style="width:20px; text-align:center;" aria-hidden="true"></i> Saved filters 
                                         <span style="float:right;">
@@ -429,19 +429,19 @@
                                 <!--              -->
                                 <!-- FILTERS MENU -->
                                 <!--              -->
-                                <div id="filters_panel_menu_filter" class="col-md-2 browser-panel collapse">
-                                    <a class="btn section" style="display:block; text-align:left;" role="button" data-toggle="collapse" href="#filters_panel_menu_filter_f" aria-expanded="false" aria-controls="filters_panel_menu_filter_f">
+                                <div id="filters_panel_menu_filter" class="col-md-2 browser-panel">
+                                    <a class="btn section" style="display:block; text-align:left;" role="button" data-toggle="collapse" href="#filters_panel_menu_filter_f" aria-expanded="true" aria-controls="filters_panel_menu_filter_f">
                                         <i class="fa fa-cubes" style="width:20px; text-align:center;" aria-hidden="true"></i> Saved filters 
                                         <span style="float:right;">
                                             <span id="selection_count" class="badge"></span>&nbsp;<i class="fa fa-chevron-right" aria-hidden="true" style="width:20px; text-align:center;"></i>
                                         </span>
                                     </a>
-                                    <div id="filters_panel_menu_filter_f" class="collapse">
+                                    <div id="filters_panel_menu_filter_f" class="">
                                         <ul>
                                         </ul>
                                     </div>
 
-                                    <a class="btn section" style="display:block; text-align:left;" role="button" data-toggle="collapse" href="#filters_panel_menu_filter_c" aria-expanded="false" aria-controls="filters_panel_menu_filter_c">
+                                    <a class="btn section" style="display:block; text-align:left;" role="button" data-toggle="collapse" href="#filters_panel_menu_filter_c" aria-expanded="true" aria-controls="filters_panel_menu_filter_c">
                                         <i class="fa fa-filter" aria-hidden="true" style="width:20px; text-align:center;">&nbsp;</i> Filter
                                         <span style="float:right;">
                                             <span id="selection_count" class="badge">40</span>

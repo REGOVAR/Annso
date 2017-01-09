@@ -30,7 +30,7 @@ INSERT INTO public.attribute(analysis_id, sample_id, name, value) VALUES
 
 
 INSERT INTO public.variant_hg19(id, chr, pos, ref, alt) VALUES
--- Homo => Homo
+-- Homo alt => Homo alt
     (20000000, '1', 1, 'A', 'T'), -- *
     (20000001, '2', 1, 'A', 'T'), -- p,m
     (20000002, '2', 2, 'A', 'T'), -- p,f

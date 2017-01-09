@@ -623,7 +623,7 @@ function create_analysis()
 
 
 
-var filter_operator_display_map = {'==' : '=', '!=' : "&#8800;", '>' : "&gt;", '>=' : "&#8805;", '<' : "&lt;", '<=' : "&#8804;"};
+var filter_operator_display_map = {'==' : '=', '!=' : "&#8800;", '>' : "&gt;", '>=' : "&#8805;", '<' : "&lt;", '<=' : "&#8804;", "IN":"&#8712;", "NOTIN":"&#8713;"};
 var add_filter_ui_parent_elmt;
 function build_filter_ui(json)
 {
@@ -657,7 +657,7 @@ function build_filter_ui(json)
     }
     else if (["IN", "NOTIN"].includes(json[0]))
     {
-        return filter_set_template.format('check', "{0} {1}".format(json[1], json[0]), json[2][0], json[2][1], JSON.stringify(json));
+        return filter_set_template.format('check', "{0} {1}".format(json[1], filter_operator_display_map[json[0]]), json[2][0], json[2][1], JSON.stringify(json));
     }
     else
     {
