@@ -59,12 +59,12 @@ function AnnsoControler () {
         {
             url: rootURL + "/analysis",
             type: "POST",
-            data: "{\"name\" : \""+ analysis_name +"\", \"template_id\" : " + template_id + "}",
+            data: '{"name" : "{0}", "template_id" : {1}}'.format(name, template_id),
             async: false
         }).fail(function() { display_error("TODO : network error"); })
-        .done(function(data)
+        .done(function(json)
         {
-            analysis.load_analysis(data);
+            analysis.load_analysis(json['data']['id']);
         });
     };
 
@@ -73,7 +73,7 @@ function AnnsoControler () {
     // Load an analysis from server
     this.load_analysis = function (id)
     {
-        $.ajax({ url: rootURL + "/analysis/" + id, type: "GET", async: false}).fail(function() { display_error("TODO : network error"); })
+        $.ajax({ url: "{0}/analysis/{1}".format(rootURL, id), type: "GET", async: false}).fail(function() { display_error("TODO : network error"); })
         .done(function(json)
         {
             if (json["success"])
@@ -201,7 +201,6 @@ function AnnsoControler () {
 
     this.save_filter = function (name)
     {
-        debugger;
         if (this.filter_mode == "quick")
         {
 
@@ -218,7 +217,11 @@ function AnnsoControler () {
             async: false}).fail(function() { display_error("TODO : network error"); })
         .done(function(json)
         {
-            if (!json["success"])
+            if (json["success"])
+            {
+                analysis.analysis.filters[json.data['id']] = json.data;
+            }
+            else
             {
                 error(json);
             }
@@ -352,6 +355,10 @@ function AnnsoUIControler ()
 
 
 
+    this.variant_display = function (display_mode)
+    {
+        // display_mode = table | list
+    };
 
 
 
@@ -384,10 +391,36 @@ function AnnsoUIControler ()
     // ------------------------------------------------------------
     // UI ACTIONS
 
-    this.variant_display = function (display_mode)
+    this.create_analysis = function ()
     {
-        // display_mode = table | list
+        var analysis_name = $('#modal_new_analysis_name').val();
+        var template_id = -1;
+
+        if (analysis_name != "")
+        {
+            analysis.new_analysis(analysis_name, template_id);
+        }
+        else
+        {
+            alert("Thanks to give a name to your analyse.");
+            return;
+        }
+
+        if (!analysis.is_valid())
+        {
+            alert ("TODO : reset whole IHM");
+        }  
+
+        $('#modal_new_analysis').modal('hide');
     };
+
+
+    this.tus_upload = function()
+    {
+        // Start or continue an upload of file with TUS protocol
+        
+    }
+
 
 
     this.reset_filter = function (id)
@@ -664,30 +697,7 @@ var ui = new AnnsoUIControler;
 
 
 
-function create_analysis()
-{
-    var analysis_name = $('#modal_new_analysis_name').val();
-    var template_id = -1;
 
-    if (analysis_name != "")
-    {
-        analysis_controler.new_analysis(analysis_name, template_id);
-    }
-    else
-    {
-        alert("Thanks to give a name to your analyse.");
-        return;
-    }
-
-    if (analysis_controler.is_valid())
-    {
-        load_analysis();
-    }
-    else
-    {
-        alert ("TODO : reset whole IHM");
-    }  
-};
 
 
 

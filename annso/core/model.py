@@ -66,8 +66,16 @@ Analysis.public_fields = ["id", "name", "template_id", "creation_date", "update_
 Template.public_fields = ["id", "name", "author", "description", "version", "creation_date", "update_date"]
 Sample.public_fields   = ["id", "name", "comments", "is_mosaic"]
 File.public_fields     = ["id", "filename", "upload_offset", "size", "type", "import_date"]
+Filter.public_fields   = ["id", "analysis_id", "name", "filter", "description"]
 
 
+def export_client_filter(self, fields=None):
+    result = {}
+    if fields is None:
+        fields = Filter.public_fields
+    for f in fields:
+        result.update({f : eval("self." + f)})
+    return result
 
 
 def export_client_sample(self, fields=None):
@@ -111,3 +119,4 @@ def new_sample_file_from_tus(filename, file_size):
 Analysis.export_client = export_client_analysis 
 Sample.new_from_tus = new_sample_file_from_tus
 Sample.export_client = export_client_sample
+Filter.export_client = export_client_filter

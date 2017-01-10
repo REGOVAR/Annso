@@ -281,8 +281,8 @@ class AnalysisHandler:
     async def new_filter(self, request):
         analysis_id = request.match_info.get('analysis_id', -1)
         data = await request.json()
-        annso.analysis.save_filter(analysis_id, data['name'], data['filter'])
-        return rest_success()
+        result = annso.analysis.save_filter(analysis_id, data['name'], data['filter'])
+        return rest_success(result)
 
     async def set_filter(self, request):
         filter_id = request.match_info.get('filter_id', -1)

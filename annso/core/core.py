@@ -80,12 +80,28 @@ class FileManager:
         self.fields_map = {}
         self.db_map = {}
 
-    # build the sql query according to the annso filtering parameter and return result as json data
-    def get_databases(self):
-        return self.db_map
 
-    def get_fields(self):
-        return self.fields_map
+    def get_from_id(self, id):
+        return db_session.query(File).filter_by(id=id).first();
+
+
+    def update(self, id, json_data):
+        file = db_session.query(File).filter_by(id=id).first();
+        if file is None:
+            raise AnnsoException()
+        return file.update(json_data)
+
+    def upload_finish(self, id, checksum, checksum_type):
+        # move file to sample directory
+
+        # register sample in the database
+
+        # parse vcf
+
+        P
+        pass:
+
+
 
 
  
@@ -155,7 +171,7 @@ class AnalysisManager:
         instance = None
         db_session.begin(nested=True)
         try:
-            instance = Analysis(name=name, creation_date=datetime.datetime.now(), update_date=datetime.datetime.now())
+            instance = Analysis(name=name, creation_date=datetime.datetime.now(), update_date=datetime.datetime.now(), setting='{"fields" : [2,3,4,5,6,8,9], "filter":["AND", []]}')
             db_session.add(instance)
             db_session.commit() # commit the save point into the session (opened by the .begin() before the try:)
             db_session.commit() # commit into the database.
@@ -175,10 +191,14 @@ class AnalysisManager:
             "creation_date" : analysis.creation_date.ctime(),
             "template_id" : analysis.t_id,
             "template_name" : analysis.t_name,
-            "setting" : json.loads(analysis.setting),
             "samples" : [],
             "attributes" : [],
             "filters" : {}}
+        if analysis.setting is not None and analysis.setting.strip() is not "":
+            result["setting"] = json.loads(analysis.setting)
+        else:
+            result["setting"] = '{"fields" : [2,3,4,5,6,8,9], "filter":["AND", []]}'
+
 
         # Get predefined filters set for this analysis
         query = "SELECT * FROM filter WHERE analysis_id = {0} ORDER BY name ASC;"
@@ -308,8 +328,19 @@ class AnalysisManager:
 
 
     def save_filter(self, analysis_id, name, filter_json):
-        query    = "INSERT INTO filter (analysis_id, name, filter) VALUES ({0}, '{1}', '{2}')".format(analysis_id, name, json.dumps(filter_json))
-        db_engine.execute(query)
+        global db_session
+        instance = None
+        db_session.begin(nested=True)
+        try:
+            instance = Filter(analysis_id=analysis_id, name=name, filter=json.dumps(filter_json))
+            db_session.add(instance)
+            db_session.commit() # commit the save point into the session (opened by the .begin() before the try:)
+            db_session.commit() # commit into the database.
+            return instance.export_client(), True
+        except IntegrityError as e:
+            db_session.rollback()
+        return None, False
+
 
     def update_filter(self, filter_id, name, filter_json):
         query    = "UPDATE filter SET name='{1}', filter='{2}' WHERE id={0}".format(filter_id, name, json.dumps(filter_json))

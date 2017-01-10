@@ -706,7 +706,7 @@
 
                             <div class="modal-footer">
                                 <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button> &nbsp; 
-                                <button type="button" class="btn btn-success" onclick="javascript:create_analysis();">Create</button>
+                                <button type="button" class="btn btn-success" onclick="javascript:ui.create_analysis();">Create</button>
                             </div>
                         </div>
                     </div>
@@ -732,7 +732,7 @@
                             <form class="form">
                                 <div class="input-group">
 
-                                    <input type="hidden" id="modal_new_file_tus_endpoint" name="modal_new_file_tus_endpoint" value="http://{{ hostname }}/sample/import">
+                                    <input type="hidden" id="modal_new_file_tus_endpoint" name="modal_new_file_tus_endpoint" value="http://{{ hostname }}/sample/upload">
                                     <input type="hidden" id="modal_new_file_tus_chunksize" name="modal_new_file_tus_chunksize" value="256000">
 
                                     <span class="input-group-addon"><i class="fa fa-file" aria-hidden="true"></i></span>
@@ -744,7 +744,7 @@
 
                             <div class="modal-footer">
                                 <button id="modal_new_file_cancel_btn" type="button" class="btn btn-default" data-dismiss="modal">Cancel</button> &nbsp; 
-                                <button id="modal_new_file_start_btn" type="button" class="btn btn-success" onclick="javascript:create_analysis();">Start import !</button>
+                                <button id="modal_new_file_start_btn" type="button" class="btn btn-success" onclick="javascript:ui.tus_upload();">Start import !</button>
                             </div>
                         </div>
                     </div>

@@ -161,7 +161,7 @@ class TusManager:
     def delete_file(self, request):
         fw = TusFileWrapper.from_request(request)
         os.unlink(fw.path)
-        pirus.files.delete(fw.id)
+        annso.sample.delete_files(fw.id)
         return TusManager.build_response(code=204)
 
 
@@ -197,52 +197,27 @@ class TusManager:
 # Custom wrapper for Pirus file
 class SampleFileWrapper (TusFileWrapper) :
     def __init__(self, id):
-        self.pfile = pirus.files.get_from_id(id, 0, ["name", "upload_offset", "path", "size"])
+        self.pfile = annso.file.get_from_id(id)
         self.id = id
-        self.name = self.pfile["name"]
-        self.upload_offset = self.pfile["upload_offset"]
-        self.path = self.pfile["path"]
-        self.size = self.pfile["size"]
+        self.name = self.pfile.name
+        self.upload_offset = self.pfile.upload_offset
+        self.path = self.pfile.path
+        self.size = self.pfile.size
         self.upload_url = "http://" + HOSTNAME + "/sample/upload/" + str(id)
 
     def save(self):
         try:
-            pirus.files.edit(self.id, {"upload_offset" : self.upload_offset, "status" : "UPLOADING"})
+            pirus.file.update(self.id, {"upload_offset" : self.upload_offset, "status" : "UPLOADING"})
         except Exception as error:
             return TusManager.build_response(code=500, body="Unexpected error occured : {}".format(error))
 
     def complete(self, checksum=None, checksum_type="md5"):
         try:
-            pirus.files.upload_finish(self.id, checksum, checksum_type)
+            pirus.file.upload_finish(self.id, checksum, checksum_type)
         except Exception as error:
             return TusManager.build_response(code=500, body="Unexpected error occured : {}".format(error))
         
 
-
-
-# Custom wrapper for Pirus pipeline
-class PirusPipelineWrapper (TusFileWrapper) :
-    def __init__(self, id):
-        self.ppipe = pirus.pipelines.get_from_id(id)
-        self.id = self.ppipe.id
-        self.name = self.ppipe.name
-        self.upload_offset = self.ppipe.upload_offset
-        self.path = self.ppipe.pipeline_file
-        self.size = self.ppipe.size
-        self.upload_url = self.ppipe.upload_url
-
-    def save(self):
-        # Update upload status of the pipe
-        self.ppipe.upload_offset = self.upload_offset
-        self.ppipe.status = "UPLOADING"
-        self.ppipe.save()
-
-    def complete(self):
-        # Save pirus package on the server plugins directory
-        try:
-            pipeline = pirus.pipelines.install(self.ppipe.id)
-        except Exception as error:
-            return TusManager.build_response(code=500, body="Unexpected error occured : {}".format(error))
 
 
 
