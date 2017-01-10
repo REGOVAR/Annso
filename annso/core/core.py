@@ -37,6 +37,7 @@ class Core:
         self.sample = SampleManager()
         self.variant = VariantManager()
         self.filter = FilterEngine()
+        self.file = FileManager()
         # self.selection = SelectionManager()
 
         # Todo
@@ -66,6 +67,25 @@ class Core:
 
 
         return Gene("GJB2", [])
+    
+
+ 
+
+
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
+# FILE MANAGER
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
+class FileManager:
+    def __init__(self):
+        self.fields_map = {}
+        self.db_map = {}
+
+    # build the sql query according to the annso filtering parameter and return result as json data
+    def get_databases(self):
+        return self.db_map
+
+    def get_fields(self):
+        return self.fields_map
 
 
  
@@ -268,6 +288,7 @@ class AnalysisManager:
         if "attributes" in data.keys():
             # create new attributes
             pattern = "({0}, {1}, '{2}', '{3}')"
+            data['attributes'] = [a for a in data['attributes'] if a['name'] != ""]
             query   = ', '.join([pattern.format(analysis_id, sid, att['name'], att['samples_value'][sid]) for att in data['attributes'] for sid in att['samples_value']])
             # check if query seems good then apply change
             if query != "":
@@ -286,15 +307,13 @@ class AnalysisManager:
 
 
 
-    def set_filter(self, analysis_id, name, filter_json):
-        # delete old filters
-            
-        # create new associations
-        query    = "INSERT INTO filter (analysis_id, name, filter) VALUES "
-        subquery = "({0}, '{1}', '{2}'')"
-        query = query + ', '.join([subquery.format(analysis_id, f['name'], f['filter']) for f in data["filters"]])
+    def save_filter(self, analysis_id, name, filter_json):
+        query    = "INSERT INTO filter (analysis_id, name, filter) VALUES ({0}, '{1}', '{2}')".format(analysis_id, name, json.dumps(filter_json))
         db_engine.execute(query)
-        db_engine.execute("UPDATE analysis SET {0}update_date=CURRENT_TIMESTAMP WHERE id={1}".format("setting='{0}', ".format(json.dumps(setting)), analysis_id))
+
+    def update_filter(self, filter_id, name, filter_json):
+        query    = "UPDATE filter SET name='{1}', filter='{2}' WHERE id={0}".format(filter_id, name, json.dumps(filter_json))
+        db_engine.execute(query)
 
 
     def delete_filter(self, filter_id):

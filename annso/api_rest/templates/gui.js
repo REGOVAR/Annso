@@ -105,10 +105,35 @@ function AnnsoControler () {
         {
             samples.push(s);
         });
-        var attributes = [];
-        $.each(analysis.analysis.attributes, function(aid, a) 
+
+        // First build attribute list from the HMI
+        var attributes={};
+        $('#browser_samples_table th input').each(function (i)
         {
-            attributes.push(a);
+            var value = $(this).val();
+            attributes[i+1] = (value == "" || !/^[a-z0-9]+$/i.test(value)) ? null : {'name':value, 'samples_value': {}};
+        });
+
+        $('#browser_samples_table tbody tr').each (function (i)
+        {
+            var sample_id = $(this).attr("id").split('_')[3];
+            $(this).find('input').each( function (i)
+            {
+                // ignore first input as it's for sample's name.
+                if (i == 0) return;
+
+                var value = $(this).val();
+                if (attributes[i] != null)
+                {
+                    attributes[i]['samples_value'][sample_id] = (value == "" || !/^[a-z0-9]+$/i.test(value)) ? "" : value;
+                }
+            });
+        });
+
+        analysis.analysis.attributes = [];
+        $.each(attributes, function(aid, a) 
+        {
+            analysis.analysis.attributes.push(a);
         });
 
         $.ajax({ 
@@ -116,7 +141,7 @@ function AnnsoControler () {
             type: "PUT", 
             data: JSON.stringify({
                 "samples" : samples,
-                "attributes" : attributes,
+                "attributes" : analysis.analysis.attributes,
                 "fields" : analysis.analysis.fields,
                 "filter" : analysis.analysis.filter
             }),
@@ -176,6 +201,7 @@ function AnnsoControler () {
 
     this.save_filter = function (name)
     {
+        debugger;
         if (this.filter_mode == "quick")
         {
 
@@ -185,21 +211,14 @@ function AnnsoControler () {
 
         }
 
-        $.ajax({ url: "{0}/analysis/{1}/savefilter".format(rootURL, id), type: "GET", async: false}).fail(function() { display_error("TODO : network error"); })
+        $.ajax({ 
+            url: "{0}/analysis/{1}/savefilter".format(rootURL, analysis.analysis.id), 
+            type: "POST", 
+            data: JSON.stringify({'name': name, 'filter':analysis.analysis.filter}),
+            async: false}).fail(function() { display_error("TODO : network error"); })
         .done(function(json)
         {
-            if (json["success"])
-            {
-                // Init model
-                analysis.analysis = new Analysis(json["data"]);
-                analysis.filter_mode = "advanced";
-                analysis.qfilter = [];
-
-
-                // Update view
-                ui.start_analysis();
-            }
-            else
+            if (!json["success"])
             {
                 error(json);
             }
@@ -284,8 +303,86 @@ function AnnsoUIControler ()
     };
 
 
+
+
+
+
+
+
     // ------------------------------------------------------------
-    // TOOLBARS ACTIONS
+    // DISPLAY method (used to refresh UI according to the model)
+
+    this.display_sample_header = function(flag)
+    {
+        if (!flag)
+        {
+            $('#browser_samples').html("<span class=\"maincontent_placeholder\">&#11172; Import and select sample(s) you want to analyse.</span>");
+        }
+        else
+        {
+            var html = "";
+            $.each(analysis.analysis.attributes, function(id, attr) 
+            {
+                html += sample_selection_table_attribute.format("th", "Attribute name", attr['name']);
+            });
+            $('#browser_samples').html(sample_selection_table_header.format(html));
+        }
+    }
+
+    this.display_saved_filter = function()
+    {
+        var html = "";
+        if (Object.keys(analysis.analysis.filters).length == 0)
+        {
+            html = filter_save_filter_empty;
+        }
+        else
+        {
+            $.each(analysis.analysis.filters, function(fid, f) 
+            {
+                html += filter_save_filter_row.format(fid, f['name']);
+            });
+        }
+
+        $('#filters_panel_menu_quick_f > ul').html(html);
+        $('#filters_panel_menu_filter_f > ul').html(html);
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    // ------------------------------------------------------------
+    // UI ACTIONS
 
     this.variant_display = function (display_mode)
     {
@@ -323,10 +420,12 @@ function AnnsoUIControler ()
         filter_name = $('#modal_save_filter_name').val();
 
         // Update data
-        analysis.analysis.save_filter(filter_name);
+        analysis.save_filter(filter_name);
 
         // Refresh ui
-        // TODO
+        $('#modal_new_analysis').modal('hide');
+        ui.display_saved_filter();
+
     };
 
 
@@ -506,41 +605,14 @@ function AnnsoUIControler ()
         // Reset UI filter
         $('#filters_panel_menu_filter_c > ul').html(build_filter_ui(analysis.analysis.filter));
         // Reset UI saved filters
-        var html = "";
-        if (Object.keys(analysis.analysis.filters).length == 0)
-        {
-            html = filter_save_filter_empty;
-        }
-        else
-        {
-            $.each(analysis.analysis.filters, function(fid, f) 
-            {
-                html += filter_save_filter_row.format(fid, f['name']);
-            });
-        }
-
-        $('#filters_panel_menu_quick_f > ul').html(html);
-        $('#filters_panel_menu_filter_f > ul').html(html);
+        ui.display_saved_filter();
     };
 
 
 
-    this.display_sample_header = function(flag)
-    {
-        if (!flag)
-        {
-            $('#browser_samples').html("<span class=\"maincontent_placeholder\">&#11172; Import and select sample(s) you want to analyse.</span>");
-        }
-        else
-        {
-            var html = "";
-            $.each(analysis.analysis.attributes, function(id, attr) 
-            {
-                html += sample_selection_table_attribute.format("th", "Attribute name", attr['name']);
-            });
-            $('#browser_samples').html(sample_selection_table_header.format(html));
-        }
-    }
+
+
+
 
 
 

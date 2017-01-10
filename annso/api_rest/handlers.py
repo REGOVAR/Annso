@@ -275,18 +275,24 @@ class AnalysisHandler:
 
     def get_filters(self, request):
         analysis_id = request.match_info.get('analysis_id', -1)
-        result = annso.filter.get_filters(analysis_id)
+        result = annso.analysis.get_filters(analysis_id)
         return rest_success(result)
+
+    async def new_filter(self, request):
+        analysis_id = request.match_info.get('analysis_id', -1)
+        data = await request.json()
+        annso.analysis.save_filter(analysis_id, data['name'], data['filter'])
+        return rest_success()
 
     async def set_filter(self, request):
         filter_id = request.match_info.get('filter_id', -1)
         data = await request.json()
-        annso.filter.set_filter(filter_id, data)
+        annso.analysis.update_filter(filter_id, data['name'], data['filter'])
         return rest_success()
 
     def delete_filter(self, request):
         filter_id = request.match_info.get('filter_id', -1)
-        annso.delete_filter(filter_id)
+        annso.analysis.delete_filter(filter_id)
         return rest_success()
 
 

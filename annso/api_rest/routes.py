@@ -61,7 +61,7 @@ app.router.add_route('POST',   "/v1/analysis/{analysis_id}/filtering",  analysis
 
 
 app.router.add_route('GET',    "/v1/analysis/{analysis_id}/filters",  analysisHandler.get_filters)
-app.router.add_route('POST',   "/v1/analysis/{analysis_id}/savefilter",  analysisHandler.set_filter)
+app.router.add_route('POST',   "/v1/analysis/{analysis_id}/savefilter",  analysisHandler.new_filter)
 app.router.add_route('PUT',    "/v1/filter/{analysis_id}",  analysisHandler.set_filter)
 app.router.add_route('DELETE', "/v1/filter/{filter_id}",  analysisHandler.delete_filter)
 
