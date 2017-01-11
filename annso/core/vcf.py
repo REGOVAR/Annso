@@ -117,7 +117,7 @@ def exec_sql_query(raw_sql):
 
 
 
-def import_vcf(filepath, db_ref_suffix="_hg19"):
+def import_vcf(file_id, filepath, db_ref_suffix="_hg19"):
     global db_session
 
     start_0 = datetime.datetime.now()
@@ -135,6 +135,11 @@ def import_vcf(filepath, db_ref_suffix="_hg19"):
         samples = {i : get_or_create(db_session, Sample, name=i)[0] for i in list((vcf_reader.header.samples))}
         db_session.commit()
 
+        # Associate sample to the file
+        ipdb.set_trace()
+        db_engine.execute("INSERT INTO sample_file (sample_id, file_id) VALUES {0};".format( ','.join(["({0}, {1})".format(samples[sid].id, file_id) for sid in samples])))
+
+
         # console verbose
         bashCommand = 'grep -v "^#" ' + str(filepath) +' | wc -l'
         if filepath.endswith(".vcf.gz"):
@@ -148,7 +153,7 @@ def import_vcf(filepath, db_ref_suffix="_hg19"):
 
         # parsing vcf file
         print("Importing file ", filepath, "\n\r\trecords  : ", records_count, "\n\r\tsamples  :  (", len(samples.keys()), ") ", reprlib.repr([s for s in samples.keys()]), "\n\r\tstart    : ", start)
-        bar = Bar('\tparsing  : ', max=records_count, suffix='%(percent).1f%% - %(elapsed_td)s')
+        # bar = Bar('\tparsing  : ', max=records_count, suffix='%(percent).1f%% - %(elapsed_td)s')
         sql_head1 = "INSERT INTO variant{0} (chr, pos, ref, alt, is_transition) VALUES ".format(db_ref_suffix)
         sql_pattern2 = "INSERT INTO sample_variant" + db_ref_suffix + " (sample_id, variant_id, chr, pos, ref, alt, genotype, deepth) SELECT {0}, id, '{1}', {2}, '{3}', '{4}', '{5}', {6} FROM variant" + db_ref_suffix + " WHERE chr='{1}' AND pos={2} AND ref='{3}' AND alt='{4}' ON CONFLICT DO NOTHING;"
         sql_tail = " ON CONFLICT DO NOTHING;"
@@ -156,7 +161,7 @@ def import_vcf(filepath, db_ref_suffix="_hg19"):
         sql_query2 = ""
         count = 0
         for r in vcf_reader: 
-            bar.next()
+            # bar.next()
             chrm = normalize_chr(str(r.chrom))
             
             for sn in r.samples:
@@ -191,9 +196,9 @@ def import_vcf(filepath, db_ref_suffix="_hg19"):
                         sql_query1 = ""
                         sql_query2 = ""
 
-        bar.finish()
+        # bar.finish()
         end = datetime.datetime.now()
-        print("\tparsing done   : " , end, " => " , (end - start).seconds, "s")
+        # print("\tparsing done   : " , end, " => " , (end - start).seconds, "s")
         transaction1 = sql_head1 + sql_query1[:-1] + sql_tail
         transaction2 = sql_query2
         db_engine.execute(transaction1 + transaction2)
@@ -201,13 +206,13 @@ def import_vcf(filepath, db_ref_suffix="_hg19"):
         current = 0
         while job_in_progress > 0:
             if current != job_in_progress:
-                print ("\tremaining sql job : ", job_in_progress)
+                # print ("\tremaining sql job : ", job_in_progress)
                 current = job_in_progress
             pass
 
         end = datetime.datetime.now()
-        print("\tdb import done : " , end, " => " , (end - start).seconds, "s")
-        print("")
+        # print("\tdb import done : " , end, " => " , (end - start).seconds, "s")
+        # print("")
 
     end = datetime.datetime.now()
     print("IMPORT ALL VCF FILES DONE in ", (end - start_0).seconds), "s"

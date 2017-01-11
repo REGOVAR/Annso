@@ -259,6 +259,7 @@ function AnnsoUIControler ()
 {
 
     this.current_tab = "welcom";
+    this.tus_uploader = null;
 
     // ------------------------------------------------------------
     // GLOBAL MENUS / TAB NAVIGATION 
@@ -418,7 +419,54 @@ function AnnsoUIControler ()
     this.tus_upload = function()
     {
         // Start or continue an upload of file with TUS protocol
-        
+        if (this.tus_uploader != null)
+        {
+            alert("Upload already in progress.");
+            return;
+        }
+
+
+        if (!tus.isSupported) 
+        {
+            $('#modal_import_sample_file .modal-body').html("TUS Not supported ! Upload not available with this browser");
+        }
+
+        var file = $("#modal_import_file_tus_localinput").prop('files')[0];
+        var chunkSize = parseInt($('#modal_new_file_tus_chunksize').val(), 10);
+        console.log("selected file", file);
+
+
+        if (isNaN(chunkSize)) 
+        {
+            chunkSize = Infinity;
+        }
+        var options = {
+            endpoint: $('#modal_new_file_tus_endpoint').val(),
+            resume: true,
+            chunkSize: chunkSize,
+            metadata: { 'filename': file.name },
+            onError: function(error) 
+            {
+                $("#modal_import_file_tus_localinput").val("");
+                display_error("Failed because: " + error, "alert", "tusFileProgress");
+                this.tus_uploader = null;
+            },
+            onProgress: function(bytesUploaded, bytesTotal) 
+            {
+                var percentage = (bytesUploaded / bytesTotal * 100).toFixed(2);
+                console.log(bytesUploaded, bytesTotal, percentage + "%");
+                buildProgressBar(percentage, "modal_new_file_progress");
+            },
+            onSuccess: function() 
+            {
+                $("#modal_import_file_tus_localinput").val("");
+                $("#modal_new_file_progress").html("");
+                this.tus_uploader = null;
+            }
+        }
+
+        this.tus_uploader = new tus.Upload(file, options);
+        this.tus_uploader.start();
     }
 
 
@@ -1412,4 +1460,21 @@ function get_file_icon(extension)
         }
     }
     return '<i class="fa fa-file-o" aria-hidden="true"></i>'
+}
+
+function buildProgressBar(percentage, containerId) 
+{
+
+    var html = "<div class='progress'>\
+                <div class='progress-bar progress-bar-striped active' role='progressbar' aria-valuenow='" + percentage + "' aria-valuemin='0' aria-valuemax='0' \
+                    style='min-width: 2em; width: " + percentage + "%;'>\
+                    " + percentage + "% \
+                </div>\
+            </div>";
+
+    if (containerId !== null)
+    {
+        $("#" + containerId).html(html);
+    }
+    return html;
 }

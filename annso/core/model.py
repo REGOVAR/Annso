@@ -101,22 +101,22 @@ def export_client_analysis(self, fields=None):
 
 
 
-def new_sample_file_from_tus(filename, file_size):
+def new_file_from_tus(filename, file_size):
     global db_session
-    sfile = File()
-    sfile.filename = filename
-    sfile.type = os.path.splitext(filename)[1][1:].strip().lower()
-    sfile.path = os.path.join(TEMP_DIR, str(uuid.uuid4()))
-    sfile.size = int(file_size)
-    sfile.upload_offset = 0
-    sfile.import_date = str(datetime.datetime.now().timestamp())
-    db_session.add(sfile)
+    file = File()
+    file.filename = filename
+    file.type = os.path.splitext(filename)[1][1:].strip().lower()
+    file.path = os.path.join(TEMP_DIR, str(uuid.uuid4()))
+    file.size = int(file_size)
+    file.upload_offset = 0
+    file.import_date = datetime.datetime.now()
+    db_session.add(file)
     db_session.commit()
-    return sfile
+    return file
 
 
 
 Analysis.export_client = export_client_analysis 
-Sample.new_from_tus = new_sample_file_from_tus
+File.new_from_tus = new_file_from_tus
 Sample.export_client = export_client_sample
 Filter.export_client = export_client_filter

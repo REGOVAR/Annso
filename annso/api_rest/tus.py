@@ -11,7 +11,7 @@ import uuid
 
 
 from aiohttp import web, MultiDict
-from core import *
+# from core import *
 
 
 
@@ -33,13 +33,17 @@ class TusFileWrapper:
     path = "<path where the file is saved on the server>"
     upload_url = "<url that the client shall used to upload the file>"
     
+    def start(self):
+        # Do something to start an upload (creating index in db by example)
+        pass
+
     def save(self):
         # Do something when the upload of a chunk of the file is done. Basicaly : save new offset position in a database
-        pass;
+        pass
 
     def complete(self):
         # Do something when the upload of the file is finished
-        pass;
+        pass
 
     @staticmethod
     def from_request(request):
@@ -51,21 +55,20 @@ class TusFileWrapper:
             return TusManager.build_response(code=404)
 
         # We can upload file or custom annotation db, we check model according to url
-        if "/sample/upload" in request.raw_path and annso.file.get_from_id(id) is not None:
-            return SampleFileWrapper(id)
-        # TODO : import wrapper for custom annotation db/csv
+        for k in TusManager.route_maping.keys():
+            if k in request.raw_path:
+                return TusManager.route_maping[k](id)
         return TusManager.build_response(code=404)
 
     @staticmethod
     def new_upload(request, filename, file_size):
         # Create and return the wrapper to manipulate the uploading file
-        if "/sample/upload" in request.raw_path :
-            pfile   = annso.sample.upload_init(filename, file_size)
-            return SampleFileWrapper(pfile["id"])
+        if request == None:
+            return TusManager.build_response(code=404)
 
-        # if "/customdb/upload" in request.raw_path :
-        #     pipe = pirus.pipeline.upload_init(filename, file_size)
-        #     return PirusPipelineWrapper(pipe["id"])
+        for k in TusManager.route_maping.keys():
+            if k in request.raw_path:
+                return TusManager.route_maping[k].new_upload(request, filename, file_size)
 
 
 
@@ -81,6 +84,9 @@ class TusFileWrapper:
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 class TusManager:
 
+    route_maping = {}
+
+
     @staticmethod
     def build_response(code, headers={}, body=""):
         h = {'Tus-Resumable' : TUS_API_VERSION,  'Tus-Version' : TUS_API_VERSION_SUPPORTED}
@@ -93,6 +99,7 @@ class TusManager:
     def resume(self, request):
         fw = TusFileWrapper.from_request(request)
         return TusManager.build_response(code=200, headers={ 'Upload-Offset' : str(fw.upload_offset), 'Cache-Control' : 'no-store' })
+
 
 
     # PATCH request done by client to upload a chunk a of file.
@@ -110,7 +117,6 @@ class TusManager:
             with open(fw.path, "br+") as f:
                 f.seek( file_offset )
                 f.write(data)
-
         except IOError:
             return TusManager.build_response(code=500, body="Unable to write file chunk on the the server :(")
 
@@ -121,6 +127,7 @@ class TusManager:
             fw.complete()
         headers = { 'Upload-Offset' : str(fw.upload_offset), 'Tus-Temp-Filename' : str(fw.id) }
         return TusManager.build_response(code=200, headers=headers)
+
 
 
     # OPTIONS request done by client to know how the server is convigured
@@ -165,6 +172,7 @@ class TusManager:
         return TusManager.build_response(code=204)
 
 
+
     # GET request !!! Not implemented - Trash code !!!
     # def exists(self, request):
     #     metadata = {}
@@ -185,37 +193,6 @@ class TusManager:
 
 
 
-
-
-
-
-# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
-# PIRUS SPECIFIC IMPLEMENTATION 
-# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
-
-
-# Custom wrapper for Pirus file
-class SampleFileWrapper (TusFileWrapper) :
-    def __init__(self, id):
-        self.pfile = annso.file.get_from_id(id)
-        self.id = id
-        self.name = self.pfile.name
-        self.upload_offset = self.pfile.upload_offset
-        self.path = self.pfile.path
-        self.size = self.pfile.size
-        self.upload_url = "http://" + HOSTNAME + "/sample/upload/" + str(id)
-
-    def save(self):
-        try:
-            pirus.file.update(self.id, {"upload_offset" : self.upload_offset, "status" : "UPLOADING"})
-        except Exception as error:
-            return TusManager.build_response(code=500, body="Unexpected error occured : {}".format(error))
-
-    def complete(self, checksum=None, checksum_type="md5"):
-        try:
-            pirus.file.upload_finish(self.id, checksum, checksum_type)
-        except Exception as error:
-            return TusManager.build_response(code=500, body="Unexpected error occured : {}".format(error))
         
 
 

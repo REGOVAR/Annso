@@ -67,24 +67,13 @@ app.router.add_route('DELETE', "/v1/filter/{filter_id}",  analysisHandler.delete
 
 
 
-# app.router.add_route('GET',  "/v1/analysis/{analysis_id}/sample",     analysisHandler.get_analyses)
-# app.router.add_route('GET',  "/v1/analysis/{analysis_id}/sample/{sample_id}",     analysisHandler.get_analyses)
-# app.router.add_route('GET',  "/v1/analysis/{analysis_id}/sample/{sample_id}/variant",     analysisHandler.get_analyses)
-# app.router.add_route('GET',  "/v1/analysis/{analysis_id}/selection",     analysisHandler.get_analyses)
-# app.router.add_route('GET',  "/v1/analysis/{analysis_id}/selection/{selection_id}",     analysisHandler.get_analyses)
-# app.router.add_route('GET',  "/v1/analysis/{analysis_id}/selection/{selection_id}/variant",     analysisHandler.get_analyses)
 
-
-
-# app.router.add_route('GET',    "/v1/field",                fieldsHandler.get_fields)
-# app.router.add_route('GET',    "/v1/field/{field_id}",     fieldsHandler.get_field)
-
-
-app.router.add_route('POST',   "/v1/sample/upload",           SampleHandler.tus_upload_init)
-app.router.add_route('OPTIONS',"/v1/sample/upload",           SampleHandler.tus_config)
-app.router.add_route('HEAD',   "/v1/sample/upload/{file_id}", SampleHandler.tus_upload_resume)
-app.router.add_route('PATCH',  "/v1/sample/upload/{file_id}", SampleHandler.tus_upload_chunk)
-app.router.add_route('DELETE', "/v1/sample/upload/{file_id}", SampleHandler.tus_upload_delete)
+# TUS routes /!\ don't forget to also modify route mapping in handlers for the TUS manager (in handlers.py, search 'tus_manager.route_maping')
+app.router.add_route('POST',   "/v1/sample/upload",           sampleHandler.tus_upload_init)
+app.router.add_route('OPTIONS',"/v1/sample/upload",           sampleHandler.tus_config)
+app.router.add_route('HEAD',   "/v1/sample/upload/{file_id}", sampleHandler.tus_upload_resume)
+app.router.add_route('PATCH',  "/v1/sample/upload/{file_id}",   sampleHandler.tus_upload_chunk)
+app.router.add_route('DELETE', "/v1/sample/upload/{file_id}", sampleHandler.tus_upload_delete)
 
 
 

@@ -16,7 +16,7 @@ from urllib.parse import parse_qsl
 
 from config import *
 from core import *
-from api_rest.tus import tus_manager
+from api_rest.tus import *
 
 
 
@@ -146,7 +146,7 @@ class WebsiteHandler:
     @aiohttp_jinja2.template('home.html')
     def home(self, request):
         data = {
-            "hostname" : "annso.absolumentg.fr/v1",
+            "hostname" : HOST_P,
             "templates" : annso.template.get(), # return by default last 10 templates
             "analysis" : annso.analysis.get(),  # return by default last 10 analyses
             "annotations_db" :     annso.annotation_db.get_databases(),
@@ -332,6 +332,48 @@ class ReportHandler:
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
 # SAMPLE HANDLER
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
+
+
+# Customization of the TUS protocol for the download of sample files
+# Sample TUS wrapper
+class SampleFileWrapper (TusFileWrapper) :
+    def __init__(self, id):
+        self.file = annso.file.get_from_id(id)
+        if self.file is not None:
+            self.id = id
+            self.name = self.file.filename
+            self.upload_offset = self.file.upload_offset
+            self.path = self.file.path
+            self.size = self.file.size
+            self.upload_url = "http://" + HOST_P + "/sample/upload/" + str(id)
+        else:
+            return TusManager.build_response(code=500, body="Unknow id : {}".format(id))
+
+
+    def save(self):
+        try:
+            annso.file.update(self.id, {"upload_offset" : self.upload_offset, "status" : "UPLOADING"})
+        except Exception as error:
+            return TusManager.build_response(code=500, body="Unexpected error occured : {}".format(error))
+
+    def complete(self, checksum=None, checksum_type="md5"):
+        try:
+            annso.file.upload_finish(self.id, checksum, checksum_type)
+        except Exception as error:
+            return TusManager.build_response(code=500, body="Unexpected error occured : {}".format(error))
+
+    @staticmethod
+    def new_upload(request, filename, file_size):
+        # Create and return the wrapper to manipulate the uploading file
+        id = annso.file.upload_init(filename, file_size)
+        return SampleFileWrapper(id)
+
+
+# set mapping
+tus_manager.route_maping["/sample/upload"] = SampleFileWrapper
+
+
+
 class SampleHandler:
     def get_samples(self, request):
         # Generic processing of the get query
@@ -371,7 +413,7 @@ class SampleHandler:
     def tus_config(self, request):
         return tus_manager.options(request)
 
-    def tus_upload_init(self, request):
+    async def tus_upload_init(self, request):
         return tus_manager.creation(request)
 
     def tus_upload_resume(self, request):

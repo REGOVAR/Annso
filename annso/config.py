@@ -6,11 +6,14 @@ import os
 DEBUG          = True
 
 
-# HOST
+# HOST (internal)
 HOST           = "0.0.0.0"
 PORT           = "8100"
 VERSION        = "v1"
 HOSTNAME       = HOST + ":" + PORT + "/" + VERSION
+
+# HOST (public)
+HOST_P = "annso.absolumentg.fr/" + VERSION
 
 
 RANGE_DEFAULT = 20
