@@ -70,6 +70,9 @@ class Core:
         return Gene("GJB2", [])
     
 
+    def notify_all(self, json):
+        print ("Core Notify All : " + str(json))
+
  
 
 
@@ -83,14 +86,8 @@ class FileManager:
 
 
     def get_from_id(self, id):
-        return db_session.query(File).filter_by(id=id).first();
+        return db_session.query(File).filter_by(id=id).first()
 
-
-    def update(self, id, json_data):
-        file = db_session.query(File).filter_by(id=id).first();
-        if file is None:
-            raise AnnsoException()
-        return file.update(json_data)
 
 
 
@@ -113,12 +110,13 @@ class FileManager:
             Update finaly the status of the file to UPLOADED or CHECKED -> file ready to be used
         """
         # Retrieve file
+        ipdb.set_trace()
         file = File.from_id(file_id)
         if file == None:
-            raise AnnsoException("Unable to retrieve the pirus file with the provided id : " + file_id)
+            raise AnnsoException("Unable to retrieve the file with the provided id : " + file_id)
         # Move file
         old_path = file.path
-        new_path = os.path.join(FILES_DIR, str(uuid.uuid4()))
+        new_path = os.path.join(FILES_DIR, "{0}.{1}".format(uuid.uuid4(), file.type))
         os.rename(old_path, new_path)
         # If checksum provided, check that file is correct
         file_status = "UPLOADED"
@@ -130,9 +128,12 @@ class FileManager:
         file.upload_offset = file.size
         file.status = file_status
         file.path = new_path
-        file.save()
 
-        import_vcf(file.id, file.path)
+        db_session.add(file)
+        db_session.commit()
+
+        import_vcf(file.id, file.path, annso)
+
         # Notify all about the new status
         # msg = {"action":"file_changed", "data" : [pfile.export_client_data()] }
         # annso.notify_all(json.dumps(msg))

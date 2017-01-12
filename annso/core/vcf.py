@@ -17,9 +17,6 @@ from core.framework import *
 from core.model import *
 
 
-# To be removed
-from progress.bar import Bar
-
 
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
@@ -117,7 +114,7 @@ def exec_sql_query(raw_sql):
 
 
 
-def import_vcf(file_id, filepath, db_ref_suffix="_hg19"):
+def import_vcf(file_id, filepath, core=None, db_ref_suffix="_hg19"):
     global db_session
 
     start_0 = datetime.datetime.now()
@@ -135,6 +132,9 @@ def import_vcf(file_id, filepath, db_ref_suffix="_hg19"):
         samples = {i : get_or_create(db_session, Sample, name=i)[0] for i in list((vcf_reader.header.samples))}
         db_session.commit()
 
+        if core is not None:
+            core.notify_all({'msg':'import_vcf_start', 'data' : {'file_id' : file_id, 'samples' : [ {'id' : samples[s].id, 'name' : samples[s].name} for s in samples.keys()]}})
+
         # Associate sample to the file
         ipdb.set_trace()
         db_engine.execute("INSERT INTO sample_file (sample_id, file_id) VALUES {0};".format( ','.join(["({0}, {1})".format(samples[sid].id, file_id) for sid in samples])))
@@ -149,7 +149,7 @@ def import_vcf(file_id, filepath, db_ref_suffix="_hg19"):
         process = subprocess.Popen(bashCommand, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
         cmd_out = process.communicate()[0]
         records_count = int(cmd_out.decode('utf8'))
-        # records_count = 5000
+        records_current = 0
 
         # parsing vcf file
         print("Importing file ", filepath, "\n\r\trecords  : ", records_count, "\n\r\tsamples  :  (", len(samples.keys()), ") ", reprlib.repr([s for s in samples.keys()]), "\n\r\tstart    : ", start)
@@ -161,7 +161,10 @@ def import_vcf(file_id, filepath, db_ref_suffix="_hg19"):
         sql_query2 = ""
         count = 0
         for r in vcf_reader: 
-            # bar.next()
+            records_current += 1 
+            if core is not None:
+                core.notify_all({'msg':'import_vcf', 'data' : {'file_id' : file_id, 'progress_total' : records_count, 'progress_current' : records_current, 'progress_percent' : records_current / max(1,records_count)}})
+
             chrm = normalize_chr(str(r.chrom))
             
             for sn in r.samples:
@@ -215,4 +218,5 @@ def import_vcf(file_id, filepath, db_ref_suffix="_hg19"):
         # print("")
 
     end = datetime.datetime.now()
-    print("IMPORT ALL VCF FILES DONE in ", (end - start_0).seconds), "s"
+    if core is not None:
+        core.notify_all({'msg':'import_vcf_end', 'data' : {'file_id' : file_id}})

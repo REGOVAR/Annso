@@ -352,7 +352,10 @@ class SampleFileWrapper (TusFileWrapper) :
 
     def save(self):
         try:
-            annso.file.update(self.id, {"upload_offset" : self.upload_offset, "status" : "UPLOADING"})
+            f = annso.file.get_from_id(self.id)
+            db_session.add(f)
+            f.upload_offset=self.upload_offset
+            db_session.commit()
         except Exception as error:
             return TusManager.build_response(code=500, body="Unexpected error occured : {}".format(error))
 

@@ -102,10 +102,18 @@ def export_client_analysis(self, fields=None):
 
 
 def new_file_from_tus(filename, file_size):
+
+    def get_extension(filename):
+        f = os.path.splitext(filename.strip().lower())
+        t = f[1][1:]
+        if t == "gz":
+            return get_extension(f[0]) + f[1]
+        return t
+
     global db_session
     file = File()
     file.filename = filename
-    file.type = os.path.splitext(filename)[1][1:].strip().lower()
+    file.type = get_extension(filename)
     file.path = os.path.join(TEMP_DIR, str(uuid.uuid4()))
     file.size = int(file_size)
     file.upload_offset = 0
@@ -115,8 +123,16 @@ def new_file_from_tus(filename, file_size):
     return file
 
 
+def file_from_id(file_id):
+    return db_session.query(File).filter_by(id=file_id).first();
+
+
+
 
 Analysis.export_client = export_client_analysis 
+
 File.new_from_tus = new_file_from_tus
+File.from_id = file_from_id
+
 Sample.export_client = export_client_sample
 Filter.export_client = export_client_filter
