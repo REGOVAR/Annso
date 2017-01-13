@@ -30,8 +30,11 @@ from core.framework import *
 
 # Connect and map the engine to the database
 Base = automap_base()
-#db_engine = create_engine("postgresql://{0}:{1}@{2}:{3}/{4}".format(DATABASE_USER, DATABASE_PWD, DATABASE_HOST,  DATABASE_PORT, DATABASE_NAME))
+
+# TODO / FIXME : why the format with config option doesn't work ...
+# db_engine = create_engine("postgresql://{0}:{1}@{2}:{3}/{4}".format(DATABASE_USER, DATABASE_PWD, DATABASE_HOST,  DATABASE_PORT, DATABASE_NAME))
 db_engine = create_engine("postgresql://annso:annso@localhost/annso")
+
 Base.prepare(db_engine, reflect=True)
 Base.metadata.create_all(db_engine)
 db_session = Session(db_engine)
@@ -46,49 +49,40 @@ db_session = Session(db_engine)
 # MODEL DEFINITION - Build from the database (see sql scripts used to generate the database)
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
 
-
-Analysis = Base.classes.analysis
-Template = Base.classes.template
-Sample = Base.classes.sample
 Variant = Base.classes.variant_hg19
 SampleVariant = Base.classes.sample_variant_hg19
-Filter = Base.classes.filter
 Attribute = Base.classes.attribute
-File = Base.classes.file
-
 AnnotationDatabase = Base.classes.annotation_database
 AnnotationField = Base.classes.annotation_field
 
 
 
 
-Analysis.public_fields = ["id", "name", "template_id", "creation_date", "update_date"]
-Template.public_fields = ["id", "name", "author", "description", "version", "creation_date", "update_date"]
-Sample.public_fields   = ["id", "name", "comments", "is_mosaic"]
-File.public_fields     = ["id", "filename", "upload_offset", "size", "type", "import_date"]
-Filter.public_fields   = ["id", "analysis_id", "name", "filter", "description"]
-
-
-def export_client_filter(self, fields=None):
-    result = {}
-    if fields is None:
-        fields = Filter.public_fields
-    for f in fields:
-        result.update({f : eval("self." + f)})
-    return result
-
-
-def export_client_sample(self, fields=None):
-    result = {}
-    if fields is None:
-        fields = Sample.public_fields
-    for f in fields:
-        result.update({f : eval("self." + f)})
-    return result
 
 
 
-def export_client_analysis(self, fields=None):
+
+
+
+
+
+
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
+# ANALYSIS
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
+
+def analysis_from_id(analysis_id):
+    """
+        Retrieve File with the provided id in the database
+    """
+    return db_session.query(Analysis).filter_by(id=analysis_id).first();
+
+
+
+def analysis_to_json(self, fields=None):
+    """
+        export the file into json format with only requested fields
+    """
     result = {}
     if fields is None:
         fields = Analysis.public_fields
@@ -101,7 +95,101 @@ def export_client_analysis(self, fields=None):
 
 
 
+Analysis               = Base.classes.analysis
+Analysis.public_fields = ["id", "name", "template_id", "creation_date", "update_date"]
+Analysis.from_id       = analysis_from_id
+Analysis.to_json       = analysis_to_json 
+
+
+
+
+
+
+
+
+
+
+
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
+# TEMPLATE
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
+
+def template_from_id(template_id):
+    """
+        Retrieve Template with the provided id in the database
+    """
+    return db_session.query(Template).filter_by(id=template_id).first();
+
+
+
+Template               = Base.classes.template
+Template.public_fields = ["id", "name", "author", "description", "version", "creation_date", "update_date"]
+Template.from_id       = template_from_id 
+
+
+
+
+
+
+
+
+
+
+
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
+# SAMPLE
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
+
+def sample_from_id(sample_id):
+    """
+        Retrieve Sample with the provided id in the database
+    """
+    return db_session.query(Sample).filter_by(id=sample_id).first();
+
+
+
+def sample_to_json(self, fields=None):
+    """
+        export the sample into json format with only requested fields
+    """
+    result = {}
+    if fields is None:
+        fields = Sample.public_fields
+    for f in fields:
+        result.update({f : eval("self." + f)})
+    return result
+
+
+
+Sample               = Base.classes.sample
+Sample.public_fields = ["id", "name", "comments", "is_mosaic"]
+Sample.from_id       = sample_from_id
+Sample.to_json       = sample_to_json
+
+
+
+
+
+
+
+
+
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
+# FILE
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
+
+def file_from_id(file_id):
+    """
+        Retrieve File with the provided id in the database
+    """
+    return db_session.query(File).filter_by(id=file_id).first();
+
+
+
 def new_file_from_tus(filename, file_size):
+    """
+        Create a new File object (and entry in the database) with initial data for an upload with TUS protocol
+    """
 
     def get_extension(filename):
         f = os.path.splitext(filename.strip().lower())
@@ -123,16 +211,50 @@ def new_file_from_tus(filename, file_size):
     return file
 
 
-def file_from_id(file_id):
-    return db_session.query(File).filter_by(id=file_id).first();
+
+File               = Base.classes.file
+File.public_fields = ["id", "filename", "upload_offset", "size", "type", "import_date"]
+File.new_from_tus  = new_file_from_tus
+File.from_id       = file_from_id
 
 
 
 
-Analysis.export_client = export_client_analysis 
 
-File.new_from_tus = new_file_from_tus
-File.from_id = file_from_id
 
-Sample.export_client = export_client_sample
-Filter.export_client = export_client_filter
+
+
+
+
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
+# FILTER
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
+
+def filter_from_id(filter_id):
+    """
+        Retrieve Filter with the provided id in the database
+    """
+    return db_session.query(Filter).filter_by(id=filter_id).first();
+
+
+
+
+def filter_to_json(self, fields=None):
+    """
+        export the filter into json format with only requested fields
+    """
+    result = {}
+    if fields is None:
+        fields = Filter.public_fields
+    for f in fields:
+        result.update({f : eval("self." + f)})
+    return result
+
+
+
+Filter               = Base.classes.filter
+Filter.public_fields = ["id", "analysis_id", "name", "filter", "description"]
+Filter.from_id       = filter_from_id
+Filter.to_json       = filter_to_json
+
+

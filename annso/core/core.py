@@ -85,11 +85,6 @@ class FileManager:
         self.db_map = {}
 
 
-    def get_from_id(self, id):
-        return db_session.query(File).filter_by(id=id).first()
-
-
-
 
     def upload_init(self, filename, file_size, metadata={}):
         """ 
@@ -135,7 +130,7 @@ class FileManager:
         import_vcf(file.id, file.path, annso)
 
         # Notify all about the new status
-        # msg = {"action":"file_changed", "data" : [pfile.export_client_data()] }
+        # msg = {"action":"file_changed", "data" : [pfile.to_json_data()] }
         # annso.notify_all(json.dumps(msg))
         # TODO : check if run was waiting the end of the upload to start
 
@@ -177,12 +172,6 @@ class AnalysisManager:
 
 
 
-    def public_fields(self):
-        return Analysis.public_fields
-
-
-
-
     def get(self, fields=None, query=None, order=None, offset=None, limit=None, sublvl=0):
         """
             Generic method to get analysis metadata according to provided filtering options
@@ -211,7 +200,7 @@ class AnalysisManager:
             db_session.add(instance)
             db_session.commit() # commit the save point into the session (opened by the .begin() before the try:)
             db_session.commit() # commit into the database.
-            return instance.export_client(), True
+            return instance.to_json(), True
         except IntegrityError as e:
             db_session.rollback()
         return None, False
@@ -372,7 +361,7 @@ class AnalysisManager:
             db_session.add(instance)
             db_session.commit() # commit the save point into the session (opened by the .begin() before the try:)
             db_session.commit() # commit into the database.
-            return instance.export_client(), True
+            return instance.to_json(), True
         except IntegrityError as e:
             db_session.rollback()
         return None, False
@@ -537,7 +526,7 @@ class SampleManager:
     def get_from_id(self, sample_id, fields=None):
         global db_session
         sample = db_session.query(Sample).filter_by(id=sample_id).first()
-        return sample.export_client()
+        return sample.to_json()
 
 
 

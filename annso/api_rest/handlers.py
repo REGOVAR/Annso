@@ -338,7 +338,7 @@ class ReportHandler:
 # Sample TUS wrapper
 class SampleFileWrapper (TusFileWrapper) :
     def __init__(self, id):
-        self.file = annso.file.get_from_id(id)
+        self.file = File.from_id(id)
         if self.file is not None:
             self.id = id
             self.name = self.file.filename
@@ -352,7 +352,7 @@ class SampleFileWrapper (TusFileWrapper) :
 
     def save(self):
         try:
-            f = annso.file.get_from_id(self.id)
+            f = File.get_from_id(self.id)
             db_session.add(f)
             f.upload_offset=self.upload_offset
             db_session.commit()
@@ -380,7 +380,7 @@ tus_manager.route_maping["/sample/upload"] = SampleFileWrapper
 class SampleHandler:
     def get_samples(self, request):
         # Generic processing of the get query
-        fields, query, order, offset, limit = process_generic_get(request.query_string, annso.sample.public_fields())
+        fields, query, order, offset, limit = process_generic_get(request.query_string, Sample.public_fields())
         # Get range meta data
         range_data = {
             "range_offset" : offset,
@@ -440,7 +440,7 @@ class SampleHandler:
 class VariantHandler:
     def get_variants(self, request):
         # Generic processing of the get query
-        fields, query, order, offset, limit = process_generic_get(request.query_string, annso.variant.public_fields())
+        fields, query, order, offset, limit = process_generic_get(request.query_string, Variant.public_fields())
         # Get range meta data
         range_data = {
             "range_offset" : offset,
