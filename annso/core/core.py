@@ -34,7 +34,6 @@ class Core:
     def __init__(self):
         self.annotation_db = AnnotationDatabaseManager()
         self.analysis = AnalysisManager()
-        self.template = TemplateManager()
         self.sample = SampleManager()
         self.variant = VariantManager()
         self.filter = FilterEngine()
@@ -174,7 +173,7 @@ class AnalysisManager:
 
     def get(self, fields=None, query=None, order=None, offset=None, limit=None, sublvl=0):
         """
-            Generic method to get analysis metadata according to provided filtering options
+            Generic method to get analysis metadata according to provided filtering options.
         """
         global db_session
         if fields is None:
@@ -192,6 +191,9 @@ class AnalysisManager:
 
 
     def create(self, name, template_id=None):
+        """
+            Create a new analysis in the database.
+        """
         global db_session
         instance = None
         db_session.begin(nested=True)
@@ -206,8 +208,11 @@ class AnalysisManager:
         return None, False
         
 
-    def get_from_id(self, analysis_id):
 
+    def load(self, analysis_id):
+        """
+            Load all data about the analysis with the provided id and return result as JSON object.
+        """
         analysis = db_session.execute("SELECT a.id, a.name, a.update_date, a.creation_date, a.setting, t.name AS t_name, t.id AS t_id FROM analysis a LEFT JOIN template t ON a.template_id = t.id WHERE a.id = {0}".format(analysis_id)).first()
         result = {
             "id" : analysis.id, 
@@ -223,7 +228,6 @@ class AnalysisManager:
             result["setting"] = json.loads(analysis.setting)
         else:
             result["setting"] = '{"fields" : [2,3,4,5,6,8,9], "filter":["AND", []]}'
-
 
         # Get predefined filters set for this analysis
         query = "SELECT * FROM filter WHERE analysis_id = {0} ORDER BY name ASC;"
@@ -245,7 +249,6 @@ class AnalysisManager:
             else:
                 result["attributes"][-1]["samples_value"][r.sample_id] = r.value
 
-
         # Get Samples used for this analysis
         query = "SELECT s.id, s.name, s.comments, s.is_mosaic, asp.nickname, f.id as f_id, f.filename, f.import_date \
             FROM analysis_sample asp \
@@ -264,25 +267,21 @@ class AnalysisManager:
                 "filename" : r.filename,
                 "import_date" : r.import_date,
                 "attributes" : {}})
-
             for a in result["attributes"]:
                 if r.id in a["samples_value"].keys():
                     result["samples"][-1]["attributes"][a['name']] = a["samples_value"][r.id]
                 else :
                     result["samples"][-1]["attributes"][a['name']] = ""
+
         return result
 
 
 
-    def get_setting(self, analysis_id):
-        analysis = db_session.query(Analysis).filter_by(id=analysis_id).first()
-        return analysis.setting
 
-
-
-
-    def set_analysis(self, analysis_id, data):
-        """ Update analysis with provided data. Data that are not provided are not updated (ignored) """
+    def update(self, analysis_id, data):
+        """ 
+            Update analysis with provided data. Data that are not provided are not updated (ignored).
+        """
         update_query = ""
         # BASICS SETTINGS (current filter and displayed fields)
         if "fields" in data.keys() or "filter" in data.keys() or "selection" in data.keys():
@@ -302,8 +301,6 @@ class AnalysisManager:
             # update database
             main_query = "setting='{0}', ".format(json.dumps(setting))
 
-
-
         # saved filters
         if "filters" in data.keys():
             # delete old filters
@@ -314,7 +311,6 @@ class AnalysisManager:
             query = query + ', '.join([subquery.format(analysis_id, f['name'], f['filter']) for f in data["filters"]])
             db_engine.execute(query)
 
-        
         # samples + nickname
         if "samples" in data.keys():
             # create new associations
@@ -353,6 +349,9 @@ class AnalysisManager:
 
 
     def save_filter(self, analysis_id, name, filter_json):
+        """
+            Save (add) a new filter for the analysis with the provided id.
+        """
         global db_session
         instance = None
         db_session.begin(nested=True)
@@ -377,47 +376,6 @@ class AnalysisManager:
 
 
 
-class TemplateManager:
-    def __init__(self):
-        pass
-
-
-
-    def public_fields(self):
-        return Template.public_fields
-
-
-
-
-    def get(self, fields=None, query=None, order=None, offset=None, limit=None, sublvl=0):
-        """
-            Generic method to get analysis metadata according to provided filtering options
-        """
-        global db_session
-        if fields is None:
-            fields = Analysis.public_fields
-        if query is None:
-            query = {}
-        if order is None:
-            order = ['-create_date', "name"]
-        if offset is None:
-            offset = 0
-        if limit is None:
-            limit = offset + RANGE_MAX
-        return db_session.query(Template).filter_by(**query).offset(offset).limit(limit).all()
-
-
-
-    def get_from_id(self, file_id, sublvl=0, fields=None):
-        pass
-        
-    
-
-    def get_from_ids(self, file_ids, sublvl=0, fields=None):
-        pass
-
-
-
 
 
 
@@ -426,14 +384,6 @@ class TemplateManager:
 # Variant MANAGER
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
 class VariantManager:
-    def __init__(self):
-        pass
-
-
-
-    def public_fields(self):
-        return Sample.public_fields
-
 
 
     def total(self):
@@ -464,15 +414,6 @@ class VariantManager:
         return result
 
 
-    def get_from_id(self, file_id, sublvl=0, fields=None):
-        pass
-        
-    
-
-    def get_from_ids(self, file_ids, sublvl=0, fields=None):
-        pass
-
-
 
 
 
@@ -487,12 +428,6 @@ class VariantManager:
 class SampleManager:
     def __init__(self):
         pass
-
-
-
-    def public_fields(self):
-        return Sample.public_fields
-
 
 
     def total(self):
@@ -520,15 +455,6 @@ class SampleManager:
         for s in db_session.execute("SELECT sp.id, sp.name, sp.comments  FROM sample sp"):
             result.append({"id" : s[0], "name" : s[1], "comments": s[2], "analyses" : []})
         return result
-
-
-
-    def get_from_id(self, sample_id, fields=None):
-        global db_session
-        sample = db_session.query(Sample).filter_by(id=sample_id).first()
-        return sample.to_json()
-
-
 
 
 
@@ -582,15 +508,12 @@ class FilterEngine:
         if type(analysis_id) != int or analysis_id <=0 : analysis_id = None
         if mode not in ["table", "list"]: mode = "table"
 
-        
-        
         # Get sample ids used for the analysis
         sample_ids = []
         if analysis_id is not None : 
             # Retrieve sample ids for the analysis 
             for row in db_session.execute("select sample_id from analysis_sample where analysis_id = {0}".format(analysis_id)):
                 sample_ids.append(str(row.sample_id))
-
 
         # Build SELECT
         q_select = ["{0}.{1}".format(self.fields_map[f_id]["db_name"], self.fields_map[f_id]["name"]) for f_id in fields]
@@ -621,22 +544,16 @@ class FilterEngine:
                     t = 'string'
                 return '{0}{1}{2}'.format(parse_value(t, data[1]), FilterEngine.op_map[operator], parse_value(t, data[2]))
 
-
             elif operator in ['IN', 'NOTIN']:
-                
-
                 tmp_table = get_tmp_table(data[1], data[2])
                 temporary_to_import[tmp_table]['where'] = FilterEngine.op_map[operator].format(tmp_table, self.fields_map[1]["db_name"])
-
                 if data[1] == 'site' :
                     temporary_to_import[tmp_table]['from']  = " LEFT JOIN {1} ON {0}.chr={1}.chr AND {0}.pos={1}.pos".format(self.fields_map[1]["db_name"], tmp_table)
                 else: #if data[1] == 'variant' :
                     temporary_to_import[tmp_table]['from']  = " LEFT JOIN {1} ON {0}.chr={1}.chr AND {0}.pos={1}.pos AND {0}.ref={1}.ref AND {0}.alt={1}.alt".format(self.fields_map[1]["db_name"], tmp_table)
-
                 return temporary_to_import[tmp_table]['where']
 
 
-        
         def get_tmp_table(mode, data):
             """ 
                 Parse json data to build temp table for ensemblist operation IN/NOTIN 
@@ -645,7 +562,6 @@ class FilterEngine:
             """
             ttable_quer_map = "CREATE TEMP TABLE IF NOT EXISTS {0} WITH (OIDS) ON COMMIT DROP AS {1}; "
 
-
             if data[0] == 'sample' :
                 tmp_table_name    = "tmp_sample_{0}_{1}".format(data[1], mode)
                 if mode == 'site':
@@ -653,12 +569,10 @@ class FilterEngine:
                 else : # if mode = 'variant' :
                     tmp_table_query = ttable_quer_map.format(tmp_table_name, "SELECT DISTINCT {0}.chr, {0}.pos, {0}.ref, {0}.alt FROM {0} WHERE {0}.sample_id={1}".format(self.variant_table, data[1]))
 
-
             elif (data[0] == 'filter') :
                 tmp_table_name  = "tmp_filter_{0}".format(data[1])
                 tmp_table_query = ttable_quer_map.format(tmp_table_name, "#Retrieve query in database" ) 
                 
-
             elif (data[0] == 'attribute') :
                 key, value = data[1].split(':')
                 tmp_table_name    = "tmp_attribute_{0}_{1}_{2}_{3}".format(analysis_id, key, value, mode)
@@ -667,12 +581,8 @@ class FilterEngine:
                 else : # if mode = 'variant' :
                     tmp_table_query = ttable_quer_map.format(tmp_table_name, "SELECT DISTINCT {0}.chr, {0}.pos, {0}.ref, {0}.alt FROM {0} INNER JOIN {1} ON {0}.sample_id={1}.sample_id AND {1}.analysis_id={2} AND {1}.name='{3}' AND {1}.value='{4}'".format(self.variant_table, 'attribute', analysis_id, key, value))
 
-
             temporary_to_import[tmp_table_name] = {'query' : tmp_table_query}
             return tmp_table_name
-
-
-
 
 
         def parse_value(ftype, data):
@@ -690,9 +600,7 @@ class FilterEngine:
                     return "'{0}'".format(data[1])
                 elif ftype == 'range' and len(data) == 3:
                     return 'int8range({0}, {1})'.format(data[1], data[2])
-
             raise AnnsoException("FilterEngine.request : Impossible to compare arguments without same type : {0} ({1}) and {2} ({3})")
-
 
 
         q_where = ""
@@ -705,7 +613,6 @@ class FilterEngine:
         if  len(q_where2.strip()) > 0:
             q_where += " AND " + q_where2
 
-
         
         # Build FROM/JOIN according to the list of used annotations databases
         q_from  = " LEFT JOIN ".join([self.db_map[d_id]["join"] for d_id in tables_to_import])
@@ -716,7 +623,6 @@ class FilterEngine:
         query = "".join([t['query'] for t in temporary_to_import.values()])
         query += "SELECT {0} FROM {1} WHERE {2} LIMIT {3} OFFSET {4};".format(', '.join(q_select), q_from, q_where, limit, offset)
 
-        
 
         # Save filter in analysis setting
         if (analysis_id > 0):
@@ -728,6 +634,7 @@ class FilterEngine:
             except : 
                 # TODO : log error
                 print ("Not able to save current filter")        
+
 
         # Execute query and get result
         print (query)

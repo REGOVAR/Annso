@@ -147,7 +147,7 @@ class WebsiteHandler:
     def home(self, request):
         data = {
             "hostname" : HOST_P,
-            "templates" : annso.template.get(), # return by default last 10 templates
+            "templates" : [], # return by default last 10 templates
             "analysis" : annso.analysis.get(),  # return by default last 10 analyses
             "annotations_db" :     annso.annotation_db.get_databases(),
             "annotations_fields" : json.dumps(annso.annotation_db.get_fields()),
@@ -204,7 +204,7 @@ class AnalysisHandler:
 
     def get_analysis(self, request):
         analysis_id = request.match_info.get('analysis_id', -1)
-        analysis = annso.analysis.get_from_id(analysis_id)
+        analysis = annso.analysis.load(analysis_id)
         if analysis is None:
             return rest_error("Unable to find the analysis with id=" + str(analysis_id))
         return rest_success(analysis)
@@ -230,7 +230,7 @@ class AnalysisHandler:
         analysis_id = request.match_info.get('analysis_id', -1)
 
         try :
-            settings = annso.analysis.get_setting(analysis_id)
+            settings = Analysis.from_id(analysis_id).setting
         except Exception as err :
             return rest_error("Unable to get analsis settings with provided information. " + str(err))
         if settings is None : settings = {}
@@ -242,7 +242,7 @@ class AnalysisHandler:
         analysis_id = request.match_info.get('analysis_id', -1)
         data = await request.json()
         try:
-            annso.analysis.set_analysis(analysis_id, data)
+            annso.analysis.update(analysis_id, data)
         except Exception as err :
             return rest_error("Error occured when trying to save settings for the analysis with id=" + str(analysis_id) + ". " + str(err))
         return rest_success() 
@@ -396,10 +396,10 @@ class SampleHandler:
         sid = request.match_info.get('sample_id', None)
         if sid is None:
             return rest_error("No valid sample id provided")
-        sample = annso.sample.get_from_id(sid)
+        sample = Sample.get_from_id(sid)
         if sample is None:
             return rest_error("No sample found with id="+str(sid))
-        return rest_success(sample)
+        return rest_success(sample.to_json())
 
 
     def get_details(self, request):
