@@ -144,7 +144,9 @@ class AnnotationDatabaseManager:
     def __init__(self, reference=1):
         self.fields_map = {}
         self.db_map = {}
-        query = "SELECT d.id, d.name_ui, d.description, a.id, a.name_ui, a.type, a.description FROM annotation_field a LEFT JOIN annotation_database d ON a.database_id=d.id WHERE d.reference_id={0} ORDER BY d.name_ui, a.name_ui".format(reference)
+        query = "SELECT d.id, d.name_ui, d.description, a.id, a.name_ui, a.type, a.description FROM annotation_field a \
+                 LEFT JOIN annotation_database d ON a.database_id=d.id \
+                 WHERE d.reference_id={0} ORDER BY d.name_ui, a.name_ui".format(reference)
         for row in db_session.execute(query):
             if row[0] not in self.db_map:
                 self.db_map[row[0]] = {"name" : row[1], "description": row[2], "fields" : []}
@@ -484,7 +486,6 @@ class FilterEngine:
             Init mapping collection for annotations databases and fields
         """
         refname = db_session.execute("SELECT table_suffix FROM reference WHERE id="+str(reference)).first()["table_suffix"]
-
         self.reference = reference
         self.fields_map = {}
         self.db_map = {}

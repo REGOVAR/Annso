@@ -203,6 +203,9 @@ class AnnotationDBHandler:
 class AnalysisHandler:
 
     def get_analysis(self, request):
+        """
+            Return all data about the analysis with the provided id (analysis metadata : name, settings, template data, samples used, filters, ... )
+        """
         analysis_id = request.match_info.get('analysis_id', -1)
         analysis = annso.analysis.load(analysis_id)
         if analysis is None:
@@ -212,6 +215,9 @@ class AnalysisHandler:
 
 
     async def create_analysis(self, request):
+        """
+            Creae 
+        """
         # 1- Retrieve data from request
         data = await request.json()
         name = data["name"]
@@ -380,7 +386,7 @@ tus_manager.route_maping["/sample/upload"] = SampleFileWrapper
 class SampleHandler:
     def get_samples(self, request):
         # Generic processing of the get query
-        fields, query, order, offset, limit = process_generic_get(request.query_string, Sample.public_fields())
+        fields, query, order, offset, limit = process_generic_get(request.query_string, Sample.public_fields)
         # Get range meta data
         range_data = {
             "range_offset" : offset,
@@ -440,7 +446,7 @@ class SampleHandler:
 class VariantHandler:
     def get_variants(self, request):
         # Generic processing of the get query
-        fields, query, order, offset, limit = process_generic_get(request.query_string, Variant.public_fields())
+        fields, query, order, offset, limit = process_generic_get(request.query_string, Variant.public_fields)
         # Get range meta data
         range_data = {
             "range_offset" : offset,
