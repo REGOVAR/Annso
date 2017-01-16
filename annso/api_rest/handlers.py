@@ -272,10 +272,19 @@ class AnalysisHandler:
 
         # 3- Execute filtering request
         # try :
-        result = annso.filter.request(int(analysis_id), mode, filter_json, fields, int(limit), int(offset))
+        result, total = annso.filter.request(int(analysis_id), mode, filter_json, fields, int(limit), int(offset))
         # except Exception as err :
         #     return rest_error("Filtering error : " + str(err))
-        return rest_success(result)
+
+        # Get range meta data
+        range_data = {
+            "range_offset" : offset,
+            "range_limit"  : limit,
+            "range_total"  : total,
+            "range_max"    : RANGE_MAX,
+        }
+
+        return rest_success(result, range_data)
 
 
 

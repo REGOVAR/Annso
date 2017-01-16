@@ -12,6 +12,7 @@ import uuid
 import subprocess
 import requests
 import psycopg2
+import hashlib
 
 
 from core.framework import *
@@ -480,10 +481,25 @@ class FilterEngine:
         'IN'       : '{0}.chr is not null', 
         'NOTIN'    : '{0}.chr is null'}
 
+    """ 
+        Filter request are saved in temps table with a hashname generated with the filter. These temp table will be kept alive to allow quick selection for pagination.
+        Temps table are deleted when no more used (now - last_request > TEMPS_TABLE_DURATION)
+    """
+    temps_tables = {}
+
+
+
+
+
+
+
+
+
     def __init__(self, reference=1):
         """
             Init Annso Filtering engine. (reference=1 mean "hg19", see database import script)
             Init mapping collection for annotations databases and fields
+            Drop all temporary table as are no more mapped 
         """
         refname = db_session.execute("SELECT table_suffix FROM reference WHERE id="+str(reference)).first()["table_suffix"]
         self.reference = reference
@@ -497,13 +513,92 @@ class FilterEngine:
             self.db_map[row[0]]["fields"][row[3]] = {"name" : row[4], "type" : row[5]}
             self.fields_map[row[3]] = {"name" : row[4], "type" : row[5], "db_id" : row[0], "db_name" : row[1], "join": row[2].format(self.variant_table)}
 
+        # Drop tmp_ tables
+        # sql =  "DECLARE @cmd varchar(4000)\
+        #         DECLARE cmds CURSOR FOR\
+        #         SELECT 'drop table [' + Table_Name + ']'\
+        #         FROM INFORMATION_SCHEMA.TABLES\
+        #         WHERE Table_Name LIKE 'tmp_%'\
+        #         OPEN cmds\
+        #         WHILE 1 = 1\
+        #         BEGIN\
+        #             FETCH cmds INTO @cmd\
+        #             IF @@fetch_status != 0 BREAK\
+        #             EXEC(@cmd)\
+        #         END\
+        #         CLOSE cmds;\
+        #         DEALLOCATE cmds"
+        # db_session.execute(sql)
 
 
 
 
     def request(self, analysis_id, mode, filter_json, fields=None, limit=100, offset=0):
+        # Generate the temp hash name corresponding to the query
+        hashname = FilterEngine.get_hasname(analysis_id, mode, fields, filter_json)
+        query = ""
+        sql_result = None
+
+        # If temps table not exist, need to create the temporary table with all entry (need it to have total count and allow pagination)
+        if hashname not in self.temps_tables.keys():
+            tpm_table, query = self.build_new_query(hashname, analysis_id, mode, filter_json, fields, limit, offset)
+            print ("---\nNew Job ID : {0}\n{1}".format(hashname, query))
+            db_engine.execute(query)
+            total = db_engine.execute("SELECT COUNT(*) FROM {};".format(tpm_table)).first()[0]
+            self.temps_tables[hashname] = {"last_time" : datetime.datetime.now(), "total" : total, "table_name" : tpm_table}
+
+        
+        # Do select query on the tmp table and update "last query time"
+        query = self.build_query_from_temps_table(hashname, fields, limit, offset)
+        sql_result = db_engine.execute(query)
+        self.temps_tables[hashname]["last_time"] = datetime.datetime.now()
+        
+
+        # Save filter in analysis setting
+        if (analysis_id > 0):
+            setting = {}
+            try : 
+                setting = json.loads(db_engine.execute("SELECT setting FROM analysis WHERE id={}".format(analysis_id)).first().setting)
+                setting["filter"] = filter_json
+                db_engine.execute("UPDATE analysis SET {0}update_date=CURRENT_TIMESTAMP WHERE id={1}".format("setting='{0}', ".format(json.dumps(setting)), analysis_id))
+            except : 
+                # TODO : log error
+                print ("Not able to save current filter")        
+
+
+        # Execute query and get result
+        print ("---\nJob ID : {0}\nTotal : {1}\n{2}".format(hashname, self.temps_tables[hashname]["total"], query))
+        result = []
+        if sql_result is not None:
+            for s in sql_result: 
+                variant = {}
+                i=0
+                for f_id in fields:
+                    variant[f_id]= FilterEngine.parse_result(s[i])
+                    i += 1
+                result.append(variant)
+        return result, self.temps_tables[hashname]["total"]
+
+
+
+
+
+
+
+
+    def build_query_from_temps_table(self, hashname, fields, limit, offset):
         """
-            Build the sql query according to the annso filtering parameter and return result as json data
+            Build the sql query according to retrieve data from an existing temp table
+        """
+        q_select = self.build_select(fields, False, True)
+        return "SELECT {0} FROM {1}  LIMIT {2} OFFSET {3};".format(q_select, self.temps_tables[hashname]["table_name"], limit, offset)
+
+
+
+
+    def build_new_query(self, hashname, analysis_id, mode, filter_json, fields=None, limit=100, offset=0):
+        """
+            Build the sql query according to the annso filtering parameter and return the query and the name of the associated temps table
         """
         # Check parameter
         if type(analysis_id) != int or analysis_id <=0 : analysis_id = None
@@ -517,7 +612,7 @@ class FilterEngine:
                 sample_ids.append(str(row.sample_id))
 
         # Build SELECT
-        q_select = ["{0}.{1}".format(self.fields_map[f_id]["db_name"], self.fields_map[f_id]["name"]) for f_id in fields]
+        q_select = self.build_select(fields, True, False)
 
         # Build FROM/JOIN
         tables_to_import = [1] # 1 is for the sample_variant_{ref} table. We always need this table as it's used for the join with other tables
@@ -561,7 +656,7 @@ class FilterEngine:
                     mode : site or variant
                     data : json data about the temp table to create
             """
-            ttable_quer_map = "CREATE TEMP TABLE IF NOT EXISTS {0} WITH (OIDS) ON COMMIT DROP AS {1}; "
+            ttable_quer_map = "CREATE TEMP TABLE IF NOT EXISTS {0} WITHOUT OIDS ON COMMIT DROP AS {1}; "
 
             if data[0] == 'sample' :
                 tmp_table_name    = "tmp_sample_{0}_{1}".format(data[1], mode)
@@ -622,43 +717,49 @@ class FilterEngine:
 
         # build query
         query = "".join([t['query'] for t in temporary_to_import.values()])
-        query += "SELECT {0} FROM {1} WHERE {2} LIMIT {3} OFFSET {4};".format(', '.join(q_select), q_from, q_where, limit, offset)
+        query += "CREATE TABLE IF NOT EXISTS tmp_{0} WITHOUT OIDS AS SELECT DISTINCT {1} FROM {2} WHERE {3};".format(hashname, q_select, q_from, q_where)
+
+        return "tmp_{0}".format(hashname), query
 
 
-        # Save filter in analysis setting
-        if (analysis_id > 0):
-            setting = {}
-            try : 
-                setting = json.loads(db_engine.execute("SELECT setting FROM analysis WHERE id={}".format(analysis_id)).first().setting)
-                setting["filter"] = filter_json
-                db_engine.execute("UPDATE analysis SET {0}update_date=CURRENT_TIMESTAMP WHERE id={1}".format("setting='{0}', ".format(json.dumps(setting)), analysis_id))
-            except : 
-                # TODO : log error
-                print ("Not able to save current filter")        
 
 
-        # Execute query and get result
-        print (query)
-        result = []
-        for s in db_session.execute(query): 
-            variant = {}
-            i=0
-            for f_id in fields:
-                variant[f_id]= FilterEngine.parse_result(s[i])
-                i += 1
-            result.append(variant)
-        return result
 
+    def build_select (self, fields, to_generic_name=False, from_generic_name=False):
+        """
+            Return the list of sql fields according to the provided list of field's id
+        """
+        if from_generic_name:
+            fields_list = ["fid_{0}".format(f_id) for f_id in fields]
+        elif to_generic_name:
+            fields_list = ["{0}.{1} as fid_{2}".format(self.fields_map[f_id]["db_name"], self.fields_map[f_id]["name"], f_id) for f_id in fields]
+        else:
+            fields_list = ["{0}.{1}".format(self.fields_map[f_id]["db_name"], self.fields_map[f_id]["name"]) for f_id in fields]
+
+        return ', '.join(fields_list)
+
+
+    @staticmethod
+    def get_hasname(analysis_id, mode, fields, filter_json):
+        # clean and sort fields list
+        clean_fields = fields
+        clean_fields.sort()
+        clean_fields = list(set(clean_fields))
+
+        string_id = "{0}{1}{2}{3}".format(analysis_id, mode, clean_fields, json.dumps(filter_json))
+        return hashlib.md5(string_id.encode()).hexdigest()
 
 
     @staticmethod
     def parse_result(value):
+        """
+            Parse value returned by sqlAlchemy and cast it, if needed, into "simples" python types
+        """
         if value is None:
             return ""
         if type(value) == psycopg2._range.NumericRange:
             return (value.lower, value.upper)
         return value
-
 
 
 

@@ -26,6 +26,8 @@ DATABASE_USER = "annso"
 DATABASE_PWD  = "ansso"
 DATABASE_NAME = "annso"
 
+TEMPS_TABLE_DURATION = 172800 # in seconds = 48h
+
 
 
 # FILESYSTEM

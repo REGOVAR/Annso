@@ -1014,11 +1014,7 @@ function load_variants_array()
         display_error("Unknow error in 'load_variants_array' request");
     }).done(function(json)
     {
-        if (json["success"])
-        {
-            json = json["data"]
-        }
-        else
+        if (!json["success"])
         {
             display_error(json);
             return;
@@ -1049,10 +1045,11 @@ function init_variants_list(json)
     html += "</tr></thead><tbody>";
 
 
+
     var rowhtml = "<tr id=\"variant_{0}\" style=\"cursor: pointer;\"><td><input type=\"checkbox\" value=\"{0}\"/></td>";
     "<td>{1}</td><td>{2}</td><td class=\"pos\">{3}</td><td class=\"seq\">{4}</td><td class=\"seq\">{5}</td></tr>";
     
-    $.each(json, function( idx, v ) 
+    $.each(json["data"], function( idx, v ) 
     {
 
         html += rowhtml.format(v["variant_id"]);
@@ -1077,13 +1074,16 @@ function init_variants_list(json)
         }
         html += "</tr>";
     });
-    $("#variants_list").html(html + "</tbody></table>");
+    $('#variants_list').html(html + "</tbody></table>");
+    $('#current_filter_count').html(annotation_format_number(json['range_total'], false));
+    $('#demo_footer').html("{0} result{1}".format(annotation_format_number(json['range_total'], false), (json['range_total'] > 1) ? 's' : ''));
 }
 
-function annotation_format_number(value)
+function annotation_format_number(value, td=true)
 {
+    var model = (td) ? "<td class=\"number\">{0}</td>" : "<span class=\"number\">{0}</span>"
     var n = value.toString(), p = n.indexOf('.');
-    return "<td class=\"number\">{0}</td>".format(
+    return model.format(
         n.replace(/\d(?=(?:\d{3})+(?:\.|$))/g, function($0, i)
         {
             return p<0 || i<p ? ($0+'&nbsp;') : $0;

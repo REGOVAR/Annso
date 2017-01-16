@@ -14,9 +14,31 @@ import shutil
 from sqlalchemy.ext.automap import automap_base
 from sqlalchemy.orm import Session
 from sqlalchemy import create_engine
-
+# from sqlalchemy_aio import ASYNCIO_STRATEGY
 
 from core.framework import *
+
+
+
+
+
+
+
+
+
+
+def connect(user, password, db, host, port):
+    '''Returns a connection and a metadata object'''
+    url = 'postgresql://{}:{}@{}:{}/{}'
+    url = url.format(user, password, host, port, db)
+    con = sqlalchemy.create_engine(url, client_encoding='utf8') #, strategy=ASYNCIO_STRATEGY)
+    meta = sqlalchemy.MetaData(bind=con)
+    return con, meta
+
+
+
+
+
 
 
 

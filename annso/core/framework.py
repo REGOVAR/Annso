@@ -45,14 +45,6 @@ def humansize(nbytes):
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
 # PGSQL TOOLS
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
-def connect(user, password, db, host, port):
-    '''Returns a connection and a metadata object'''
-    url = 'postgresql://{}:{}@{}:{}/{}'
-    url = url.format(user, password, host, port, db)
-    con = sqlalchemy.create_engine(url, client_encoding='utf8')
-    meta = sqlalchemy.MetaData(bind=con)
-    return con, meta
-
 
 def get_or_create(session, model, defaults=None, **kwargs):
     if defaults is None:
