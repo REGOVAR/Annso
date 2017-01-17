@@ -100,7 +100,7 @@ Enable this virtual host by creating a symbolic link ::
         sudo /etc/init.d/nginx restart
 	
 
-
+Don't forget to modify the <ANNSO_PATH>/annso/config.py file according to your configuration.
 
 
 
@@ -110,8 +110,8 @@ Run Annso
 
 just ::
 
-	cd <ANNSO_PATH>
-  make app
+	cd <ANNSO_PATH>/annso
+	make app
 
 
 
