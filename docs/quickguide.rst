@@ -14,7 +14,7 @@ Installation
 The following tutorial will show you how to set up a quick development environment for the annso application on a linux server.
 You may need to install first ::
 
-        sudo apt install build-essential libssl-dev libffi-dev python3-dev virtualenv
+        sudo apt install build-essential libssl-dev libffi-dev python3-dev virtualenv libpq-dev
 
 
 Annso need a postgresql database (9.5+). As ususal, you can customise value, just don't forget to update the config.py file accordingly ::
