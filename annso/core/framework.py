@@ -7,6 +7,7 @@ import logging
 import uuid
 import hashlib
 import sqlalchemy
+import time
 
 from sqlalchemy.sql.expression import ClauseElement
 from sqlalchemy.exc import IntegrityError
@@ -169,11 +170,13 @@ class Timer(object):
             print (self.msecs, ' ms')
             
     def __str__(self):
-        return str(self.msecs) + ' ms'
+        if self.msecs >= 1000:
+            return "{0} s".format(self.secs)
+        return "{0} ms".format(self.msecs)
 
-    def total_ms():
+    def total_ms(self):
         return self.msecs
-    def total_s():
+    def total_s(self):
         return self.secs
 
 

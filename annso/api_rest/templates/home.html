@@ -101,10 +101,10 @@
                             <div style="padding:10px; margin-left:75px; border-left: 1px solid #ddd;">
                                 <div class="btn-group ">
                                     <a class="btn btn-default" href="#modal_import_sample_file" title="Import sample/variant data from local file" data-toggle="modal">
-                                        <i class="fa fa-download" style="width:20px; text-align:center;" aria-hidden="true"></i> VCF
+                                        <i class="fa fa-download" style="width:20px; text-align:center;" aria-hidden="true"></i> From VCF
                                     </a>
                                     <a class="btn btn-default" href="#modal_import_sample_db" onclick="javascript:ui.load_sample_database();" title="Import sample/variant data from database" data-toggle="modal">
-                                        <i class="fa fa-database" style="width:20px; text-align:center;" aria-hidden="true"></i> Database
+                                        <i class="fa fa-database" style="width:20px; text-align:center;" aria-hidden="true"></i> From Database
                                     </a>
                                 </div>
                                 &nbsp;
@@ -146,7 +146,7 @@
                                 &nbsp;
                                 <div class="btn-group" data-toggle="buttons">
                                     <label class="btn btn-default active" onclick="javascript:ui.variant_display('table');">
-                                        <input type="radio" checked>  <i class="fa fa-table" aria-hidden="true"></i>
+                                        <input type="radio" checked>  <i class="fa fa-table" aria-hidden="true"></i> 
                                     </label>
                                     <label class="btn btn-default" onclick="javascript:ui.variant_display('list');">
                                         <input type="radio">  <i class="fa fa-list" aria-hidden="true"></i>
@@ -155,10 +155,10 @@
                                 &nbsp;
                                 <div class="btn-group">
                                     <button class="btn btn-default" title="Reset filter (display all variants)"  onclick="javascript:ui.reset_filter();">
-                                        <i class="fa fa-ban" aria-hidden="true">&nbsp;</i>   
+                                        <i class="fa fa-ban" aria-hidden="true">&nbsp;</i> Reset filter
                                     </button>
                                     <button class="btn btn-default" title="Apply current filter" onclick="javascript:ui.apply_filter();">
-                                        <i class="fa fa-play" aria-hidden="true">&nbsp;</i>   
+                                        <i class="fa fa-play" aria-hidden="true">&nbsp;</i> Apply filter
                                     </button>
                                     <button class="btn btn-default" title="Create a selection for this filter and continue with a new filter" href="#modal_save_filter" data-toggle="modal">
                                         <i class="fa fa-floppy-o" aria-hidden="true"></i> Save filter

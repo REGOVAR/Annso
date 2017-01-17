@@ -255,7 +255,7 @@ class AnalysisHandler:
 
         
 
-    async def filtering(self, request):
+    async def filtering(self, request, count=False):
         # 1- Retrieve data from request
         data = await request.json()
         analysis_id = request.match_info.get('analysis_id', -1)
@@ -271,20 +271,18 @@ class AnalysisHandler:
         if offset<0 : offset = 0
 
         # 3- Execute filtering request
-        # try :
-        result, total = annso.filter.request(int(analysis_id), mode, filter_json, fields, int(limit), int(offset))
-        # except Exception as err :
-        #     return rest_error("Filtering error : " + str(err))
+        try :
+            result = annso.filter.request(int(analysis_id), mode, filter_json, fields, int(limit), int(offset), count)
+        except Exception as err :
+            return rest_error("Filtering error : " + str(err))
+        return rest_success(result)
 
-        # Get range meta data
-        range_data = {
-            "range_offset" : offset,
-            "range_limit"  : limit,
-            "range_total"  : total,
-            "range_max"    : RANGE_MAX,
-        }
 
-        return rest_success(result, range_data)
+
+
+    async def filtering_count(self, request):
+        return await self.filtering(request, True)
+
 
 
 
