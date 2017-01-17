@@ -17,10 +17,10 @@ You may need to install first ::
         sudo apt install build-essential libssl-dev libffi-dev python3-dev virtualenv
 
 
-Annso need a postgresql database (9.5+) ::
+Annso need a postgresql database (9.5+). As ususal, you can customise value, just don't forget to update the config.py file accordingly ::
 
         sudo apt install postgresql
-        psql -U postgres -c "CREATE USER annso;"
+        psql -U postgres -c "CREATE USER annso WITH PASSWORD 'annso';"
         psql -U postgres -c "DROP DATABASE IF EXISTS annso;"
         psql -U postgres -c "CREATE DATABASE annso;"
         psql -U postgres -c "GRANT ALL PRIVILEGES ON DATABASE annso to annso;"
