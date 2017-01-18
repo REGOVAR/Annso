@@ -829,13 +829,55 @@ var ui = new AnnsoUIControler;
 
 
 
+function update_filter_set_map()
+{
+    html='';
+    entry = '<option value="{0}">{1}</option>';
+    filter_set_map = {};
+    attributes_values = [];
+    var idx=0;
+    $.each(analysis.analysis.samples, function (id, sample)
+    {
+        label = "sample " + (sample["nickname"] != "") ? sample["nickname"] : sample["name"];
+        json  = ["sample", sample["id"]];
+        html += entry.format(idx, label);
+        filter_set_map[idx] = json;
+        idx += 1;
+    });
+    $.each(analysis.analysis.attributes, function (id, key)
+    {
+        var k = key['name'];
+        $.each(key['samples_value'], function (id, val)
+        {
+            kv = '{0}:{1}'.format(k, val);
+            if (attributes_values.indexOf(kv) == -1)
+            {
+                attributes_values.push(kv);
+                label = "group " + kv;
+                json  = ["attribute",  kv];
+                html += entry.format(idx, label);
+                filter_set_map[idx] = json;
+                idx += 1;
+            }
+        });
+    });
+    $.each(analysis.analysis.filters, function (id, filter)
+    {
+        label = "filter " + filter["name"];
+        json  = ["filter",  id];
+        html += entry.format(idx, label);
+        filter_set_map[idx] = json;
+        idx += 1;
+    });
+
+    $('#modal_filter_variant_set').html(html);
+}
 
 
 
 
 
-
-
+var filter_set_map = {};
 var filter_operator_display_map = {'==' : '=', '!=' : "&#8800;", '>' : "&gt;", '>=' : "&#8805;", '<' : "&lt;", '<=' : "&#8804;", "IN":"&#8712;", "NOTIN":"&#8713;"};
 var add_filter_ui_parent_elmt;
 function build_filter_ui(json)
@@ -870,13 +912,35 @@ function build_filter_ui(json)
     }
     else if (["IN", "NOTIN"].includes(json[0]))
     {
-        return filter_set_template.format('check', "{0} {1}".format(json[1], filter_operator_display_map[json[0]]), json[2][0], json[2][1], JSON.stringify(json));
+        return filter_set_template.format('check', "{0} {1}".format(json[1], filter_operator_display_map[json[0]]), build_filter_ui_set(json[2]), JSON.stringify(json));
     }
     else
     {
         return "TO BE implemented";
     }
 }
+function build_filter_ui_set(json)
+{
+    html = "";
+
+    if (json[0] == "sample")
+    {
+        s = analysis.analysis.samples[json[1]];
+        html = "sample " + (s["nickname"] != "") ? s["nickname"] : s["name"];
+    }
+    else if (json[0] == "attribute")
+    {
+        html = "group " + json[1];
+    }
+    else if (json[0] == "filter")
+    {
+        f = analysis.analysis.filters[json[1]];
+        html = "filter " + f["name"];
+    }
+
+    return html;
+}
+
 
 function add_filter_ui(operator)
 {
@@ -908,7 +972,7 @@ function add_filter_ui2(operator)
     var type = $('#modal_filter_variant_type').find(":selected").val();
     var set = $('#modal_filter_variant_set').find(":selected").val();
 
-    json = [operator, type, [set, $('#modal_filter_variant_setid').val()]];
+    json = [operator, type, filter_set_map[set]];
     
 
 
@@ -1033,11 +1097,6 @@ var substringMatcher = function(strs)
 
 
 
-
-function add_sample_to_analysis(sample)
-{
-
-}
 
 
 function toggle_select_sample( id, clean_list=false)

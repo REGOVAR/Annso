@@ -23,18 +23,18 @@ var filter_condition_template = "<li class=\"condition {0}\">\
     </button>\
     <button class=\"fa delete\" onclick=\"javascript:ui.remove_afilter_condition(this);\">&nbsp;</button>\
     <button class=\"fa edit\" onclick=\"javascript:ui.edit_afilter_condition(this);\">&nbsp;</button>\
-    <input type=\"hidden\" value='{2}'' />\
+    <input type=\"hidden\" value='{2}' />\
 </li>";
 
 
 var filter_set_template = "<li class=\"condition {0}\">\
     <button onclick=\"javascript:filter_toggle_condition(this);\">\
         <i class=\"fa\" aria-hidden=\"true\">&nbsp;</i>\
-        <span>{1} <b class=\"fa {2}\" aria-hidden=\"true\"></b> {3}</span>\
+        <span>{1} {2}</span>\
     </button>\
     <button class=\"fa delete\" onclick=\"javascript:ui.remove_afilter_condition(this);\">&nbsp;</button>\
     <button class=\"fa edit\" onclick=\"javascript:ui.edit_afilter_condition(this);\">&nbsp;</button>\
-    <input type=\"hidden\" value='{4}'' />\
+    <input type=\"hidden\" value='{3}' />\
 </li>";
 
 
@@ -53,7 +53,7 @@ var filter_group_template = "<li class=\"condition {0}\">\
     <ul class=\"{1}\">\
         {5}\
         <li class=\"addcondition\">\
-            <button href=\"#modal_filter_add_condition\" data-toggle=\"modal\" onclick=\"add_filter_ui_parent_elmt=$(this).parent();\">\
+            <button href=\"#modal_filter_add_condition\" data-toggle=\"modal\" onclick=\"add_filter_ui_parent_elmt=$(this).parent();update_filter_set_map();\">\
                 <b class=\"fa fa-plus\" aria-hidden=\"true\">&nbsp;</b>\
                 <span>Add new condition</span>\
             </button>\
