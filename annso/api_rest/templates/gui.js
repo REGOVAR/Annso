@@ -1191,7 +1191,8 @@ function init_variants_list(json)
     $.each(json["data"], function( idx, v ) 
     {
 
-        html += variants_table_row_start.format(v["id"]);
+        selected = (analysis.analysis.selection.indexOf(v["id"].toString()) == -1) ? "" : " checked";
+        html += variants_table_row_start.format(v["id"], selected);
         for (var i=0; i<analysis.analysis.fields.length; i++)
         {
             fid   = analysis.analysis.fields[i];
