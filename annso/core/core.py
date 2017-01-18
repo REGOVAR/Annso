@@ -17,8 +17,11 @@ import hashlib
 
 from core.framework import *
 from core.model import *
-from core.report import *
-from core.vcf import import_vcf
+
+
+
+# from core.report import *
+# from core.vcf import import_vcf
 
 
 
@@ -105,7 +108,6 @@ class FileManager:
             Update finaly the status of the file to UPLOADED or CHECKED -> file ready to be used
         """
         # Retrieve file
-        ipdb.set_trace()
         file = File.from_id(file_id)
         if file == None:
             raise AnnsoException("Unable to retrieve the file with the provided id : " + file_id)
@@ -379,6 +381,9 @@ class AnalysisManager:
 
 
 
+    def generate_report(self, analysis_id, report_id, report_data):
+        return
+
 
 
 
@@ -557,8 +562,8 @@ class FilterEngine:
         with Timer() as t:
             if sql_result is not None:
                 for s in sql_result: 
-                    variant = {}
-                    i=0
+                    variant = {'id' : s.variant_id}
+                    i=1
                     for f_id in fields:
                         variant[f_id]= FilterEngine.parse_result(s[i])
                         i += 1
@@ -591,7 +596,7 @@ class FilterEngine:
                 sample_ids.append(str(row.sample_id))
 
         # Build SELECT
-        q_select = ', '.join(["{0}.{1}".format(self.fields_map[f_id]["db_name"], self.fields_map[f_id]["name"]) for f_id in fields])
+        q_select = 'variant_id, ' + ', '.join(["{0}.{1}".format(self.fields_map[f_id]["db_name"], self.fields_map[f_id]["name"]) for f_id in fields])
         # q_select += ', count(*) OVER() AS annso_query_total_count'
 
         # Build FROM/JOIN

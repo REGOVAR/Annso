@@ -125,21 +125,18 @@
                                 <span id="variant_qfilter_warning" class="text-danger" style="font-style:italic"></span>
                                 <div class="input-group">
                                     <span class="input-group-addon"><i class="fa fa-search" aria-hidden="true"></i></span>
-                                    <input id="variant_qfilter_input" type="text" class="form-control" placeholder="Filter variants" aria-describedby="sizing-addon1">
+                                    <input id="variant_qfilter_input" type="text" class="form-control" placeholder="Search" aria-describedby="sizing-addon1">
                                 </div>
                             </form>
                             <div style="padding:10px; margin-left:75px; border-left: 1px solid #ddd;">
-                                <div class="btn-group" data-toggle="buttons">
-                                    <label class="btn btn-default" onclick="javascript:ui.select_submenu('quick');">
-                                        <input type="radio" checked>  <i class="fa fa-bolt" aria-hidden="true"></i>
+                                <div id="view_selection" class="btn-group" data-toggle="buttons">
+                                    <label class="btn btn-default" onclick="javascript:ui.select_view('quick');">
+                                        <input type="radio">  <i class="fa fa-bolt" aria-hidden="true"></i>
                                     </label>
-                                    <label class="btn btn-default active" onclick="javascript:ui.select_submenu('filter');">
+                                    <label class="btn btn-default active" onclick="javascript:ui.select_view('filter');">
                                         <input type="radio">  <i class="fa fa-filter" aria-hidden="true"></i>
                                     </label>
-                                        <!-- <label class="btn btn-default" onclick="javascript:ui.select_submenu('expert');">
-                                            <input type="radio">  <i class="fa fa-code" aria-hidden="true"></i>
-                                        </label> -->
-                                    <label class="btn btn-default" onclick="javascript:ui.select_submenu('info');">
+                                    <label class="btn btn-default" onclick="javascript:ui.select_view('info');">
                                         <input type="radio" >  <i class="fa fa-info" aria-hidden="true"></i>
                                     </label>
                                 </div>
@@ -160,29 +157,33 @@
                                     <button class="btn btn-default" title="Apply current filter" onclick="javascript:ui.apply_filter();">
                                         <i class="fa fa-play" aria-hidden="true">&nbsp;</i> Apply filter
                                     </button>
-                                    <button class="btn btn-default" title="Create a selection for this filter and continue with a new filter" href="#modal_save_filter" data-toggle="modal">
+                                    <button class="btn btn-default" title="Save the current filter " href="#modal_save_filter" data-toggle="modal">
                                         <i class="fa fa-floppy-o" aria-hidden="true"></i> Save filter
                                     </button>
                                 </div>
-                                
-                            </div>
-                        </div>
-
-                        <!--                 -->
-                        <!-- RESULT TOOLBAR -->
-                        <!--                 -->
-                        <div id="result_toolbar" class="collapse">
-                            <div style="padding:10px; margin-left:75px; border-left: 1px solid #ddd;">
-                                <div class="btn-group" data-toggle="buttons">
-                                    <label class="btn btn-default active" onclick="javascript:ui.select_submenu('info');">
-                                        <input type="radio" checked>  <i class="fa fa-list" aria-hidden="true"></i>
-                                    </label>
-                                    <label class="btn btn-default" onclick="javascript:ui.select_submenu('export');">
-                                        <input type="radio">  <i class="fa fa-share-square-o" aria-hidden="true"></i>
-                                    </label>
-                                    <label class="btn btn-default" onclick="javascript:ui.select_submenu('report');">
-                                        <input type="radio">  <i class="fa fa-print" aria-hidden="true"></i>
-                                    </label>
+                                &nbsp;
+                                <div class="btn-group" role="group">
+                                    <button id="show_selection" class="btn btn-default" title="Display the current selection of variant" onclick="javascript:ui.show_selection();">
+                                        
+                                    </button>
+                                    <div class="btn-group">
+                                        <button type="button" class="btn btn-default dropdown-toggle disable" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" title="Generate a report for the selected variants">
+                                            <i class="fa fa-share-square-o" aria-hidden="true"></i> Export <span class="caret"></span>
+                                        </button>
+                                        
+                                        <ul class="dropdown-menu" role="menu" aria-labelledby="dLabel">
+                                            <li><a onclick="javascript:report_export('csv');" title="to CSV file">CSV file</a></li>
+                                        </ul>
+                                    </div>
+                                    <div class="btn-group">
+                                        <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" title="Generate a report for the selected variants">
+                                            <i class="fa fa-print" aria-hidden="true"></i> Report <span class="caret"></span>
+                                        </button>
+                                        
+                                        <ul class="dropdown-menu" role="menu" aria-labelledby="dLabel">
+                                            <li><a onclick="javascript:report_selection(1);" title="DIMS report">DIMS report</a></li>
+                                        </ul>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -204,8 +205,6 @@
                                         <i class="fa fa-user" style="width:20px; text-align:center;" aria-hidden="true"></i> Samples </a></li>
                                     <li><a id="nav_project_variant" class="hidden" data-toggle="tab" href="#filters_panel" onclick="javascript:ui.select_tab('variant');">
                                         <i class="fa fa-filter" style="width:20px; text-align:center;" aria-hidden="true"></i> Filtering</a></li>
-                                    <li><a id="nav_project_selection" class="hidden" data-toggle="tab" href="#selection_panel" onclick="javascript:ui.select_tab('result');">
-                                        <i class="fa fa-check-square-o" aria-hidden="true" style="width:20px; text-align:center;">&nbsp;</i> Selection</a></li>
                                 </ul>
                             </div>
                         </nav>
@@ -480,6 +479,7 @@
                                 <!--              -->
                                 <div class="col-md-10" style="height:500px; padding-left:0; padding-right:0; overflow-y: auto;">
                                     <div id="variants_list"></div>
+                                    <div id="selection_list"></div>
                                 </div>
                             </div>
                         </div>
@@ -487,127 +487,6 @@
 
 
 
-                        <!--                 -->
-                        <!-- SELECTION PANEL --> 
-                        <!--                 -->
-                        <div id="selection_panel" class="tab-pane fade">
-                            <div class="row" style="margin:0; padding-left:75px">
-
-
-                                <!--                -->
-                                <!-- SELECTION MENU --> 
-                                <!--                -->
-                                <div id="selection_panel_menu_info" class="col-md-2 browser-panel">
-                                    infos sur le variant
-                                </div>
-
-
-                                <!--                  -->
-                                <!-- SELECTION EXPORT --> 
-                                <!--                  -->
-                                <div id="selection_panel_menu_export" class="col-md-2 browser-panel collapse">
-                                    export form
-                                </div>
-
-
-                                <!--                 -->
-                                <!-- SELECTION PRINT --> 
-                                <!--                 -->
-                                <div id="selection_panel_menu_report" class="col-md-2 browser-panel collapse">
-                                    <ul>
-                                        <li><a href="#"><i class="fa fa-check" aria-hidden="true" style="width:20px; text-align:center;">&nbsp;</i>
-                                            config report
-                                            </a>
-                                        </li>
-                                        <li><a href="#" ><i class="fa fa-check" aria-hidden="true" style="width:20px; text-align:center;">&nbsp;</i>
-                                            config report
-                                            </a>
-                                        </li>
-                                    </ul>
-                                    <button onclick="javascript:fake_generate_report();"> Generate report</button>
-                                </div>
-
-
-
-
-                                <!--                        -->
-                                <!-- SELECTED VARIANTS LIST -->
-                                <!--                        -->
-                                <div id="selection_panel_content_info" class="col-md-10" style="height:500px; padding-left:0; padding-right:0; overflow-y: auto;">
-                                    <div id="selection_list">
-                                        <table id="selection_list_table" class="table table-striped table-bordered" cellspacing="0" width="100%" style="margin:0">
-                                            <thead>
-                                                <tr>
-                                                    <th>Sample</th>
-                                                    <th>chr</th>
-                                                    <th>pos</th>
-                                                    <th>ref</th>
-                                                    <th>alt</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                <tr>
-                                                    <td>CGH0157</td>
-                                                    <td>1 </td>
-                                                    <td class="pos">871334</td>
-                                                    <td>G </td>
-                                                    <td>T </td>
-                                                </tr>
-                                                <tr>
-                                                    <td>CGH0157</td>
-                                                    <td>1 </td>
-                                                    <td class="pos">876499</td>
-                                                    <td>A </td>
-                                                    <td>T </td>
-                                                </tr>
-                                                <tr>
-                                                    <td>CGH0157</td>
-                                                    <td>1 </td>
-                                                    <td class="pos">877715</td>
-                                                    <td>C </td>
-                                                    <td>G </td>
-                                                </tr>
-                                                <tr>
-                                                    <td>CGH0157</td>
-                                                    <td>1 </td>
-                                                    <td class="pos">880238</td>
-                                                    <td>A </td>
-                                                    <td>G </td>
-                                                </tr>
-                                                <tr>
-                                                    <td>CGH0157</td>
-                                                    <td>1 </td>
-                                                    <td class="pos">881627</td>
-                                                    <td>G </td>
-                                                    <td>A </td>
-                                                </tr>
-                                            </tbody>
-                                        </table>
-                                    </div>
-                                </div>
-
-
-                                <!--                 -->
-                                <!-- EXPORT VARIANTS -->
-                                <!--                 -->
-                                <div id="selection_panel_content_export" class="col-md-10 collapse" style="height:500px; padding-left:0; padding-right:0; overflow-y: auto;">
-                                    - array : source => target<br/>
-                                    - export result preview
-                                </div>
-
-
-
-
-                                <!--                 -->
-                                <!-- EXPORT VARIANTS -->
-                                <!--                 -->
-                                <script language="javascript" src="http://www.proteinatlas.org/common.js?version=15.0.0" type="text/javascript"></script>
-                                <script language="javascript" src="http://www.proteinatlas.org/utils/d3.min.js?version=15.0.0" type="text/javascript"></script>
-                                <div id="selection_panel_content_report" class="col-md-10 collapse" style="height:500px; padding-left:60px; padding-right:0; overflow-y: auto;">
-                                    
-                                </div>
-                            </div>
-                        </div>
                     </div>
 
                     <div id="demo_footer" class="panel-footer">&nbsp;</div>

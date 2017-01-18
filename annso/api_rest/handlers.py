@@ -257,6 +257,7 @@ class AnalysisHandler:
 
     async def filtering(self, request, count=False):
         # 1- Retrieve data from request
+        ipdb.set_trace()
         data = await request.json()
         analysis_id = request.match_info.get('analysis_id', -1)
         filter_json = data["filter"] if "filter" in data else {}
@@ -309,35 +310,44 @@ class AnalysisHandler:
         return rest_success()
 
 
+    async def get_selection(self, request):
+        data = await request.json()
+        analysis_id = request.match_info.get('analysis_id', -1)
+
+        try :
+            result = annso.analysis.get_selection(analysis_id, data)
+        except Exception as err :
+            return rest_error("AnalysisHandler.get_selection error : " + str(err))
+        return rest_success(result)
 
 
-# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
-# REPORT HANDLER
-# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
 
 
-class ReportHandler:
 
-    async def get_omim_data(self, request):
-        try:
-            return rest_success(annso.report.get_omim_data(gene_name))
-        except Exception as err:
-            return rest_error("Unexpected error occured when trying to retrieve OMOM information for the gene : " + str(gene_name) + ". " + str(err))
+    async def get_report(self, request):
+        data = await request.json()
+        analysis_id = request.match_info.get('analysis_id', -1)
+        report_id = request.match_info.get('report_id', -1)
 
-    @aiohttp_jinja2.template('report.html')
-    async def get_html_report(self, request):
+        try :
+            result = annso.analysis.generate_report(analysis_id, report_id, data)
+        except Exception as err :
+            return rest_error("AnalysisHandler.get_report error : " + str(err))
+
+
         from core.report import get_ta_image, get_hbt_image, get_decipher_image, get_sp_image
-        # 1- Retrieve data from request
-        #data = await request.json()
-        data = { "variants" : [1,212,342], "lang" : "EN-en"}
+        from api_rest.routes import aiohttp_jinja2
+        template = aiohttp_jinja2.get_template('report.html')
+        return template.render(gene=result);
 
-        # 2- Get report data thanks to the core
-        gene = annso.get_report(data["variants"])
 
-        # 3- Return html template
-        return {
-            "gene" : gene
-        }
+
+    async def get_export(self, request):
+        data = await request.json()
+        analysis_id = request.match_info.get('analysis_id', -1)
+        export_id = request.match_info.get('export_id', -1)
+
+        return rest_success({"url" : "http://your_export."+str(export_id)})
 
 
 
@@ -345,7 +355,6 @@ class ReportHandler:
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
 # SAMPLE HANDLER
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
-
 
 # Customization of the TUS protocol for the download of sample files
 # Sample TUS wrapper
@@ -372,17 +381,22 @@ class SampleFileWrapper (TusFileWrapper) :
         except Exception as error:
             return TusManager.build_response(code=500, body="Unexpected error occured : {}".format(error))
 
+
     def complete(self, checksum=None, checksum_type="md5"):
         try:
             annso.file.upload_finish(self.id, checksum, checksum_type)
         except Exception as error:
             return TusManager.build_response(code=500, body="Unexpected error occured : {}".format(error))
 
+
     @staticmethod
     def new_upload(request, filename, file_size):
-        # Create and return the wrapper to manipulate the uploading file
+        """ 
+            Create and return the wrapper to manipulate the uploading file
+        """
         id = annso.file.upload_init(filename, file_size)
         return SampleFileWrapper(id)
+
 
 
 # set mapping
@@ -404,8 +418,8 @@ class SampleHandler:
         # Return result of the query for PirusFile 
         return rest_success(annso.sample.get(fields, query, order, offset, limit), range_data)
 
+
     def get_sample(self, request):
-        # 1- Retrieve request parameters
         sid = request.match_info.get('sample_id', None)
         if sid is None:
             return rest_error("No valid sample id provided")
@@ -416,13 +430,11 @@ class SampleHandler:
 
 
     def get_details(self, request):
-        # 1- Retrieve request parameters
         db_name = request.match_info.get('db_name', None)
         if db_name is None:
             return rest_error("No database name provided")
 
         return rest_success({"database" : db_name})
-
 
 
     # Resumable download implement the TUS.IO protocol.
@@ -441,39 +453,6 @@ class SampleHandler:
 
     def tus_upload_delete(self, request):
         return tus_manager.delete_file(request)
-
-
-
-
-
-
-# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
-# VARIANT HANDLER
-# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
-class VariantHandler:
-    def get_variants(self, request):
-        # Generic processing of the get query
-        fields, query, order, offset, limit = process_generic_get(request.query_string, Variant.public_fields)
-        # Get range meta data
-        range_data = {
-            "range_offset" : offset,
-            "range_limit"  : limit,
-            "range_total"  : annso.variant.total(),
-            "range_max"    : RANGE_MAX,
-        }
-        # Return result of the query for PirusFile 
-        return rest_success(annso.variant.get(fields, query, order, offset, limit), range_data)
-
-
-
-    def get_details(self, request):
-        # 1- Retrieve request parameters
-        db_name = request.match_info.get('db_name', None)
-        if db_name is None:
-            return rest_error("No database name provided")
-
-        return rest_success({"database" : db_name})
-
 
 
 

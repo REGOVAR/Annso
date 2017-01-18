@@ -43,6 +43,11 @@ function Analysis(json)
     this.fields = settings["fields"];
     this.filter = settings["filter"];
     this.selection = settings["selection"];
+
+    if (this.selection == undefined)
+    {
+        this.selection = [];
+    }
     
 }
 

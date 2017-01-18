@@ -57,7 +57,7 @@ function AnnsoControler () {
     {
         $.ajax(
         {
-            url: rootURL + "/analysis",
+            url: "{0}/analysis".format(rootURL),
             type: "POST",
             data: '{"name" : "{0}", "template_id" : {1}}'.format(name, template_id),
             async: false
@@ -229,29 +229,64 @@ function AnnsoControler () {
     };
 
 
-    this.switch_variant = function (id)
+    this.add_to_selection = function (id)
     {
+        if (analysis.analysis.selection.indexOf(id) == -1)
+        {
+            analysis.analysis.selection.push(id);
+        }
+        
+    };
 
+    this.remove_to_selection = function (id)
+    {
+        var idx = analysis.analysis.selection.indexOf(id);
+        if (idx != -1)
+        {
+            analysis.analysis.selection.splice(idx, 1);
+        }
     };
 
     this.export_selection = function ()
     {
-
+        $.ajax({ 
+            url: "{0}/analysis/{1}/export/{2}".format(rootURL, analysis.analysis.id, 'csv'), 
+            type: "GET", 
+            data: JSON.stringify({}), // export config parameter if needed
+            async: false}).fail(function() { display_error("TODO : network error"); })
+        .done(function(html)
+        {
+            if (json["success"])
+            {
+                alert( json );
+            }
+            else
+            {
+                error(json);
+            }
+        });
     };
 
 
     this.report_selection = function ()
     {
-
+        $.ajax({ 
+            url: "{0}/selection/report/{1}".format(rootURL, 1), 
+            type: "POST", 
+            data: JSON.stringify({'variants': analysis.analysis.selection}),
+            async: false}).fail(function() { display_error("TODO : network error"); })
+        .done(function(report)
+        {
+            $('#selection_panel_content_report').html(report);
+        });
     };
 
 };
 
-
-
-
-
 var analysis = new AnnsoControler;
+
+
+
 
 
 
@@ -270,7 +305,6 @@ function AnnsoUIControler ()
         $('#welcom_toolbar').hide();
         $('#sample_toolbar').hide();
         $('#variant_toolbar').hide();
-        $('#result_toolbar').hide();
         $('#' + tab_name + '_toolbar').show();
 
         if (tab_name == "variant")
@@ -283,26 +317,26 @@ function AnnsoUIControler ()
         }
     };
 
-    this.select_submenu = function(menu_name)
+    this.select_view = function(view_name)
     {
-
-        if (this.current_tab == "variant")
+        if (view_name == null)
         {
             $('#filters_panel_menu_quick').hide();
             $('#filters_panel_menu_info').hide();
             $('#filters_panel_menu_filter').hide();
-            $('#filters_panel_menu_' + menu_name ).show();
+
+            $('#variants_list').hide();
+            $('#selection_list').show();
         }
-        if (this.current_tab == "result")
+        else
         {
-            $('#selection_panel_menu_info').hide();
-            $('#selection_panel_menu_export').hide();
-            $('#selection_panel_menu_report').hide();
-            $('#selection_panel_content_info').hide();
-            $('#selection_panel_content_export').hide();
-            $('#selection_panel_content_report').hide();
-            $('#selection_panel_menu_' + menu_name ).show();
-            $('#selection_panel_content_' + menu_name ).show();
+            $('#filters_panel_menu_quick').hide();
+            $('#filters_panel_menu_info').hide();
+            $('#filters_panel_menu_filter').hide();
+            $('#filters_panel_menu_' + view_name ).show();
+
+            $('#selection_list').hide();
+            $('#variants_list').show();
         }
     };
 
@@ -514,7 +548,7 @@ function AnnsoUIControler ()
     this.load_sample_database = function ()
     {
         $('#modal_import_sample_db_content').html('<i class="fa fa-refresh fa-spin fa-3x fa-fw" style="margin:200px 250px"></i><span class="sr-only">Loading data from database</span>');
-        $.ajax({ url: rootURL + "/sample", type: "GET", async: false}).fail(function()
+        $.ajax({ url: "{0}/sample".format(rootURL), type: "GET", async: false}).fail(function()
         {
             alert( "ERROR" );
         }).done(function(json) 
@@ -687,6 +721,7 @@ function AnnsoUIControler ()
         $('#filters_panel_menu_filter_c > ul').html(build_filter_ui(analysis.analysis.filter));
         // Reset UI saved filters
         ui.display_saved_filter();
+        ui.update_selection();
     };
 
 
@@ -731,6 +766,52 @@ function AnnsoUIControler ()
     {
         // TODO
     };
+
+
+    this.check_all_variant = function()
+    {
+        var checked = $('#checkbox_all_variants').prop('checked');
+        $('#variants_list_table input[type=checkbox]').each( function (idx, elmt)
+        {
+            $(elmt).prop('checked', checked);
+            ui.check_variant(elmt);
+        });
+    };
+    this.check_variant = function(elmt)
+    {
+        if ($(elmt).prop('checked'))
+        {
+            analysis.add_to_selection($(elmt).val());
+        }
+        else
+        {
+            analysis.remove_to_selection($(elmt).val());
+        }
+        ui.update_selection();
+    };
+
+
+    this.update_selection = function()
+    {
+        if (analysis.analysis.selection.length > 0)
+        {
+            $('#show_selection').html(toolbar_selection_label.format(" <span class=\"badge\">{0}</span>".format(analysis.analysis.selection.length)));
+        }
+        else
+        {
+            $('#show_selection').html(toolbar_selection_label.format(""));
+        }
+    }
+
+
+
+    this.show_selection = function()
+    {
+        // hide left menu
+        ui.select_view(null);
+
+
+    }
 
 }
 var ui = new AnnsoUIControler;
@@ -1006,7 +1087,7 @@ function load_variants_array()
 
     // retrieve list of sample
     $.ajax({ 
-        url: rootURL + "/analysis/" + analysis.analysis.id + "/filtering", 
+        url: "{0}/analysis/{1}/filtering".format(rootURL, analysis.analysis.id), 
         type: "POST",
         data: "{\"mode\" : \"table\", \"filter\" : " + JSON.stringify(analysis.analysis.filter) + ", \"fields\" : " + JSON.stringify(analysis.analysis.fields) + "}",
         async: true}).fail(function()
@@ -1036,23 +1117,20 @@ function load_variants_array()
 
 function init_variants_list(json)
 {
-    var html = "<table id=\"variants_list_table\" class=\"table table-striped table-bordered\" cellspacing=\"0\" width=\"100%\" style=\"margin:0\"><thead><tr><th style=\"width:20px\"></th>";
+    var html = variants_table_header_start;
 
     for (var i=0; i<analysis.analysis.fields.length; i++)
     {
-        html += "<th>{0}</th>".format(annotation_fields[analysis.analysis.fields[i]]["name"]);
+        html += variants_table_header_cell.format(annotation_fields[analysis.analysis.fields[i]]["name"]);
     }
-    html += "</tr></thead><tbody>";
+    html += variants_table_header_end;
 
 
-
-    var rowhtml = "<tr id=\"variant_{0}\" style=\"cursor: pointer;\"><td><input type=\"checkbox\" value=\"{0}\"/></td>";
-    "<td>{1}</td><td>{2}</td><td class=\"pos\">{3}</td><td class=\"seq\">{4}</td><td class=\"seq\">{5}</td></tr>";
     
     $.each(json["data"], function( idx, v ) 
     {
 
-        html += rowhtml.format(v["variant_id"]);
+        html += variants_table_row_start.format(v["id"]);
         for (var i=0; i<analysis.analysis.fields.length; i++)
         {
             fid   = analysis.analysis.fields[i];
@@ -1069,10 +1147,10 @@ function init_variants_list(json)
                 if (ftype == "int" || ftype == "float")
                     html += annotation_format_number(v[fid]);
                 else 
-                    html += "<td>{0}</td>".format(v[fid]);
+                    html += variants_table_row_cell.format(v[fid]);
             }
         }
-        html += "</tr>";
+        html += variants_table_row_end;
     });
     $('#variants_list').html(html + "</tbody></table>");
     $('#current_filter_count').html(annotation_format_number(json['range_total'], false));
@@ -1262,19 +1340,6 @@ function fake_rename_sample()
 }
 
 
-
-
-
-
-
-function fake_generate_report()
-{
-    $.ajax({ url: "http://annso.absolumentg.fr/v1/report", type: "GET", async: false}).done(function(report)
-    {
-        $('#selection_panel_content_report').html(report);
-        
-    });
-}
 
 
 

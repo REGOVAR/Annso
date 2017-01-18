@@ -1,5 +1,5 @@
 
-
+var toolbar_selection_label = "<i class=\"fa fa-check-square-o\" aria-hidden=\"true\"></i> Selection{0}";
 
 
 var sample_selection_table_header    = "<table id=\"browser_samples_table\" class=\"table table-striped table-bordered\" cellspacing=\"0\" width=\"100%\" style=\"margin:0;\"><thead><tr><th style=\"width:30px;\"></th><th>Sample</th>{0}</tr></thead><tbody></tbody></table>";
@@ -62,4 +62,15 @@ var filter_group_template = "<li class=\"condition {0}\">\
 </li>";
 
 var filter_save_filter_empty = "<li class=\"empty_selection\">No filter saved</li>";
-var filter_save_filter_row = "<li><a href=\"javascript:ui.reset_filter({0});\"><i class=\"fa fa-cube\" aria-hidden=\"true\" style=\"width:20px; text-align:center;\">&nbsp;</i>{1}</a></li>";
+var filter_save_filter_row   = "<li><a href=\"javascript:ui.reset_filter({0});\"><i class=\"fa fa-cube\" aria-hidden=\"true\" style=\"width:20px; text-align:center;\">&nbsp;</i>{1}</a></li>";
+
+
+var variants_table_header_start = "<table id=\"variants_list_table\" class=\"table table-striped table-bordered\" cellspacing=\"0\" width=\"100%\" style=\"margin:0\">\
+    <thead><tr><th style=\"width:20px\"><input id=\"checkbox_all_variants\" type=\"checkbox\" onchange=\"javascript:ui.check_all_variant();\"/></th>";
+var variants_table_header_cell  = "<th>{0}</th>";
+var variants_table_header_end   = "</tr></thead><tbody>";
+
+var variants_table_row_start = "<tr id=\"variant_{0}\" style=\"cursor: pointer;\"><td><input type=\"checkbox\" value=\"{0}\" onchange=\"javascript:ui.check_variant(this);\"/></td>";
+var variants_table_row_cell  = "<td>{0}</td>";
+var variants_table_row_end   = "</tr>";
+
