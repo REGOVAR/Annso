@@ -60,8 +60,8 @@ app.router.add_route('DELETE', "/v1/analysis/{analysis_id}/filter/{filter_id}", 
 app.router.add_route('POST',   "/v1/analysis/{analysis_id}/filtering", analysisHandler.filtering)               # Get result (variants) of the provided filter
 app.router.add_route('POST',   "/v1/analysis/{analysis_id}/filtering/count", analysisHandler.filtering_count)   # Get total count of result of the provided filter
 app.router.add_route('GET',    "/v1/analysis/{analysis_id}/selection", analysisHandler.get_selection)           # Get variants data for the provided selection
-app.router.add_route('GET',    "/v1/analysis/{analysis_id}/export/{export_id}", analysisHandler.get_export)     # Export selection of the provided analysis into the requested format
-app.router.add_route('GET',    "/v1/analysis/{analysis_id}/report/{report_id}", analysisHandler.get_report)     # Generate report html for the provided analysis+report id
+app.router.add_route('POST',   "/v1/analysis/{analysis_id}/export/{export_id}", analysisHandler.get_export)     # Export selection of the provided analysis into the requested format
+app.router.add_route('POST',   "/v1/analysis/{analysis_id}/report/{report_id}", analysisHandler.get_report)     # Generate report html for the provided analysis+report id
 
 
 

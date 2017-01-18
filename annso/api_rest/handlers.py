@@ -151,13 +151,24 @@ class WebsiteHandler:
             "analysis" : annso.analysis.get(),  # return by default last 10 analyses
             "annotations_db" :     annso.annotation_db.get_databases(),
             "annotations_fields" : json.dumps(annso.annotation_db.get_fields()),
+            "export_modules" : [annso.export_modules[m]['info'] for m in annso.export_modules], 
+            "import_modules" : [annso.import_modules[m]['info'] for m in annso.import_modules], 
+            "report_modules" : [annso.report_modules[m]['info'] for m in annso.report_modules], 
         }
+
         return data
 
 
 
     def get_config(self, request):
-        return rest_success({})
+        return rest_success({
+            "host" : HOST_P,
+            "pagination_default_range" : RANGE_DEFAULT,
+            "pagination_max_range" : RANGE_MAX,
+            "export_modules" : annso.export_modules, 
+            "import_modules" : annso.import_modules,
+            "report_modules" : annso.report_modules
+            })
 
 
 
@@ -257,7 +268,6 @@ class AnalysisHandler:
 
     async def filtering(self, request, count=False):
         # 1- Retrieve data from request
-        ipdb.set_trace()
         data = await request.json()
         analysis_id = request.match_info.get('analysis_id', -1)
         filter_json = data["filter"] if "filter" in data else {}
@@ -330,15 +340,10 @@ class AnalysisHandler:
         report_id = request.match_info.get('report_id', -1)
 
         try :
-            result = annso.analysis.generate_report(analysis_id, report_id, data)
+            result = annso.analysis.report(analysis_id, report_id, data)
         except Exception as err :
             return rest_error("AnalysisHandler.get_report error : " + str(err))
-
-
-        from core.report import get_ta_image, get_hbt_image, get_decipher_image, get_sp_image
-        from api_rest.routes import aiohttp_jinja2
-        template = aiohttp_jinja2.get_template('report.html')
-        return template.render(gene=result);
+        return result
 
 
 
@@ -347,6 +352,10 @@ class AnalysisHandler:
         analysis_id = request.match_info.get('analysis_id', -1)
         export_id = request.match_info.get('export_id', -1)
 
+        try :
+            result = annso.analysis.export(analysis_id, export_id, data)
+        except Exception as err :
+            return rest_error("AnalysisHandler.get_export error : " + str(err))
         return rest_success({"url" : "http://your_export."+str(export_id)})
 
 

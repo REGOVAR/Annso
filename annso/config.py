@@ -39,14 +39,20 @@ CACHE_DIR       = "/tmp/annso_" + VERSION + "/cache"
 
 
 # MODULES ACTIVATED
-EXPORTS_MODULES = ["cvs"]
+EXPORTS_MODULES = ["csv"]
 IMPORTS_MODULES = ["vcf"]
 REPORTS_MODULES = ["dims"]
 
 
 
 # AUTOCOMPUTED VALUES
-ANNSO_DIR       = os.path.dirname(os.path.abspath(__file__))
-TEMPLATE_DIR    = os.path.join(ANNSO_DIR, "api_rest/templates/")
-ERROR_ROOT_URL  = "api.pirus.org/errorcode/"
+ANNSO_DIR           = os.path.dirname(os.path.abspath(__file__))
+TEMPLATE_DIR        = os.path.join(ANNSO_DIR, "api_rest/templates/")
+ERROR_ROOT_URL      = "api.pirus.org/errorcode/"
+
+
+# INTERNAL CONSTANT
+EXPORTS_MODULES_PATH = "exports.{0}"
+IMPORTS_MODULES_PATH = "imports.{0}"
+REPORTS_MODULES_PATH = "reports.{0}.report"
 

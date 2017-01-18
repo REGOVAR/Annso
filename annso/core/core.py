@@ -20,11 +20,6 @@ from core.model import *
 
 
 
-# from core.report import *
-# from core.vcf import import_vcf
-
-
-
 
 
 
@@ -39,13 +34,44 @@ class Core:
         self.annotation_db = AnnotationDatabaseManager()
         self.analysis = AnalysisManager()
         self.sample = SampleManager()
-        self.variant = VariantManager()
         self.filter = FilterEngine()
         self.file = FileManager()
-        # self.selection = SelectionManager()
+        
+        self.export_modules = {}
+        self.import_modules = {}
+        self.report_modules = {}
 
-        # Todo
-        pass
+        # Load metada for activated modules
+        for name in EXPORTS_MODULES:
+            try:
+                m = __import__('exports.{0}'.format(name))
+                self.export_modules[name] = {
+                    "info" : eval ('m.{0}.metadata'.format(name)),
+                    "do"   : eval ('m.{0}.export_data'.format(name)),
+                }
+                self.export_modules[name].update({'id' : name})
+            except:
+                print("Unable to load exports.{0} module".format(name))
+        for name in IMPORTS_MODULES:
+            try:
+                m = __import__('imports.{0}'.format(name))
+                self.import_modules[name] = {
+                    "info" : eval ('m.{0}.metadata'.format(name)),
+                    "do"   : eval ('m.{0}.import_data'.format(name)),
+                }
+                self.import_modules[name].update({'id' : name})
+            except:
+                print("Unable to load imports.{0} module".format(name))
+        for name in REPORTS_MODULES:
+            try:
+                m = __import__('reports.{0}.report'.format(name))
+                self.report_modules[name] = {
+                    "info" : eval ('m.{0}.report.metadata'.format(name)),
+                    "do"   : eval ('m.{0}.report.report_data'.format(name)),
+                }
+                self.report_modules[name].update({'id' : name})
+            except:
+                print("Unable to load reports.{0} module".format(name))
 
 
 
@@ -381,45 +407,15 @@ class AnalysisManager:
 
 
 
-    def generate_report(self, analysis_id, report_id, report_data):
-        return
+    def report(self, analysis_id, report_id, report_data):
+        return "<h1>Your report!</h1>"
 
 
 
+    def export(self, analysis_id, export_id, report_data):
+        return "<h1>Your export!</h1>"
 
 
-# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
-# Variant MANAGER
-# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
-class VariantManager:
-
-
-    def total(self):
-        return 350
-
-
-
-    def get(self, fields=None, query=None, order=None, offset=None, limit=None, sublvl=0):
-        """
-            Generic method to get files metadata according to provided filtering options
-        """
-        global db_session
-        if fields is None:
-            fields = Sample.public_fields
-        if query is None:
-            query = {}
-        if order is None:
-            order = ['-create_date', "name"]
-        if offset is None:
-            offset = 0
-        if limit is None:
-            limit = offset + RANGE_MAX
-
-        result = []
-        for r in db_engine.execute("SELECT s.name, sv.* FROM sample_variant_hg19 sv INNER JOIN sample s ON s.id = sv.sample_id"):
-            result.append((r[1], r[0], r[3], r[4], r[5], r[6]))
-
-        return result
 
 
 
@@ -439,7 +435,7 @@ class SampleManager:
 
 
     def total(self):
-        return 3
+        return db_session.execute("SELECT count(*) FROM sample").first()[0]
 
 
     def get(self, fields=None, query=None, order=None, offset=None, limit=None, sublvl=0):
@@ -508,22 +504,6 @@ class FilterEngine:
             self.db_map[row[0]]["fields"][row[3]] = {"name" : row[4], "type" : row[5]}
             self.fields_map[row[3]] = {"name" : row[4], "type" : row[5], "db_id" : row[0], "db_name" : row[1], "join": row[2].format(self.variant_table)}
 
-        # Drop tmp_ tables
-        # sql =  "DECLARE @cmd varchar(4000)\
-        #         DECLARE cmds CURSOR FOR\
-        #         SELECT 'drop table [' + Table_Name + ']'\
-        #         FROM INFORMATION_SCHEMA.TABLES\
-        #         WHERE Table_Name LIKE 'tmp_%'\
-        #         OPEN cmds\
-        #         WHILE 1 = 1\
-        #         BEGIN\
-        #             FETCH cmds INTO @cmd\
-        #             IF @@fetch_status != 0 BREAK\
-        #             EXEC(@cmd)\
-        #         END\
-        #         CLOSE cmds;\
-        #         DEALLOCATE cmds"
-        # db_session.execute(sql)
 
 
 

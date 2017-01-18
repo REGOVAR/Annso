@@ -251,14 +251,14 @@ function AnnsoControler () {
     {
         $.ajax({ 
             url: "{0}/analysis/{1}/export/{2}".format(rootURL, analysis.analysis.id, 'csv'), 
-            type: "GET", 
-            data: JSON.stringify({}), // export config parameter if needed
+            type: "POST", 
+            data: JSON.stringify({}),
             async: false}).fail(function() { display_error("TODO : network error"); })
-        .done(function(html)
+        .done(function(json)
         {
             if (json["success"])
             {
-                alert( json );
+                $('#selection_list').html(json);
             }
             else
             {
@@ -271,13 +271,13 @@ function AnnsoControler () {
     this.report_selection = function ()
     {
         $.ajax({ 
-            url: "{0}/selection/report/{1}".format(rootURL, 1), 
+            url: "{0}/analysis/{1}/report/{2}".format(rootURL, analysis.analysis.id, 'dims'),
             type: "POST", 
-            data: JSON.stringify({'variants': analysis.analysis.selection}),
+            data: JSON.stringify({}),
             async: false}).fail(function() { display_error("TODO : network error"); })
         .done(function(report)
         {
-            $('#selection_panel_content_report').html(report);
+            $('#selection_list').html(report);
         });
     };
 
@@ -796,10 +796,12 @@ function AnnsoUIControler ()
         if (analysis.analysis.selection.length > 0)
         {
             $('#show_selection').html(toolbar_selection_label.format(" <span class=\"badge\">{0}</span>".format(analysis.analysis.selection.length)));
+            $('#show_selection').parent().find("button").each(function(idx, elmt){ $(elmt).attr('disabled', false);});
         }
         else
         {
             $('#show_selection').html(toolbar_selection_label.format(""));
+            $('#show_selection').parent().find("button").each(function(idx, elmt){ $(elmt).attr('disabled', true);});
         }
     }
 

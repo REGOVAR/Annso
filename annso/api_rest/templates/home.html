@@ -172,7 +172,9 @@
                                         </button>
                                         
                                         <ul class="dropdown-menu" role="menu" aria-labelledby="dLabel">
-                                            <li><a onclick="javascript:report_export('csv');" title="to CSV file">CSV file</a></li>
+                                            {% for m in export_modules %}
+                                            <li><a onclick="javascript:analysis.export_selection('{{ m['id'] }}');" title="{{ m["description"] }}">{{ m["name"] }}</a></li>
+                                            {% endfor %}
                                         </ul>
                                     </div>
                                     <div class="btn-group">
@@ -181,13 +183,14 @@
                                         </button>
                                         
                                         <ul class="dropdown-menu" role="menu" aria-labelledby="dLabel">
-                                            <li><a onclick="javascript:report_selection(1);" title="DIMS report">DIMS report</a></li>
+                                            {% for m in report_modules %}
+                                            <li><a onclick="javascript:analysis.report_selection('{{ m['id'] }}');" title="{{ m["description"] }}">{{ m["name"] }}</a></li>
+                                            {% endfor %}
                                         </ul>
                                     </div>
                                 </div>
                             </div>
                         </div>
-
                     </div>
 
 

@@ -1,120 +1,126 @@
 #!env/python3
 # coding: utf-8
-import ipdb
-
-import os
-import datetime
-import sqlalchemy
-import subprocess
-import multiprocessing as mp
-import reprlib
-from pysam import VariantFile
-
-
-
-from config import *
-from core.framework import *
-from core.model import *
 
 
 
 
-# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
-# Stand alone tools
-# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
-
-def normalize_chr(chrm):
-    chrm = chrm.upper()
-    if (chrm.startswith("CHROM")):
-        chrm = chrm[5:]
-    if (chrm.startswith("CHRM")):
-        chrm = chrm[4:]
-    if (chrm.startswith("CHR")):
-        chrm = chrm[3:]
-    return chrm
+metadata = {
+    "name" : "VCF",
+    "input" :  ["vcf", "vcf.gz"],
+    "description" : "Import variants from vcf file"
+}
 
 
-def get_alt(alt):
-    if ('|' in alt):
-        return alt.split('|')
-    else:
-        return alt.split('/')
+
+def import_data(file_id, filepath, core=None, db_ref_suffix="_hg19"):
+    import ipdb
+
+    import os
+    import datetime
+    import sqlalchemy
+    import subprocess
+    import multiprocessing as mp
+    import reprlib
+    from pysam import VariantFile
 
 
-def normalize(pos, ref, alt):
-    if (ref == alt):
-        return None,None,None
-    if ref is None:
-        ref = ''
-    if alt is None:
-        alt = ''
-
-    while len(ref) > 0 and len(alt) > 0 and ref[0]==alt[0] :
-        ref = ref[1:]
-        alt = alt[1:]
-        pos += 1
-    if len(ref) == len(alt):
-        while ref[-1:]==alt[-1:]:
-            ref = ref[0:-1]
-            alt = alt[0:-1]
-
-    return pos, ref, alt
+    from core.framework import get_or_create
+    from core.model import Sample, db_engine, db_session
 
 
-def is_transition(ref, alt):
-    tr = ref+alt
-    if len(ref) == 1 and tr in ('AG', 'GA', 'CT', 'TC'):
-        return True
-    return False
 
-def normalize_gt(infos):
-    gt = get_info(infos, 'GT')
 
-    if gt != 'NULL':
-        if infos['GT'][0] == infos['GT'][1]:
-            # Homozyot ref
-            if infos['GT'][0] in [None, 0] : 
-                return 0
-            # Homozyot alt
-            return '1'
-        else :
-            if 0 in infos['GT'] :
-                # Hetero ref
-                return '2'
+
+
+    # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+    # Tools
+    # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+
+    def normalize_chr(chrm):
+        chrm = chrm.upper()
+        if (chrm.startswith("CHROM")):
+            chrm = chrm[5:]
+        if (chrm.startswith("CHRM")):
+            chrm = chrm[4:]
+        if (chrm.startswith("CHR")):
+            chrm = chrm[3:]
+        return chrm
+
+
+    def get_alt(alt):
+        if ('|' in alt):
+            return alt.split('|')
+        else:
+            return alt.split('/')
+
+
+    def normalize(pos, ref, alt):
+        if (ref == alt):
+            return None,None,None
+        if ref is None:
+            ref = ''
+        if alt is None:
+            alt = ''
+        while len(ref) > 0 and len(alt) > 0 and ref[0]==alt[0] :
+            ref = ref[1:]
+            alt = alt[1:]
+            pos += 1
+        if len(ref) == len(alt):
+            while ref[-1:]==alt[-1:]:
+                ref = ref[0:-1]
+                alt = alt[0:-1]
+        return pos, ref, alt
+
+
+    def is_transition(ref, alt):
+        tr = ref+alt
+        if len(ref) == 1 and tr in ('AG', 'GA', 'CT', 'TC'):
+            return True
+        return False
+
+
+    def normalize_gt(infos):
+        gt = get_info(infos, 'GT')
+        if gt != 'NULL':
+            if infos['GT'][0] == infos['GT'][1]:
+                # Homozyot ref
+                if infos['GT'][0] in [None, 0] : 
+                    return 0
+                # Homozyot alt
+                return '1'
             else :
-                return '3'
-        print ("unknow : " + str(infos['GT']) )
-    return '?'
-
-def get_info(infos, key):
-    if (key in infos):
-        if infos[key] is None : return 'NULL'
-        return infos[key]
-    return 'NULL'
+                if 0 in infos['GT'] :
+                    # Hetero ref
+                    return '2'
+                else :
+                    return '3'
+            print ("unknow : " + str(infos['GT']) )
+        return '?'
 
 
 
-
-# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
-# Import method
-# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
-
-# USING db_engine and db_session global variables defined in core.model
-
-
-# Multi-thread management to execute raw queries
-
-
-def exec_sql_query(raw_sql):
-    global job_in_progress, db_engine
-    job_in_progress += 1
-    db_engine.execute(raw_sql)
-    job_in_progress -= 1
+    def get_info(infos, key):
+        if (key in infos):
+            if infos[key] is None : return 'NULL'
+            return infos[key]
+        return 'NULL'
 
 
 
 
-def import_vcf(file_id, filepath, core=None, db_ref_suffix="_hg19"):
+    # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+    # Import 
+    # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+
+
+    def exec_sql_query(raw_sql):
+        global job_in_progress, db_engine
+        job_in_progress += 1
+        db_engine.execute(raw_sql)
+        job_in_progress -= 1
+
+
+
     global db_session
 
     start_0 = datetime.datetime.now()
