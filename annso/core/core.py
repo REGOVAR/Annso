@@ -123,7 +123,7 @@ class FileManager:
         """
         # TODO : test file extension if ["vcf", "gvcf", "vcf.gz", "gvcf.gz"] : sample file, otherwise ...
         sample_file = File.new_from_tus(filename, file_size)
-        return sample_file.id
+        return sample_file
 
 
 
@@ -155,7 +155,11 @@ class FileManager:
         db_session.add(file)
         db_session.commit()
 
-        import_vcf(file.id, file.path, annso)
+        # Importing to the database according to the type (if an import module can manage it)
+        for m in annso.import_modules.values():
+            if file.type in m['info']['input']:
+                m['do'](file.id, file.path, annso)
+                break;
 
         # Notify all about the new status
         # msg = {"action":"file_changed", "data" : [pfile.to_json_data()] }
@@ -296,7 +300,7 @@ class AnalysisManager:
                 "nickname" : r.nickname, 
                 "file_id" : r.f_id, 
                 "filename" : r.filename,
-                "import_date" : r.import_date,
+                "import_date" : r.import_date.ctime(),
                 "attributes" : {}})
             for a in result["attributes"]:
                 if r.id in a["samples_value"].keys():

@@ -383,7 +383,7 @@ class SampleFileWrapper (TusFileWrapper) :
 
     def save(self):
         try:
-            f = File.get_from_id(self.id)
+            f = File.from_id(self.id)
             db_session.add(f)
             f.upload_offset=self.upload_offset
             db_session.commit()
@@ -403,8 +403,8 @@ class SampleFileWrapper (TusFileWrapper) :
         """ 
             Create and return the wrapper to manipulate the uploading file
         """
-        id = annso.file.upload_init(filename, file_size)
-        return SampleFileWrapper(id)
+        annso_file = annso.file.upload_init(filename, file_size)
+        return SampleFileWrapper(annso_file.id)
 
 
 
@@ -432,7 +432,7 @@ class SampleHandler:
         sid = request.match_info.get('sample_id', None)
         if sid is None:
             return rest_error("No valid sample id provided")
-        sample = Sample.get_from_id(sid)
+        sample = Sample.from_id(sid)
         if sample is None:
             return rest_error("No sample found with id="+str(sid))
         return rest_success(sample.to_json())

@@ -31,7 +31,6 @@ def import_data(file_id, filepath, core=None, db_ref_suffix="_hg19"):
 
 
 
-
     # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
     # Tools
     # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
@@ -142,7 +141,6 @@ def import_data(file_id, filepath, core=None, db_ref_suffix="_hg19"):
             core.notify_all({'msg':'import_vcf_start', 'data' : {'file_id' : file_id, 'samples' : [ {'id' : samples[s].id, 'name' : samples[s].name} for s in samples.keys()]}})
 
         # Associate sample to the file
-        ipdb.set_trace()
         db_engine.execute("INSERT INTO sample_file (sample_id, file_id) VALUES {0};".format( ','.join(["({0}, {1})".format(samples[sid].id, file_id) for sid in samples])))
 
 

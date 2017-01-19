@@ -1293,7 +1293,7 @@ function annotation_format_sequence(seq)
 function annotation_format_sampleid(id)
 {
     name = analysis.analysis.samples[id]["nickname"];
-    if (name == null)
+    if (name == null || name == "")
         name = analysis.analysis.samples[id]["name"];
 
     return "<td>{0}</td>".format(name);
