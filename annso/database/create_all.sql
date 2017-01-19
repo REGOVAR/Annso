@@ -275,7 +275,7 @@ CREATE TABLE public.sample_variant_hg19
     alt text NOT NULL,
     variant_id integer,
     genotype character varying(1),
-    deepth integer,
+    depth integer,
     info character varying(255)[][] COLLATE pg_catalog."C.UTF-8",
     mosaic real,
     CONSTRAINT sample_variant_hg19_pkey PRIMARY KEY (sample_id, chr, pos, ref, alt),
@@ -351,12 +351,6 @@ ALTER TABLE public.annotation_field OWNER TO annso;
 
 
 
-
-
-
-
-
-
 CREATE TABLE public."parameter"
 (
     key character varying(255) COLLATE pg_catalog."C.UTF-8" NOT NULL ,
@@ -366,6 +360,105 @@ CREATE TABLE public."parameter"
 )
 WITH ( OIDS=FALSE );
 ALTER TABLE public."parameter" OWNER TO annso;
+
+
+
+
+
+
+
+
+--
+-- INDEXES
+--
+DROP INDEX IF EXISTS public.sample_idx;
+CREATE INDEX sample_idx
+  ON public.sample
+  USING btree
+  (id);
+
+
+
+
+DROP INDEX IF EXISTS public.sample_variant_hg19_idx_id;
+CREATE INDEX sample_variant_hg19_idx_id
+  ON public.sample_variant_hg19
+  USING btree
+  (variant_id);
+
+DROP INDEX IF EXISTS public.sample_variant_hg19_idx_variant;
+CREATE INDEX sample_variant__hg19idx_variant
+  ON public.sample_variant_hg19
+  USING btree
+  (sample_id, chr COLLATE pg_catalog."default", pos, ref COLLATE pg_catalog."default", alt COLLATE pg_catalog."default");
+
+DROP INDEX IF EXISTS public.sample_variant_hg19_idx_site;
+CREATE INDEX sample_variant_hg19_idx_site
+  ON public.sample_variant_hg19
+  USING btree
+  (sample_id, chr COLLATE pg_catalog."default", pos);
+
+DROP INDEX IF EXISTS public.sample_variant_hg19_idx_bin;
+CREATE INDEX sample_variant_hg19_idx_bin
+  ON public.sample_variant_hg19
+  USING btree
+  (sample_id, chr COLLATE pg_catalog."default", bin, pos);
+
+
+
+
+DROP INDEX IF EXISTS public.attribute_idx;
+CREATE INDEX attribute_idx
+  ON public.attribute
+  USING btree
+  (analysis_id, sample_id, name COLLATE pg_catalog."default");
+
+
+
+
+DROP INDEX IF EXISTS public.variant_hg19_idx_id;
+CREATE INDEX variant_hg19_idx_id
+  ON public.variant_hg19
+  USING btree
+  (id);
+
+DROP INDEX IF EXISTS public.variant_hg19_idx_variant;
+CREATE INDEX variant_hg19_idx_variant
+  ON public.variant_hg19
+  USING btree
+  (chr COLLATE pg_catalog."default", pos, ref COLLATE pg_catalog."default", alt COLLATE pg_catalog."default");
+
+DROP INDEX IF EXISTS public.variant_hg19_idx_site;
+CREATE INDEX variant_hg19_idx_site
+  ON public.variant_hg19
+  USING btree
+  (chr COLLATE pg_catalog."default", pos);
+
+DROP INDEX IF EXISTS public.variant_hg19_idx_bin;
+CREATE INDEX variant_hg19_idx_bin
+  ON public.variant_hg19
+  USING btree
+  (chr COLLATE pg_catalog."default", bin, pos);
+
+
+
+
+DROP INDEX IF EXISTS public.analysis_idx;
+CREATE INDEX analysis_idx
+  ON public.analysis
+  USING btree
+  (id);
+
+
+
+
+DROP INDEX IF EXISTS public.filter_idx;
+CREATE INDEX filter_idx
+  ON public.filter
+  USING btree
+  (id);
+    
+
 
 
 
@@ -409,4 +502,9 @@ INSERT INTO public.annotation_field(database_id, name, name_ui, type, descriptio
   (1, 'ref',       'ref',    'string', 'Reference sequence.'),
   (1, 'alt',       'alt',    'string', 'Alternative sequence of the variant.'),
   (1, 'genotype',  'GT',     'string', 'Genotype. Values can be : 0=ref/ref, 1=alt/alt, 2=ref/alt, 3=alt1/alt2'),
-  (1, 'deepth',    'DP',     'float',  'Deepth.');
+  (1, 'depth',    'DP',     'float',  'Deepth.');
+
+
+
+
+

@@ -1143,6 +1143,10 @@ function load_variants_array()
             samples.push({"id" : key, "attributes" : []});
         }
     });
+
+    // displaying computing feedback
+    $('#current_filter_count').html('<i class="fa fa-refresh fa-spin fa-fw"></i>');
+    $('#demo_footer').html('Computing total number of variant filtered <i class="fa fa-refresh fa-spin fa-fw"></i>');
     $('#variants_list').html('<i class="fa fa-refresh fa-spin fa-3x fa-fw" style="display:block;margin:auto;margin-top:200px;"></i><span class="sr-only">Loading data from database</span>');
 
 
@@ -1168,8 +1172,47 @@ function load_variants_array()
         }
         else
         {
-            init_variants_list(json);
+            count = init_variants_list(json);
+            if (count == 100)
+            {
+                // As the server return the max range variants, maybe the total is higher. so, do another request to get total count
+                loading_filter_count();
+            }
+            else
+            {
+                $('#current_filter_count').html(annotation_format_number(count, false));
+                $('#demo_footer').html("{0} variant{1}".format(annotation_format_number(count, false), (count > 1) ? 's' : ''));
+            }
+            
         }
+    });
+}
+
+
+function loading_filter_count()
+{
+    // Sending request to get total count
+    $.ajax({ 
+        url: "{0}/analysis/{1}/filtering/count".format(rootURL, analysis.analysis.id), 
+        type: "POST",
+        data: "{\"mode\" : \"table\", \"filter\" : " + JSON.stringify(analysis.analysis.filter) + ", \"fields\" : " + JSON.stringify(analysis.analysis.fields) + "}",
+        async: true}).fail(function()
+    {
+        display_error("Unknow error in 'loading_filter_count' request");
+    }).done(function(json)
+    {
+        if (json["success"])
+        {
+            $('#current_filter_count').html(annotation_format_number(json["data"], false));
+            $('#demo_footer').html("{0} variant{1}".format(annotation_format_number(json["data"], false), (json["data"] > 1) ? 's' : ''));
+        }
+        else
+        {
+            $('#current_filter_count').html("-");
+            $('#demo_footer').html("-");
+            display_error(json);
+        }
+        
     });
 }
 
@@ -1178,6 +1221,7 @@ function load_variants_array()
 
 function init_variants_list(json)
 {
+    var count = 0;
     var html = variants_table_header_start;
 
     for (var i=0; i<analysis.analysis.fields.length; i++)
@@ -1190,7 +1234,7 @@ function init_variants_list(json)
     
     $.each(json["data"], function( idx, v ) 
     {
-
+        count += 1;
         selected = (analysis.analysis.selection.indexOf(v["id"].toString()) == -1) ? "" : " checked";
         html += variants_table_row_start.format(v["id"], selected);
         for (var i=0; i<analysis.analysis.fields.length; i++)
@@ -1215,8 +1259,7 @@ function init_variants_list(json)
         html += variants_table_row_end;
     });
     $('#variants_list').html(html + "</tbody></table>");
-    $('#current_filter_count').html(annotation_format_number(json['range_total'], false));
-    $('#demo_footer').html("{0} result{1}".format(annotation_format_number(json['range_total'], false), (json['range_total'] > 1) ? 's' : ''));
+    return count;
 }
 
 function annotation_format_number(value, td=true)

@@ -515,9 +515,9 @@ class FilterEngine:
         sql_result = None
 
         
-        # Do select query on the tmp table and update "last query time"
-        query = self.build_query(analysis_id, mode, filter_json, fields, limit, offset)
 
+        # Do select query on the tmp table and update "last query time"
+        query = self.build_query(analysis_id, mode, filter_json, fields, limit, offset, count)
         with Timer() as t:
             sql_result = db_engine.execute(query)
         print ("---\nFields :\n{0}\nFilter :\n{1}\nQuery :\n{2}\nRequest query : {3}".format(fields, filter_json, query, t))
@@ -525,7 +525,7 @@ class FilterEngine:
         
 
         # Save filter in analysis setting
-        if (analysis_id > 0):
+        if not count and (analysis_id > 0):
             setting = {}
             try : 
                 setting = json.loads(db_engine.execute("SELECT setting FROM analysis WHERE id={}".format(analysis_id)).first().setting)
@@ -536,20 +536,23 @@ class FilterEngine:
                 print ("Not able to save current filter")        
 
 
-        # Execute query and get result
-        
-        result = []
-        with Timer() as t:
-            if sql_result is not None:
-                for s in sql_result: 
-                    variant = {'id' : s.variant_id}
-                    i=1
-                    for f_id in fields:
-                        variant[f_id]= FilterEngine.parse_result(s[i])
-                        i += 1
-                    result.append(variant)
-        print ("Result processing : {0}\nTotal result : {1}".format(t, "-"))
-        return result#s.annso_query_total_count
+
+        # Get result
+        if count:
+            result = sql_result.first()[0]
+        else:
+            result = []
+            with Timer() as t:
+                if sql_result is not None:
+                    for s in sql_result: 
+                        variant = {'id' : s.variant_id}
+                        i=1
+                        for f_id in fields:
+                            variant[f_id]= FilterEngine.parse_result(s[i])
+                            i += 1
+                        result.append(variant)
+            print ("Result processing : {0}\nTotal result : {1}".format(t, "-"))
+        return result
 
 
 
@@ -560,7 +563,7 @@ class FilterEngine:
 
 
 
-    def build_query(self, analysis_id, mode, filter_json, fields=None, limit=100, offset=0):
+    def build_query(self, analysis_id, mode, filter_json, fields=None, limit=100, offset=0, count=False):
         """
             Build the sql query according to the annso filtering parameter and return the query and the name of the associated temps table
         """
@@ -577,7 +580,7 @@ class FilterEngine:
 
         # Build SELECT
         q_select = 'variant_id, ' + ', '.join(["{0}.{1}".format(self.fields_map[f_id]["db_name"], self.fields_map[f_id]["name"]) for f_id in fields])
-        # q_select += ', count(*) OVER() AS annso_query_total_count'
+
 
         # Build FROM/JOIN
         tables_to_import = [1] # 1 is for the sample_variant_{ref} table. We always need this table as it's used for the join with other tables
@@ -680,11 +683,14 @@ class FilterEngine:
         q_from += " " + " ".join([t['from'] for t in temporary_to_import.values()])
         
 
-        # build query
-        query = "".join([t['query'] for t in temporary_to_import.values()])
-        query += "SELECT DISTINCT {0} FROM {1} WHERE {2} LIMIT {3} OFFSET {4};".format(q_select, q_from, q_where, limit, offset)
-
-        return query
+        # build final query
+        query_tpm = "".join([t['query'] for t in temporary_to_import.values()])
+        if count:
+            query_req = "SELECT DISTINCT {0} FROM {1} WHERE {2}".format(q_select, q_from, q_where)
+            return '{0} SELECT COUNT(*) FROM ({1}) AS sub;'.format(query_tpm, query_req)
+        else: 
+            query_req = "SELECT DISTINCT {0} FROM {1} WHERE {2} LIMIT {3} OFFSET {4};".format(q_select, q_from, q_where, limit, offset)
+            return query_tpm + query_req
 
 
 
