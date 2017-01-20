@@ -9,8 +9,8 @@
 --
 -- Import csv data
 --
-DROP TABLE IF EXISTS public.import_dbnfsp_variant_hg19;
-CREATE TABLE public.import_dbnfsp_variant_hg19
+DROP TABLE IF EXISTS public.import_dbnfsp_variant;
+CREATE TABLE public.import_dbnfsp_variant
 (
     chr text,
     pos text,
@@ -203,7 +203,7 @@ CREATE TABLE public.import_dbnfsp_variant_hg19
 WITH (
   OIDS=FALSE
 );
-ALTER TABLE public.import_dbnfsp_variant_hg19
+ALTER TABLE public.import_dbnfsp_variant
   OWNER TO annso;
 
 
@@ -240,6 +240,490 @@ COPY import_dbnfsp_variant_hg19 FROM '/tmp/hg19_db/dbNSFP/dbNSFP3.3a_variant.chr
 
 
 
+--
+-- Create Annso tables for dbNFSP data
+--
+
+DROP TABLE IF EXISTS public.dbnfsp_variant;
+CREATE TABLE public.dbnfsp_variant
+(
+    chr_hg38 character varying(255),
+    pos_hg38 serial,
+    chr_hg19 character varying(255),
+    pos_hg19 serial,
+    chr_hg18 character varying(255),
+    pos_hg18 serial,
+    ref text,
+    alt text,
+    aaref text,
+    aaalt text,
+    rs_dbSNP147 text,
+    genename text,
+    cds_strand character varying(1),
+    refcodon text,
+    codonpos integer,
+    codon_degeneracy integer,
+    Ancestral_allele character varying(1),
+    AltaiNeandertal text,
+    Denisova text,
+
+    Ensembl_geneid text,
+    Ensembl_transcriptid text,
+    Ensembl_proteinid text,
+    aapos text,
+    SIFT_score text,
+    SIFT_converted_rankscore text,
+    SIFT_pred text,
+    FATHMM_score text,
+    FATHMM_converted_rankscore text,
+    FATHMM_pred text,
+    PROVEAN_score text,
+    PROVEAN_converted_rankscore text,
+    PROVEAN_pred text,
+
+    Uniprot_acc_Polyphen2 text,
+    Uniprot_id_Polyphen2 text,
+    Uniprot_aapos_Polyphen2 text,
+    Polyphen2_HDIV_score text,
+    Polyphen2_HDIV_rankscore text,
+    Polyphen2_HDIV_pred text,
+    Polyphen2_HVAR_score text,
+    Polyphen2_HVAR_rankscore text,
+    Polyphen2_HVAR_pred text,
+
+    LRT_score real,
+    LRT_converted_rankscore real,
+    LRT_pred character varying(1),
+    LRT_Omega real,
+
+    MutationTaster_score real,
+    MutationTaster_converted_rankscore real,
+    MutationTaster_pred character varying(1),
+    MutationTaster_model text,
+    MutationTaster_AAE text,
+    MutationAssessor_UniprotID text,
+    MutationAssessor_variant text,
+    MutationAssessor_score real,
+    MutationAssessor_rankscore real,
+    MutationAssessor_pred character varying(1),
+
+    Transcript_id_VEST3 text,
+    Transcript_var_VEST3 text,
+    VEST3_score text,
+    VEST3_rankscore real,
+
+    MetaSVM_score real,
+    MetaSVM_rankscore real,
+    MetaSVM_pred character varying(1),
+    MetaLR_score real,
+    MetaLR_rankscore real,
+    MetaLR_pred character varying(1),
+
+    Reliability_index serial,
+
+    M_CAP_score real,
+    M_CAP_rankscore real,
+    M_CAP_pred character varying(1),
+
+    CADD_raw real,
+    CADD_raw_rankscore real,
+    CADD_phred real,
+
+    DANN_score real,
+    DANN_rankscore real,
+
+    fathmm_MKL_coding_score real,
+    fathmm_MKL_coding_rankscore real,
+    fathmm_MKL_coding_pred character varying(1),
+    fathmm_MKL_coding_group text,
+
+    Eigen_coding_or_noncoding boolean,
+    Eigen_raw real,
+    Eigen_phred real,
+    Eigen_PC_raw real,
+    Eigen_PC_phred real,
+    Eigen_PC_raw_rankscore real,
+
+    GenoCanyon_score real,
+    GenoCanyon_score_rankscore real,
+
+    integrated_fitCons_score real,
+    integrated_fitCons_rankscore real,
+    integrated_confidence_value real,
+
+    GM12878_fitCons_score real,
+    GM12878_fitCons_score_rankscore real,
+    GM12878_confidence_value real,
+
+    H1_hESC_fitCons_score real,
+    H1_hESC_fitCons_rankscore real,
+    H1_hESC_confidence_value real,
+
+    HUVEC_fitCons_score real,
+    HUVEC_fitCons_rankscore real,
+    HUVEC_confidence_value real,
+
+    GERPpp_NR real,
+    GERPpp_RS real,
+    GERPpp_RS_rankscore real,
+
+    phyloP100way_vertebrate real,
+    phyloP100way_vertebrate_rankscore real,
+    phyloP20way_mammalian real,
+    phyloP20way_mammalian_rankscore real,
+
+    phastCons100way_vertebrate real,
+    phastCons100way_vertebrate_rankscore real,
+    phastCons20way_mammalian real,
+    phastCons20way_mammalian_rankscore real,
+
+    SiPhy_29way_pi text,
+    SiPhy_29way_logOdds text,
+    SiPhy_29way_logOdds_rankscore text,
+
+    _1000Gp3_AC serial,
+    _1000Gp3_AF real,
+    _1000Gp3_AFR_AC text,
+    _1000Gp3_AFR_AF real,
+    _1000Gp3_EUR_AC serial,
+    _1000Gp3_EUR_AF real,
+    _1000Gp3_AMR_AC serial,
+    _1000Gp3_AMR_AF real,
+    _1000Gp3_EAS_AC serial,
+    _1000Gp3_EAS_AF real,
+    _1000Gp3_SAS_AC serial,
+    _1000Gp3_SAS_AF real,
+    TWINSUK_AC serial,
+    TWINSUK_AF real,
+    ALSPAC_AC serial,
+    ALSPAC_AF real,
+    ESP6500_AA_AC serial,
+    ESP6500_AA_AF real,
+    ESP6500_EA_AC serial,
+    ESP6500_EA_AF real,
+    ExAC_AC serial,
+    ExAC_AF real,
+    ExAC_Adj_AC serial,
+    ExAC_Adj_AF real,
+    ExAC_AFR_AC serial,
+    ExAC_AFR_AF real,
+    ExAC_AMR_AC serial,
+    ExAC_AMR_AF real,
+    ExAC_EAS_AC serial,
+    ExAC_EAS_AF real,
+    ExAC_FIN_AC serial,
+    ExAC_FIN_AF real,
+    ExAC_NFE_AC serial,
+    ExAC_NFE_AF real,
+    ExAC_SAS_AC serial,
+    ExAC_SAS_AF real,
+    ExAC_nonTCGA_AC serial,
+    ExAC_nonTCGA_AF real,
+    ExAC_nonTCGA_Adj_AC serial,
+    ExAC_nonTCGA_Adj_AF real,
+    ExAC_nonTCGA_AFR_AC serial,
+    ExAC_nonTCGA_AFR_AF real,
+    ExAC_nonTCGA_AMR_AC serial,
+    ExAC_nonTCGA_AMR_AF real,
+    ExAC_nonTCGA_EAS_AC serial,
+    ExAC_nonTCGA_EAS_AF real,
+    ExAC_nonTCGA_FIN_AC serial,
+    ExAC_nonTCGA_FIN_AF real,
+    ExAC_nonTCGA_NFE_AC serial,
+    ExAC_nonTCGA_NFE_AF real,
+    ExAC_nonTCGA_SAS_AC serial,
+    ExAC_nonTCGA_SAS_AF real,
+    ExAC_nonpsych_AC serial,
+    ExAC_nonpsych_AF real,
+    ExAC_nonpsych_Adj_AC serial,
+    ExAC_nonpsych_Adj_AF real,
+    ExAC_nonpsych_AFR_AC serial,
+    ExAC_nonpsych_AFR_AF real,
+    ExAC_nonpsych_AMR_AC serial,
+    ExAC_nonpsych_AMR_AF real,
+    ExAC_nonpsych_EAS_AC serial,
+    ExAC_nonpsych_EAS_AF real,
+    ExAC_nonpsych_FIN_AC serial,
+    ExAC_nonpsych_FIN_AF real,
+    ExAC_nonpsych_NFE_AC serial,
+    ExAC_nonpsych_NFE_AF real,
+    ExAC_nonpsych_SAS_AC serial,
+    ExAC_nonpsych_SAS_AF real,
+    clinvar_rs text,
+    clinvar_clnsig text,
+    clinvar_trait text,
+    clinvar_golden_stars text,
+    Interpro_domain text,
+    GTEx_V6_gene text,
+    GTEx_V6_tissue text
+)
+WITH (
+  OIDS=FALSE
+);
+ALTER TABLE public.dbnfsp_variant
+  OWNER TO annso;
+
+
+
+
+
+
+
+
+
+
+--
+-- Migrate imported data to annso database
+--
+INSERT INTO public.dbnfsp_variant(
+    chr_hg38, pos_hg38, chr_hg19, pos_hg19, chr_hg18, pos_hg18
+    ref, alt, aaref, aaalt, 
+    s_dbSNP147, genename, cds_strand,
+    refcodon, codonpos, codon_degeneracy,
+    Ancestral_allele, AltaiNeandertal, Denisova,
+
+    Ensembl_geneid, Ensembl_transcriptid, Ensembl_proteinid, aapos,
+    SIFT_score, SIFT_converted_rankscore, SIFT_pred,
+    FATHMM_score, FATHMM_converted_rankscore, FATHMM_pred,
+    PROVEAN_score, PROVEAN_converted_rankscore, PROVEAN_pred,
+
+    Uniprot_acc_Polyphen2, Uniprot_id_Polyphen2, Uniprot_aapos_Polyphen2,
+    Polyphen2_HDIV_score, Polyphen2_HDIV_rankscore, Polyphen2_HDIV_pred, Polyphen2_HVAR_score, Polyphen2_HVAR_rankscore, Polyphen2_HVAR_pred,
+    LRT_score, LRT_converted_rankscore, LRT_pred, LRT_Omega,
+    MutationTaster_score, MutationTaster_converted_rankscore, MutationTaster_pred, MutationTaster_model, MutationTaster_AAE, MutationAssessor_UniprotID, MutationAssessor_variant, 
+    MutationAssessor_score, MutationAssessor_rankscore, MutationAssessor_pred,
+
+    Transcript_id_VEST3, Transcript_var_VEST3, VEST3_score, VEST3_rankscore,
+    MetaSVM_score, MetaSVM_rankscore, MetaSVM_pred, MetaLR_score, MetaLR_rankscore, MetaLR_pred,
+    Reliability_index,
+    M_CAP_score, M_CAP_rankscore, M_CAP_pred,
+    CADD_raw, CADD_raw_rankscore, CADD_phred,
+    DANN_score, DANN_rankscore
+    fathmm_MKL_coding_score, fathmm_MKL_coding_rankscore, fathmm_MKL_coding_pred, fathmm_MKL_coding_group,
+    Eigen_coding_or_noncoding, Eigen_raw, Eigen_phred, Eigen_PC_raw, Eigen_PC_phred, Eigen_PC_raw_rankscore,
+    GenoCanyon_score, GenoCanyon_score_rankscore,
+    integrated_fitCons_score, integrated_fitCons_rankscore, integrated_confidence_value,
+    GM12878_fitCons_score, GM12878_fitCons_score_rankscore, GM12878_confidence_value,
+    H1_hESC_fitCons_score, H1_hESC_fitCons_rankscore, H1_hESC_confidence_value,
+    HUVEC_fitCons_score, HUVEC_fitCons_rankscore, HUVEC_confidence_value,
+    GERPpp_NR, GERPpp_RS, GERPpp_RS_rankscore,
+    phyloP100way_vertebrate, phyloP100way_vertebrate_rankscore, phyloP20way_mammalian, phyloP20way_mammalian_rankscore,
+    phastCons100way_vertebrate, phastCons100way_vertebrate_rankscore, phastCons20way_mammalian, phastCons20way_mammalian_rankscore,
+    SiPhy_29way_pi, SiPhy_29way_logOdds, SiPhy_29way_logOdds_rankscore ,
+
+    _1000Gp3_AC, _1000Gp3_AF, _1000Gp3_AFR_AC, _1000Gp3_AFR_AF, _1000Gp3_EUR_AC, _1000Gp3_EUR_AF, _1000Gp3_AMR_AC, _1000Gp3_AMR_AF, _1000Gp3_EAS_AC, _1000Gp3_EAS_AF, _1000Gp3_SAS_AC, _1000Gp3_SAS_AF,
+
+    TWINSUK_AC, TWINSUK_AF,
+    ALSPAC_AC, ALSPAC_AF,
+    ESP6500_AA_AC, ESP6500_AA_AF, ESP6500_EA_AC, ESP6500_EA_AF,
+
+    ExAC_AC, ExAC_AF, ExAC_Adj_AC, ExAC_Adj_AF, ExAC_AFR_AC, ExAC_AFR_AF, ExAC_AMR_AC, ExAC_AMR_AF, ExAC_EAS_AC, ExAC_EAS_AF, ExAC_FIN_AC, ExAC_FIN_AF, ExAC_NFE_AC,
+    ExAC_NFE_AF, ExAC_SAS_AC, ExAC_SAS_AF, ExAC_nonTCGA_AC, ExAC_nonTCGA_AF, ExAC_nonTCGA_Adj_AC, ExAC_nonTCGA_Adj_AF, ExAC_nonTCGA_AFR_AC, ExAC_nonTCGA_AFR_AF, 
+    ExAC_nonTCGA_AMR_AC, ExAC_nonTCGA_AMR_AF, ExAC_nonTCGA_EAS_AC, ExAC_nonTCGA_EAS_AF, ExAC_nonTCGA_FIN_AC, ExAC_nonTCGA_FIN_AF, ExAC_nonTCGA_NFE_AC, ExAC_nonTCGA_NFE_AF,
+    ExAC_nonTCGA_SAS_AC, ExAC_nonTCGA_SAS_AF, ExAC_nonpsych_AC, ExAC_nonpsych_AF, ExAC_nonpsych_Adj_AC, ExAC_nonpsych_Adj_AF, ExAC_nonpsych_AFR_AC, ExAC_nonpsych_AFR_AF, 
+    ExAC_nonpsych_AMR_AC, ExAC_nonpsych_AMR_AF, ExAC_nonpsych_EAS_AC, ExAC_nonpsych_EAS_AF, ExAC_nonpsych_FIN_AC, ExAC_nonpsych_FIN_AF, ExAC_nonpsych_NFE_AC, 
+    ExAC_nonpsych_NFE_AF, ExAC_nonpsych_SAS_AC, ExAC_nonpsych_SAS_AF,
+
+    clinvar_rs, clinvar_clnsig, clinvar_trait, clinvar_golden_stars, Interpro_domain,
+    GTEx_V6_gene, GTEx_V6_tissue)
+
+SELECT 
+    chr, pos, hg19_chr, hg19_pos, hg18_chr, hg18_pos,
+    ref, alt, aaref, aaalt,
+    rs_dbSNP147, genename, cds_strand,
+    refcodon, codonpos, codon_degeneracy, 
+    Ancestral_allele, AltaiNeandertal, Denisova,
+
+    Ensembl_geneid, Ensembl_transcriptid, Ensembl_proteinid, aapos,
+    SIFT_score, SIFT_converted_rankscore, SIFT_pred,
+    FATHMM_score, FATHMM_converted_rankscore, FATHMM_pred,
+    PROVEAN_score, PROVEAN_converted_rankscore, PROVEAN_pred,
+
+Uniprot_acc_Polyphen2, Uniprot_id_Polyphen2, Uniprot_aapos_Polyphen2,
+Polyphen2_HDIV_score, Polyphen2_HDIV_rankscore, Polyphen2_HDIV_pred, Polyphen2_HVAR_score, Polyphen2_HVAR_rankscore, Polyphen2_HVAR_pred,
+LRT_score, LRT_converted_rankscore, LRT_pred, LRT_Omega,
+MutationTaster_score, MutationTaster_converted_rankscore, MutationTaster_pred, MutationTaster_model, MutationTaster_AAE, MutationAssessor_UniprotID, MutationAssessor_variant, 
+MutationAssessor_score, MutationAssessor_rankscore, MutationAssessor_pred,
+
+
+
+    Uniprot_acc_Polyphen2, Uniprot_id_Polyphen2, Uniprot_aapos_Polyphen2,
+    Polyphen2_HDIV_score, Polyphen2_HDIV_rankscore, Polyphen2_HDIV_pred,
+    Polyphen2_HVAR_score text,
+    Polyphen2_HVAR_rankscore text,
+    Polyphen2_HVAR_pred text,
+    LRT_score text,
+    LRT_converted_rankscore text,
+    LRT_pred text,
+    LRT_Omega text,
+    MutationTaster_score text,
+    MutationTaster_converted_rankscore text,
+    MutationTaster_pred text,
+    MutationTaster_model text,
+    MutationTaster_AAE text,
+    MutationAssessor_UniprotID text,
+    MutationAssessor_variant text,
+    MutationAssessor_score text,
+    MutationAssessor_score_rankscore text,
+    MutationAssessor_pred text,
+    FATHMM_score text,
+    FATHMM_converted_rankscore text,
+    FATHMM_pred text,
+    PROVEAN_score text,
+    PROVEAN_converted_rankscore text,
+    PROVEAN_pred text,
+    Transcript_id_VEST3 text,
+    Transcript_var_VEST3 text,
+    VEST3_score text,
+    VEST3_rankscore text,
+    MetaSVM_score text,
+    MetaSVM_rankscore text,
+    MetaSVM_pred text,
+    MetaLR_score text,
+    MetaLR_rankscore text,
+    MetaLR_pred text,
+    Reliability_index text,
+    M_CAP_score text,
+    M_CAP_rankscore text,
+    M_CAP_pred text,
+    CADD_raw text,
+    CADD_raw_rankscore text,
+    CADD_phred text,
+    DANN_score text,
+    DANN_rankscore text,
+    fathmm_MKL_coding_score text,
+    fathmm_MKL_coding_rankscore text,
+    fathmm_MKL_coding_pred text,
+    fathmm_MKL_coding_group text,
+    Eigen_coding_or_noncoding text,
+    Eigen_raw text,
+    Eigen_phred text,
+    Eigen_PC_raw text,
+    Eigen_PC_phred text,
+    Eigen_PC_raw_rankscore text,
+    GenoCanyon_score text,
+    GenoCanyon_score_rankscore text,
+    integrated_fitCons_score text,
+    integrated_fitCons_rankscore text,
+    integrated_confidence_value text,
+    GM12878_fitCons_score text,
+    GM12878_fitCons_score_rankscore text,
+    GM12878_confidence_value text,
+    H1_hESC_fitCons_score text,
+    H1_hESC_fitCons_score_rankscore text,
+    H1_hESC_confidence_value text,
+    HUVEC_fitCons_score text,
+    HUVEC_fitCons_score_rankscore text,
+    HUVEC_confidence_value text,
+    GERPpp_NR text,
+    GERPpp_RS text,
+    GERPpp_RS_rankscore text,
+    phyloP100way_vertebrate text,
+    phyloP100way_vertebrate_rankscore text,
+    phyloP20way_mammalian text,
+    phyloP20way_mammalian_rankscore text,
+    phastCons100way_vertebrate text,
+    phastCons100way_vertebrate_rankscore text,
+    phastCons20way_mammalian text,
+    phastCons20way_mammalian_rankscore text,
+    SiPhy_29way_pi text,
+    SiPhy_29way_logOdds text,
+    SiPhy_29way_logOdds_rankscore text,
+    _1000Gp3_AC text,
+    _1000Gp3_AF text,
+    _1000Gp3_AFR_AC text,
+    _1000Gp3_AFR_AF text,
+    _1000Gp3_EUR_AC text,
+    _1000Gp3_EUR_AF text,
+    _1000Gp3_AMR_AC text,
+    _1000Gp3_AMR_AF text,
+    _1000Gp3_EAS_AC text,
+    _1000Gp3_EAS_AF text,
+    _1000Gp3_SAS_AC text,
+    _1000Gp3_SAS_AF text,
+    TWINSUK_AC text,
+    TWINSUK_AF text,
+    ALSPAC_AC text,
+    ALSPAC_AF text,
+    ESP6500_AA_AC text,
+    ESP6500_AA_AF text,
+    ESP6500_EA_AC text,
+    ESP6500_EA_AF text,
+    ExAC_AC text,
+    ExAC_AF text,
+    ExAC_Adj_AC text,
+    ExAC_Adj_AF text,
+    ExAC_AFR_AC text,
+    ExAC_AFR_AF text,
+    ExAC_AMR_AC text,
+    ExAC_AMR_AF text,
+    ExAC_EAS_AC text,
+    ExAC_EAS_AF text,
+    ExAC_FIN_AC text,
+    ExAC_FIN_AF text,
+    ExAC_NFE_AC text,
+    ExAC_NFE_AF text,
+    ExAC_SAS_AC text,
+    ExAC_SAS_AF text,
+    ExAC_nonTCGA_AC text,
+    ExAC_nonTCGA_AF text,
+    ExAC_nonTCGA_Adj_AC text,
+    ExAC_nonTCGA_Adj_AF text,
+    ExAC_nonTCGA_AFR_AC text,
+    ExAC_nonTCGA_AFR_AF text,
+    ExAC_nonTCGA_AMR_AC text,
+    ExAC_nonTCGA_AMR_AF text,
+    ExAC_nonTCGA_EAS_AC text,
+    ExAC_nonTCGA_EAS_AF text,
+    ExAC_nonTCGA_FIN_AC text,
+    ExAC_nonTCGA_FIN_AF text,
+    ExAC_nonTCGA_NFE_AC text,
+    ExAC_nonTCGA_NFE_AF text,
+    ExAC_nonTCGA_SAS_AC text,
+    ExAC_nonTCGA_SAS_AF text,
+    ExAC_nonpsych_AC text,
+    ExAC_nonpsych_AF text,
+    ExAC_nonpsych_Adj_AC text,
+    ExAC_nonpsych_Adj_AF text,
+    ExAC_nonpsych_AFR_AC text,
+    ExAC_nonpsych_AFR_AF text,
+    ExAC_nonpsych_AMR_AC text,
+    ExAC_nonpsych_AMR_AF text,
+    ExAC_nonpsych_EAS_AC text,
+    ExAC_nonpsych_EAS_AF text,
+    ExAC_nonpsych_FIN_AC text,
+    ExAC_nonpsych_FIN_AF text,
+    ExAC_nonpsych_NFE_AC text,
+    ExAC_nonpsych_NFE_AF text,
+    ExAC_nonpsych_SAS_AC text,
+    ExAC_nonpsych_SAS_AF text,
+    clinvar_rs text,
+    clinvar_clnsig text,
+    clinvar_trait text,
+    clinvar_golden_stars text,
+    Interpro_domain text,
+    GTEx_V6_gene text,
+    GTEx_V6_tissue text
+FROM import_dbnfsp_variant;
+
+
+INSERT INTO public.refgene_exon_hg19(bin, name, chr, strand, txstart, txend, txrange, cdsstart, cdsend, cdsrange, exoncount, i_exonstart, i_exonend, score, name2, cdsstartstat, cdsendstat)
+SELECT bin, name, chrom, strand, txstart, txend, int8range(txstart, txend), cdsstart, cdsend, int8range(cdsstart, cdsend), exoncount, unnest(string_to_array(trim(trailing ',' from exonstarts), ',')), unnest(string_to_array(trim(trailing ',' from exonends), ',')), score, name2, cdsstartstat, cdsendstat
+FROM import_refgene_hg19;
+
+
+
+UPDATE public.refgene_exon_hg19 SET 
+  exonstart=CAST(coalesce(i_exonstart, '0') AS integer),
+  exonend  =CAST(coalesce(i_exonend,   '0') AS integer),
+  exonrange=int8range(CAST(coalesce(i_exonstart, '0') AS integer), CAST(coalesce(i_exonend, '0') AS integer)) ;
+
+
+UPDATE public.refgene_hg19 SET chr=substring(chr from 4)
+
+
+ALTER TABLE public.refgene_exon_hg19 DROP COLUMN i_exonstart;
+ALTER TABLE public.refgene_exon_hg19 DROP COLUMN i_exonend;
 
 
 
@@ -251,59 +735,114 @@ COPY import_dbnfsp_variant_hg19 FROM '/tmp/hg19_db/dbNSFP/dbNSFP3.3a_variant.chr
 
 
 
+
+
+--
+-- Create indexes
+--
+DROP INDEX IF EXISTS public.refgene_hg19_chrom_txrange_idx;
+CREATE INDEX refgene_hg19_chrom_txrange_idx
+  ON public.refgene_hg19
+  USING btree
+  (chr COLLATE pg_catalog."default", txrange);
+
+
+DROP INDEX IF EXISTS public.refgene_hg19_txrange_idx;
+CREATE INDEX refgene_hg19_txrange_idx
+  ON public.refgene_hg19
+  USING gist
+  (txrange);
+
+
+
+
+DROP INDEX IF EXISTS public.refgene_exon_hg19_chrom_exonange_idx;
+CREATE INDEX refgene_exon_hg19_chrom_exonange_idx
+  ON public.refgene_exon_hg19
+  USING btree
+  (chr COLLATE pg_catalog."default", exonrange);
+
+
+DROP INDEX IF EXISTS public.refgene_exon_hg19_exonange_idx;
+CREATE INDEX refgene_exon_hg19_exonange_idx
+  ON public.refgene_exon_hg19
+  USING gist
+  (exonrange);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+--
+-- Register refGen into annso database
+-- 
 INSERT INTO public.annotation_database(name, name_ui, description, url, reference_id, update_date, jointure) VALUES
-  ('import_dbnfsp_variant_hg19', 
+  ('dbnfsp_variant', 
   'dbNSFP', 
   'Integrated database of functional annotations from multiple sources for the comprehensive collection of human non-synonymous SNPs (nsSNVs).', 
   'https://sites.google.com/site/jpopgen/dbNSFP', 
   1, 
   CURRENT_TIMESTAMP, 
-  'import_dbnfsp_variant_hg19 ON {0}.chr=import_dbnfsp_variant_hg19.chr AND {0}.pos=import_dbnfsp_variant_hg19.pos AND {0}.ref=import_dbnfsp_variant_hg19.ref AND {0}.alt=import_dbnfsp_variant_hg19.alt'),
+  'dbnfsp_variant ON {0}.chr=dbnfsp_variant.chr_hg19 AND {0}.pos=dbnfsp_variant.pos_hg19 AND {0}.ref=dbnfsp_variant.ref AND {0}.alt=dbnfsp_variant.alt'),
 
 
 
 
-
-8   hg19_chr: chromosome as to hg19, "." means missing
-9   hg19_pos(1-based): physical position on the chromosome as to hg19 (1-based coordinate).
-        For mitochondrial SNV, this position refers to a YRI sequence (GenBank: AF347015)
-10  hg18_chr: chromosome as to hg18, "." means missing
-11  hg18_pos(1-based): physical position on the chromosome as to hg18 (1-based coordinate)
-        For mitochondrial SNV, this position refers to a YRI sequence (GenBank: AF347015)
 
 
 
 
 INSERT INTO public.annotation_field(database_id, name, name_ui, type, description) VALUES
-  (3, 'chr',          'chr',          'string',    'Chromosome.'),
-  (3, 'pos',          'pos',          'int',       'Position in the chromosome. For mitochondrial SNV, this position refers to the rCRS (GenBank: NC_012920).'),
-  (3, 'ref',          'ref',          'string',    'Reference nucleotide allele (as on the + strand).'),
-  (3, 'alt',          'alt',          'string',    'Alternative nucleotide allele (as on the + strand).'),
-  (3, 'aaref',        'aaref',        'string',    'Reference amino acid. "." if the variant is a splicing site SNP (2bp on each end of an intron).'),
-  (3, 'aaalt',        'aaalt',        'string',    'Alternative amino acid. "." if the variant is a splicing site SNP (2bp on each end of an intron).'),
-
-  (3, 'rs_dbSNP147',      'rs_dbSNP147',      'int',       'Rs number from dbSNP 147.'),
-  (3, 'genename',         'genename',         'string',    'Gene name; if the nsSNV can be assigned to multiple genes, gene names are separated by ";".'),
-  (3, 'cds_strand',       'cds_strand',       'string',    'Coding sequence (CDS) strand (+ or -).'),
-  (3, 'refcodon',         'refcodon',         'string',    'Reference codon.'),
-  (3, 'codonpos',         'codonpos',         'int',       'Position on the codon (1, 2 or 3).'),
-  (3, 'codon_degeneracy', 'codon_degeneracy', 'int',       'Degenerate type (0, 2 or 3).'),
-
-  (3, 'Ancestral_allele:', 'Ancestral_allele', 'string',       'Ancestral allele based on 8 primates EPO.<br/>Ancestral alleles by Ensembl 84. The following comes from its original README file:<ul><li>ACTG - high-confidence call, ancestral state supported by the other two sequences;</li><li>actg - low-confidence call, ancestral state supported by one sequence only;</li><li>N    - failure, the ancestral state is not supported by any other sequence;</li><li>-    - the extant species contains an insertion at this position;</li><li>.    - no coverage in the alignment.</li></ul>'),
-  (3, 'AltaiNeandertal',   'AltaiNeandertal',  'int',  'Genotype of a deep sequenced Altai Neanderthal.'),
-  (3, 'Denisova',          'Denisova',         'int',  'Genotype of a deep sequenced Denisova.'),
-
+  (3, 'chr_hg38',          'chr',              'string',    'Chromosome as to hg38.'),
+  (3, 'pos_hg38',          'pos',              'int',       'Physical position on the chromosome as to hg38 (1-based coordinate). For mitochondrial SNV, this position refers to the rCRS (GenBank: NC_012920).'),
+  (3, 'chr_hg19',          'chr',              'string',    'Chromosome as to hg19.'),
+  (3, 'pos_hg19',          'pos',              'int',       'Physical position on the chromosome as to hg38 (1-based coordinate).For mitochondrial SNV, this position refers to a YRI sequence (GenBank: AF347015).'),
+  (3, 'chr_hg18',          'chr',              'string',    'Chromosome as to hg38.'),
+  (3, 'pos_hg18',          'pos',              'int',       'Physical position on the chromosome as to hg38 (1-based coordinate). For mitochondrial SNV, this position refers to a YRI sequence (GenBank: AF347015).'),
+  (3, 'ref',               'ref',              'string',    'Reference nucleotide allele (as on the + strand).'),
+  (3, 'alt',               'alt',              'string',    'Alternative nucleotide allele (as on the + strand).'),
+  (3, 'aaref',             'aaref',            'string',    'Reference amino acid. "." if the variant is a splicing site SNP (2bp on each end of an intron).'),
+  (3, 'aaalt',             'aaalt',            'string',    'Alternative amino acid. "." if the variant is a splicing site SNP (2bp on each end of an intron).'),
+  (3, 'rs_dbSNP147',       'rs_dbSNP147',      'string',    'Rs number from dbSNP 147.'),
+  (3, 'genename',          'genename',         'string',    'Gene name; if the nsSNV can be assigned to multiple genes, gene names are separated by ";".'),
+  (3, 'cds_strand',        'cds_strand',       'string',    'Coding sequence (CDS) strand (+ or -).'),
+  (3, 'refcodon',          'refcodon',         'string',    'List of reference codon.'),
+  (3, 'codonpos',          'codonpos',         'int',       'Position on the codon (1, 2 or 3).'),
+  (3, 'codon_degeneracy',  'codon_degeneracy', 'int',       'Degenerate type (0, 2 or 3).'),
+  (3, 'Ancestral_allele:', 'Ancestral_allele', 'string',    'Ancestral allele based on 8 primates EPO. Ancestral alleles by Ensembl 84. The following comes from its original README file: "ACTG" for high-confidence call, ancestral state supported by the other two sequences; "actg" for low-confidence call, ancestral state supported by one sequence only; "N" for failure, the ancestral state is not supported by any other sequence; "-" for the extant species contains an insertion at this position; "."for no coverage in the alignment.'),
+  (3, 'AltaiNeandertal',   'AltaiNeandertal',  'int',       'Genotype of a deep sequenced Altai Neanderthal.'),
+  (3, 'Denisova',          'Denisova',         'int',       'Genotype of a deep sequenced Denisova.'),
 
   (3, 'Ensembl_geneid',         'Ensembl_geneid',          'string',     'Ensembl gene id.'),
   (3, 'Ensembl_transcriptid',   'Ensembl_transcriptid',    'string',     'Ensembl transcript ids (Multiple entries separated by ";").'),
   (3, 'Ensembl_proteinid',      'Ensembl_proteinid',       'string',     'Ensembl protein ids. Multiple entries separated by ";",  corresponding to Ensembl_transcriptids.'),  
-  (3, 'aapos',                  'aapos',                   'int',        'Amino acid position as to the protein. "-1" if the variant is a splicing site SNP (2bp on each end of an intron). Multiple entries separated by ";", corresponding to Ensembl_proteinid.'),
+  (3, 'aapos',                  'aapos',                   'string',        'Amino acid position as to the protein. "-1" if the variant is a splicing site SNP (2bp on each end of an intron). Multiple entries separated by ";", corresponding to Ensembl_proteinid.'),
 
 
-  (3, 'SIFT_score',               'SIFT_score',               'float',  'SIFT score (SIFTori). Scores range from 0 to 1. The smaller the score the more likely the SNP has damaging effect. Multiple scores separated by ";", corresponding to Ensembl_proteinid.'),
-  (3, 'SIFT_converted_rankscore', 'SIFT_converted_rankscore', 'float',  'SIFTori scores were first converted to SIFTnew=1-SIFTori, then ranked among all SIFTnew scores in dbNSFP. The rankscore is the ratio of the rank the SIFTnew score over the total number of SIFTnew scores in dbNSFP. If there are multiple scores, only the most damaging (largest) rankscore is presented. The rankscores range from 0.00963 to 0.91219.'),
-  (3, 'SIFT_pred',                'SIFT_pred',                'string', 'If SIFTori is smaller than 0.05 (rankscore>0.395) the corresponding nsSNV is predicted as "D(amaging)"; otherwise it is predicted as "T(olerated)". Multiple predictions separated by ";".'),
-  
+  (3, 'SIFT_score',                  'SIFT_score',                  'float',  'SIFT score (SIFTori). Scores range from 0 to 1. The smaller the score the more likely the SNP has damaging effect. Multiple scores separated by ";", corresponding to Ensembl_proteinid.'),
+  (3, 'SIFT_converted_rankscore',    'SIFT_converted_rankscore',    'float',  'SIFTori scores were first converted to SIFTnew=1-SIFTori, then ranked among all SIFTnew scores in dbNSFP. The rankscore is the ratio of the rank the SIFTnew score over the total number of SIFTnew scores in dbNSFP. If there are multiple scores, only the most damaging (largest) rankscore is presented. The rankscores range from 0.00963 to 0.91219.'),
+  (3, 'SIFT_pred',                   'SIFT_pred',                   'string', 'If SIFTori is smaller than 0.05 (rankscore>0.395) the corresponding nsSNV is predicted as "D(amaging)"; otherwise it is predicted as "T(olerated)". Multiple predictions separated by ";".'),
+  (3, 'FATHMM_score',                'FATHMM_score',                'string', 'FATHMM default score (weighted for human inherited-disease mutations with Disease Ontology) (FATHMMori). Scores range from -16.13 to 10.64. The smaller the score  the more likely the SNP has damaging effect. Multiple scores separated by ";", corresponding to Ensembl_proteinid.'),
+  (3, 'FATHMM_converted_rankscore',  'FATHMM_converted_rankscore',  'float',  'FATHMMori scores were first converted to FATHMMnew=1-(FATHMMori+16.13)/26.77, then ranked among all FATHMMnew scores in dbNSFP. The rankscore is the ratio of the rank of the score over the total number of FATHMMnew scores in dbNSFP. If there are multiple scores, only the most damaging (largest) rankscore is presented. The scores range from 0 to 1.'),
+  (3, 'FATHMM_pred',                 'FATHMM_pred',                 'string', 'If a FATHMMori score is <=-1.5 (or rankscore >=0.81332) the corresponding nsSNV is predicted as "D(AMAGING)"; otherwise it is predicted as "T(OLERATED)". Multiple predictions separated by ";", corresponding to Ensembl_proteinid.'),
+  (3, 'PROVEAN_score',               'PROVEAN_score',               'string', 'PROVEAN score (PROVEANori). Scores range from -14 to 14. The smaller the score the more likely the SNP has damaging effect. Multiple scores separated by ";", corresponding to Ensembl_proteinid.'),
+  (3, 'PROVEAN_converted_rankscore', 'PROVEAN_converted_rankscore', 'float',  'PROVEANori were first converted to PROVEANnew=1-(PROVEANori+14)/28, then ranked among all PROVEANnew scores in dbNSFP. The rankscore is the ratio of the rank the PROVEANnew score over the total number of PROVEANnew scores in dbNSFP. If there are multiple scores, only the most damaging (largest) rankscore is presented. The scores range from 0 to 1.'),
+  (3, 'PROVEAN_pred',                'PROVEAN_pred',                'string', 'If PROVEANori <= -2.5 (rankscore>=0.543) the corresponding nsSNV is predicted as "D(amaging)"; otherwise it is predicted as "N(eutral)". Multiple predictions separated by ";", corresponding to Ensembl_proteinid.'),
+
+
+
   (3, 'Uniprot_acc_Polyphen2',   'Uniprot_acc_Polyphen2',    'string', 'Uniprot accession number provided by Polyphen2. Multiple entries separated by ";".'),
   (3, 'Uniprot_id_Polyphen2',    'Uniprot_id_Polyphen2',     'string', 'Uniprot ID numbers corresponding to Uniprot_acc_Polyphen2. Multiple entries separated by ";".'),
   (3, 'Uniprot_aapos_Polyphen2', 'Uniprot_aapos_Polyphen2',  'int',    'Amino acid position as to Uniprot_acc_Polyphen2. Multiple entries separated by ";".'),
@@ -338,24 +877,14 @@ INSERT INTO public.annotation_field(database_id, name, name_ui, type, descriptio
 
 
 
-  (3, 'FATHMM_score',               'FATHMM_score',               'string', 'FATHMM default score (weighted for human inherited-disease mutations with Disease Ontology) (FATHMMori). Scores range from -16.13 to 10.64. The smaller the score  the more likely the SNP has damaging effect. Multiple scores separated by ";", corresponding to Ensembl_proteinid.'),
-  (3, 'FATHMM_converted_rankscore', 'FATHMM_converted_rankscore', 'float',  'FATHMMori scores were first converted to FATHMMnew=1-(FATHMMori+16.13)/26.77, then ranked among all FATHMMnew scores in dbNSFP. The rankscore is the ratio of the rank of the score over the total number of FATHMMnew scores in dbNSFP. If there are multiple scores, only the most damaging (largest) rankscore is presented. The scores range from 0 to 1.'),
-  (3, 'FATHMM_pred',                'FATHMM_pred',                'string', 'If a FATHMMori score is <=-1.5 (or rankscore >=0.81332) the corresponding nsSNV is predicted as "D(AMAGING)"; otherwise it is predicted as "T(OLERATED)". Multiple predictions separated by ";", corresponding to Ensembl_proteinid.'),
 
 
 
 
-  (3, 'PROVEAN_score',               'PROVEAN_score',               'string', 'PROVEAN score (PROVEANori). Scores range from -14 to 14. The smaller the score the more likely the SNP has damaging effect. Multiple scores separated by ";", corresponding to Ensembl_proteinid.'),
-  (3, 'PROVEAN_converted_rankscore', 'PROVEAN_converted_rankscore', 'float',  'PROVEANori were first converted to PROVEANnew=1-(PROVEANori+14)/28, then ranked among all PROVEANnew scores in dbNSFP. The rankscore is the ratio of the rank the PROVEANnew score over the total number of PROVEANnew scores in dbNSFP. If there are multiple scores, only the most damaging (largest) rankscore is presented. The scores range from 0 to 1.'),
-  (3, 'PROVEAN_pred',                'PROVEAN_pred',                'string', 'If PROVEANori <= -2.5 (rankscore>=0.543) the corresponding nsSNV is predicted as "D(amaging)"; otherwise it is predicted as "N(eutral)". Multiple predictions separated by ";", corresponding to Ensembl_proteinid.'),
-
-
-
-
-  (3, 'Transcript_id_VEST3',  'Transcript_id_VEST3',  'string', 'Transcript id provided by VEST3.'),
-  (3, 'Transcript_var_VEST3', 'Transcript_var_VEST3', 'string', 'amino acid change as to Transcript_id_VEST3.'),
-  (3, 'VEST3_score', 'VEST3_score', 'string', 'VEST 3.0 score. Score ranges from 0 to 1. The larger the score the more likely the mutation may cause functional change. Multiple scores separated by ";", corresponding to Transcript_id_VEST3. Please note this score is free for non-commercial use. For more details please refer to http://wiki.chasmsoftware.org/index.php/SoftwareLicense. Commercial users should contact the Johns Hopkins Technology Transfer office.'),
-  (3, 'VEST3_rankscore', 'VEST3_rankscore', 'float', 'VEST3 scores were ranked among all VEST3 scores in dbNSFP. The rankscore is the ratio of the rank of the score over the total number of VEST3 scores in dbNSFP. In case there are multiple scores for the same variant, the largest score (most damaging) is presented. The scores range from 0 to 1.  Please note VEST score is free for non-commercial use. For more details please refer to http://wiki.chasmsoftware.org/index.php/SoftwareLicense. Commercial users should contact the Johns Hopkins Technology Transfer office.'),
+  (3, 'Transcript_id_VEST3',  'Transcript_id_VEST3',     'string', 'Transcript id provided by VEST3.'),
+  (3, 'Transcript_var_VEST3', 'Transcript_var_VEST3',    'string', 'amino acid change as to Transcript_id_VEST3.'),
+  (3, 'VEST3_score',          'VEST3_score',             'string', 'VEST 3.0 score. Score ranges from 0 to 1. The larger the score the more likely the mutation may cause functional change. Multiple scores separated by ";", corresponding to Transcript_id_VEST3. Please note this score is free for non-commercial use. For more details please refer to http://wiki.chasmsoftware.org/index.php/SoftwareLicense. Commercial users should contact the Johns Hopkins Technology Transfer office.'),
+  (3, 'VEST3_rankscore',      'VEST3_rankscore',         'float', 'VEST3 scores were ranked among all VEST3 scores in dbNSFP. The rankscore is the ratio of the rank of the score over the total number of VEST3 scores in dbNSFP. In case there are multiple scores for the same variant, the largest score (most damaging) is presented. The scores range from 0 to 1.  Please note VEST score is free for non-commercial use. For more details please refer to http://wiki.chasmsoftware.org/index.php/SoftwareLicense. Commercial users should contact the Johns Hopkins Technology Transfer office.'),
 
 
 
@@ -374,34 +903,21 @@ INSERT INTO public.annotation_field(database_id, name, name_ui, type, descriptio
 
 
 
-  (3, 'M-CAP_score',     'M-CAP_score',     'float',  'M-CAP score (details in DOI: 10.1038/ng.3703). Scores range from 0 to 1. The larger the score the more likely the SNP has damaging effect.'),
-  (3, 'M-CAP_rankscore', 'M-CAP_rankscore', 'float',  'M-CAP scores were ranked among all M-CAP scores in dbNSFP. The rankscore is the ratio of the rank of the score over the total number of M-CAP scores in dbNSFP.'),
-  (3, 'M-CAP_pred',      'M-CAP_pred',      'string', 'Prediction of M-CAP score based on the authors\'s recommendation, "T(olerated)" or "D(amaging)". The score cutoff between "D" and "T" is 0.025.'),
-
-
-
+  (3, 'M_CAP_score',     'M-CAP_score',     'float',  'M-CAP score (details in DOI: 10.1038/ng.3703). Scores range from 0 to 1. The larger the score the more likely the SNP has damaging effect.'),
+  (3, 'M_CAP_rankscore', 'M-CAP_rankscore', 'float',  'M-CAP scores were ranked among all M-CAP scores in dbNSFP. The rankscore is the ratio of the rank of the score over the total number of M-CAP scores in dbNSFP.'),
+  (3, 'M_CAP_pred',      'M-CAP_pred',      'string', 'Prediction of M-CAP score based on the authors\'s recommendation, "T(olerated)" or "D(amaging)". The score cutoff between "D" and "T" is 0.025.'),
 
   (3, 'CADD_raw',           'CADD_raw',           'float',  'CADD raw score for functional prediction of a SNP. Please refer to Kircher et al. (2014) Nature Genetics 46(3):310-5 for details. The larger the score the more likely the SNP has damaging effect. Scores range from -7.535037 to 35.788538 in dbNSFP. Please note the following copyright statement for CADD: "CADD scores (http://cadd.gs.washington.edu/) are Copyright 2013 University of Washington and Hudson-Alpha Institute for Biotechnology (all rights reserved) but are freely available for all academic, non-commercial applications. For commercial licensing information contact Jennifer McCullar (mccullaj@uw.edu)."'),
   (3, 'CADD_raw_rankscore', 'CADD_raw_rankscore', 'float',  'CADD raw scores were ranked among all CADD raw scores in dbNSFP. The rankscore is the ratio of the rank of the score over the total number of CADD raw scores in dbNSFP. Please note the following copyright statement for CADD: "CADD scores (http://cadd.gs.washington.edu/) are Copyright 2013 University of Washington and Hudson-Alpha Institute for Biotechnology (all rights reserved) but are freely available for all academic, non-commercial applications. For commercial licensing information contact Jennifer McCullar (mccullaj@uw.edu)."'),
-  (3, 'CADD_phred',         'CADD_phred',         'string', 'CADD phred-like score. This is phred-like rank score based on whole genome CADD raw scores. Please refer to Kircher et al. (2014) Nature Genetics 46(3):310-5 for details. The larger the score the more likely the SNP has damaging effect. Please note the following copyright statement for CADD: "CADD scores (http://cadd.gs.washington.edu/) are Copyright 2013 University of Washington and Hudson-Alpha Institute for Biotechnology (all rights reserved) but are freely available for all academic, non-commercial applications. For commercial licensing information contact Jennifer McCullar (mccullaj@uw.edu)."'),
-
-
-
+  (3, 'CADD_phred',         'CADD_phred',         'float', 'CADD phred-like score. This is phred-like rank score based on whole genome CADD raw scores. Please refer to Kircher et al. (2014) Nature Genetics 46(3):310-5 for details. The larger the score the more likely the SNP has damaging effect. Please note the following copyright statement for CADD: "CADD scores (http://cadd.gs.washington.edu/) are Copyright 2013 University of Washington and Hudson-Alpha Institute for Biotechnology (all rights reserved) but are freely available for all academic, non-commercial applications. For commercial licensing information contact Jennifer McCullar (mccullaj@uw.edu)."'),
 
   (3, 'DANN_score',     'DANN_score',     'float', 'DANN is a functional prediction score retrained based on the training data of CADD using deep neural network. Scores range from 0 to 1. A larger number indicate a higher probability to be damaging. More information of this score can be found in doi: 10.1093/bioinformatics/btu703. For commercial application of DANN, please contact Daniel Quang (dxquang@uci.edu)'),
   (3, 'DANN_rankscore', 'DANN_rankscore', 'float', 'DANN scores were ranked among all DANN scores in dbNSFP. The rankscore is the ratio of the rank of the score over the total number of DANN scores in dbNSFP.'),
-
-
-
 
   (3, 'fathmm_MKL_coding_score',     'fathmm-MKL_coding_score',     'float',  'fathmm-MKL p-values. Scores range from 0 to 1. SNVs with scores >0.5 are predicted to be deleterious, and those <0.5 are predicted to be neutral or benign. Scores close to 0 or 1 are with the highest-confidence. Coding scores are trained using 10 groups of features. More details of the score can be found in doi: 10.1093/bioinformatics/btv009.'),
   (3, 'fathmm_MKL_coding_rankscore', 'fathmm-MKL_coding_rankscore', 'float',  'fathmm-MKL coding scores were ranked among all fathmm-MKL coding scores in dbNSFP. The rankscore is the ratio of the rank of the score over the total number of fathmm-MKL coding scores in dbNSFP.'),
   (3, 'fathmm_MKL_coding_pred',      'fathmm-MKL_coding_pred',      'string', 'If a fathmm-MKL_coding_score is >0.5 (or rankscore >0.28317) the corresponding nsSNV is predicted as "D(AMAGING)"; otherwise it is predicted as "N(EUTRAL)".'),
   (3, 'fathmm_MKL_coding_group',     'fathmm-MKL_coding_group',     'string', 'the groups of features (labeled A-J) used to obtained the score. More details can be found in doi: 10.1093/bioinformatics/btv009.'),
-
-
-
-
 
   (3, 'Eigen_coding_or_noncoding', 'Eigen_coding_or_noncoding', 'bool',  'Whether Eigen-raw and Eigen-phred scores are based on coding (True) model or noncoding (False) model.'),
   (3, 'Eigen_raw',                 'Eigen-raw',                 'float', 'Eigen score for coding SNVs. A functional prediction score based on conservation, allele frequencies, and deleteriousness prediction using an unsupervised learning method (doi: 10.1038/ng.3477).'),
@@ -410,14 +926,8 @@ INSERT INTO public.annotation_field(database_id, name, name_ui, type, descriptio
   (3, 'Eigen_PC_phred',            'Eigen-PC-phred',            'float', 'Eigen PC score in phred scale.'),
   (3, 'Eigen_PC_raw_rankscore',    'Eigen-PC-raw_rankscore',    'float', 'Eigen-PC-raw scores were ranked among all Eigen-PC-raw scores in dbNSFP. The rankscore is the ratio of the rank of the score over the total number of Eigen-PC-raw scores in dbNSFP.'),
 
-
-
-
   (3, 'GenoCanyon_score',           'GenoCanyon_score',           'float', 'A functional prediction score based on conservation and biochemical annotations using an unsupervised statistical learning. (doi:10.1038/srep10576)'),
   (3, 'GenoCanyon_score_rankscore', 'GenoCanyon_score_rankscore', 'float', 'GenoCanyon_score scores were ranked among all integrated fitCons scores in dbNSFP. The rankscore is the ratio of the rank of the score over the total number of GenoCanyon_score scores in dbNSFP.'),
-
-
-
 
   (3, 'integrated_fitCons_score',     'integrated_fitCons_score',     'float', 'fitCons score predicts the fraction of genomic positions belonging to a specific function class (defined by epigenomic "fingerprint") that are under selective pressure. Scores range from 0 to 1, with a larger score indicating a higher proportion of nucleic sites of the functional class the genomic position belong to are under selective pressure, therefore more likely to be functional important. Integrated (i6) scores are integrated across three cell types (GM12878, H1-hESC and HUVEC). More details can be found  in doi:10.1038/ng.3196.'),
   (3, 'integrated_fitCons_rankscore', 'integrated_fitCons_rankscore', 'float', 'integrated fitCons scores were ranked among all integrated fitCons scores in dbNSFP. The rankscore is the ratio of the rank of the score over the total number of integrated fitCons scores in dbNSFP.'),
@@ -426,6 +936,10 @@ INSERT INTO public.annotation_field(database_id, name, name_ui, type, descriptio
   (3, 'GM12878_fitCons_score',     'GM12878_fitCons_score',     'float', 'fitCons score predicts the fraction of genomic positions belonging to a specific function class (defined by epigenomic "fingerprint") that are under selective pressure. Scores range from 0 to 1, with a larger score indicating a higher proportion of nucleic sites of the functional class the genomic position belong to are under selective pressure, therefore more likely to be functional important. GM12878 fitCons scores are based on cell type GM12878. More details can be found in doi:10.1038/ng.3196.'),
   (3, 'GM12878_fitCons_rankscore', 'GM12878_fitCons_rankscore', 'float', 'GM12878 fitCons scores were ranked among all GM12878 fitCons scores in dbNSFP. The rankscore is the ratio of the rank of the score over the total number of GM12878 fitCons scores in dbNSFP.'),
   (3, 'GM12878_confidence_value',  'GM12878_confidence_value',  'float', '0 - highly significant scores (approx. p<.003); 1 - significant scores (approx. p<.05); 2 - informative scores (approx. p<.25); 3 - other scores (approx. p>=.25).'),
+
+
+
+
 
   (3, 'H1_hESC_fitCons_score',     'H1-hESC_fitCons_score',     'float', 'fitCons score predicts the fraction of genomic positions belonging to a specific function class (defined by epigenomic "fingerprint") that are under selective pressure. Scores range from 0 to 1, with a larger score indicating a higher proportion of nucleic sites of the functional class the genomic position belong to are under selective pressure, therefore more likely to be functional important. GM12878 fitCons scores are based on cell type H1-hESC. More details can be found in doi:10.1038/ng.3196.'),
   (3, 'H1_hESC_fitCons_rankscore', 'H1-hESC_fitCons_rankscore', 'float', 'H1-hESC fitCons scores were ranked among all H1-hESC fitCons scores in dbNSFP. The rankscore is the ratio of the rank of the score over the total number of H1-hESC fitCons scores in dbNSFP.'),
@@ -439,8 +953,8 @@ INSERT INTO public.annotation_field(database_id, name, name_ui, type, descriptio
 
 
   (3, 'GERPpp_NR',           'GERP++_NR',           'float',  'GERP++ neutral rate.'),
-  (3, 'GERP++_RS',           'GERP++_RS',           'float',  'GERP++ RS score, the larger the score, the more conserved the site. Scores range from -12.3 to 6.17.'),
-  (3, 'GERP++_RS_rankscore', 'GERP++_RS_rankscore', 'string', 'GERP++ RS scores were ranked among all GERP++ RS scores in dbNSFP. The rankscore is the ratio of the rank of the score over the total number of GERP++ RS scores in dbNSFP.'),
+  (3, 'GERPpp_RS',           'GERP++_RS',           'float',  'GERP++ RS score, the larger the score, the more conserved the site. Scores range from -12.3 to 6.17.'),
+  (3, 'GERPpp_RS_rankscore', 'GERP++_RS_rankscore', 'string', 'GERP++ RS scores were ranked among all GERP++ RS scores in dbNSFP. The rankscore is the ratio of the rank of the score over the total number of GERP++ RS scores in dbNSFP.'),
 
 
 
@@ -573,3 +1087,10 @@ INSERT INTO public.annotation_field(database_id, name, name_ui, type, descriptio
 
   (3, 'GTEx_V6_gene',   'GTEx_V6_gene',    'string', 'Target gene of the (significant) eQTL SNP.'),
   (3, 'GTEx_V6_tissue', 'GTEx_V6_tissue',  'string', 'Tissue type of the expression data with which the eQTL/gene pair is detected.'),
+
+
+
+
+
+
+

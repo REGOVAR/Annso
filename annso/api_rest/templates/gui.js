@@ -773,6 +773,8 @@ function AnnsoUIControler ()
         var checked = $('#checkbox_all_variants').prop('checked');
         $('#variants_list_table input[type=checkbox]').each( function (idx, elmt)
         {
+            if (idx == 0) return;
+            
             $(elmt).prop('checked', checked);
             ui.check_variant(elmt);
         });
@@ -812,7 +814,43 @@ function AnnsoUIControler ()
         // hide left menu
         ui.select_view(null);
 
+        // Retrieve selected variant data
+        $.ajax({ 
+        url: "{0}/analysis/{1}/filtering".format(rootURL, analysis.analysis.id), 
+        type: "POST",
+        data: "{\"mode\" : \"table\", \"filter\" : " + JSON.stringify(analysis.analysis.filter) + ", \"fields\" : " + JSON.stringify(analysis.analysis.fields) + "}",
+        async: true}).fail(function()
+        {
+            display_error("Unknow error in 'load_variants_array' request");
+        }).done(function(json)
+        {
+            if (!json["success"])
+            {
+                display_error(json);
+                return;
+            }
 
+            if (  $("#variants_list_table").length )
+            {
+                update_variants_list(json);
+            }
+            else
+            {
+                count = init_variants_list(json, '#variants_list');
+                if (count == 100)
+                {
+                    // As the server return the max range variants, maybe the total is higher. so, do another request to get total count
+                    loading_variants_count();
+                }
+                else
+                {
+                    $('#current_filter_count').html(annotation_format_number(count, false));
+                    $('#demo_footer').html("{0} variant{1}".format(annotation_format_number(count, false), (count > 1) ? 's' : ''));
+                }
+                
+            }
+        });
+        
     }
 
 }
@@ -1133,6 +1171,8 @@ function toggle_select_sample( id, clean_list=false)
 }
 
 
+
+
 function load_variants_array()
 {
     // Init the analysis by creating relation between sample, attributes and the analysis
@@ -1172,11 +1212,11 @@ function load_variants_array()
         }
         else
         {
-            count = init_variants_list(json);
+            count = init_variants_list(json, '#variants_list');
             if (count == 100)
             {
                 // As the server return the max range variants, maybe the total is higher. so, do another request to get total count
-                loading_filter_count();
+                loading_variants_count();
             }
             else
             {
@@ -1189,7 +1229,7 @@ function load_variants_array()
 }
 
 
-function loading_filter_count()
+function loading_variants_count()
 {
     // Sending request to get total count
     $.ajax({ 
@@ -1198,7 +1238,7 @@ function loading_filter_count()
         data: "{\"mode\" : \"table\", \"filter\" : " + JSON.stringify(analysis.analysis.filter) + ", \"fields\" : " + JSON.stringify(analysis.analysis.fields) + "}",
         async: true}).fail(function()
     {
-        display_error("Unknow error in 'loading_filter_count' request");
+        display_error("Unknow error in 'loading_variants_count' request");
     }).done(function(json)
     {
         if (json["success"])
@@ -1219,7 +1259,7 @@ function loading_filter_count()
 
 
 
-function init_variants_list(json)
+function init_variants_list(json, container_id)
 {
     var count = 0;
     var html = variants_table_header_start;
@@ -1258,7 +1298,7 @@ function init_variants_list(json)
         }
         html += variants_table_row_end;
     });
-    $('#variants_list').html(html + "</tbody></table>");
+    $(container_id).html(html + "</tbody></table>");
     return count;
 }
 

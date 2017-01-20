@@ -17,13 +17,13 @@ CREATE TYPE field_type AS ENUM ('int', 'string', 'float', 'range');
 CREATE SEQUENCE public.template_id_seq
     INCREMENT 1
     MINVALUE 1
-    MAXVALUE 9223372036854775807
+    MAXVALUE 2147483647
     START 1
     CACHE 1;
 ALTER TABLE public.template_id_seq OWNER TO annso;
 CREATE TABLE public.template
 (
-    id integer NOT NULL DEFAULT nextval('template_id_seq'::regclass),
+    id serial NOT NULL DEFAULT nextval('template_id_seq'::regclass),
     name character varying(50) COLLATE pg_catalog."C.UTF-8",
     author character varying(255) COLLATE pg_catalog."C.UTF-8",
     description text COLLATE pg_catalog."C.UTF-8",
@@ -44,13 +44,13 @@ ALTER TABLE public.template OWNER TO annso;
 CREATE SEQUENCE public.analysis_id_seq
     INCREMENT 1
     MINVALUE 1
-    MAXVALUE 9223372036854775807
+    MAXVALUE 2147483647
     START 1
     CACHE 1;
 ALTER TABLE public.analysis_id_seq OWNER TO annso;
 CREATE TABLE public.analysis
 (
-    id integer NOT NULL DEFAULT nextval('analysis_id_seq'::regclass),
+    id serial NOT NULL DEFAULT nextval('analysis_id_seq'::regclass),
     name character varying(50) COLLATE pg_catalog."C.UTF-8",
     comments text COLLATE pg_catalog."C.UTF-8",
     template_id integer,
@@ -73,13 +73,13 @@ ALTER TABLE public.analysis OWNER TO annso;
 CREATE SEQUENCE public.filter_id_seq
     INCREMENT 1
     MINVALUE 1
-    MAXVALUE 9223372036854775807
+    MAXVALUE 2147483647
     START 1
     CACHE 1;
 ALTER TABLE public.filter_id_seq OWNER TO annso;
 CREATE TABLE public.filter
 (
-    id integer NOT NULL DEFAULT nextval('filter_id_seq'::regclass),
+    id serial NOT NULL DEFAULT nextval('filter_id_seq'::regclass),
     analysis_id integer,
     name character varying(50) COLLATE pg_catalog."C.UTF-8",
     description text COLLATE pg_catalog."C.UTF-8",
@@ -107,13 +107,13 @@ ALTER TABLE public.filter OWNER TO annso;
 CREATE SEQUENCE public.reference_id_seq
     INCREMENT 1
     MINVALUE 1
-    MAXVALUE 9223372036854775807
+    MAXVALUE 2147483647
     START 1
     CACHE 1;
 ALTER TABLE public.reference_id_seq OWNER TO annso;
 CREATE TABLE public."reference"
 (
-    id integer NOT NULL DEFAULT nextval('reference_id_seq'::regclass),
+    id serial NOT NULL DEFAULT nextval('reference_id_seq'::regclass),
     name character varying(50) COLLATE pg_catalog."C.UTF-8",
     description character varying(255) COLLATE pg_catalog."C.UTF-8",
     url character varying(255) COLLATE pg_catalog."C.UTF-8",
@@ -129,13 +129,13 @@ ALTER TABLE public."reference" OWNER TO annso;
 CREATE SEQUENCE public.file_id_seq
     INCREMENT 1
     MINVALUE 1
-    MAXVALUE 9223372036854775807
+    MAXVALUE 2147483647
     START 1
     CACHE 1;
 ALTER TABLE public.file_id_seq OWNER TO annso;
 CREATE TABLE public.file
 (
-    id integer NOT NULL DEFAULT nextval('file_id_seq'::regclass),
+    id serial NOT NULL DEFAULT nextval('file_id_seq'::regclass),
     filename character varying(50) COLLATE pg_catalog."C.UTF-8",
     comments character varying(255) COLLATE pg_catalog."C.UTF-8",
     type character varying(10) COLLATE pg_catalog."C.UTF-8",
@@ -162,13 +162,13 @@ ALTER TABLE public.file OWNER TO annso;
 CREATE SEQUENCE public.sample_id_seq
     INCREMENT 1
     MINVALUE 1
-    MAXVALUE 9223372036854775807
+    MAXVALUE 2147483647
     START 1
     CACHE 1;
 ALTER TABLE public.sample_id_seq OWNER TO annso;
 CREATE TABLE public.sample
 (
-    id integer NOT NULL DEFAULT nextval('sample_id_seq'::regclass),
+    id serial NOT NULL DEFAULT nextval('sample_id_seq'::regclass),
     name character varying(50) COLLATE pg_catalog."C.UTF-8",
     comments character varying(255) COLLATE pg_catalog."C.UTF-8",
     is_mosaic boolean,
@@ -181,8 +181,8 @@ ALTER TABLE public.sample OWNER TO annso;
 
 CREATE TABLE public.sample_file
 (
-    sample_id integer NOT NULL,
-    file_id integer NOT NULL,
+    sample_id serial NOT NULL,
+    file_id serial NOT NULL,
     CONSTRAINT sample_file_pkey PRIMARY KEY (sample_id, file_id),
     CONSTRAINT sample_file_sample_id_fkey FOREIGN KEY (sample_id)
         REFERENCES public."sample" (id) MATCH SIMPLE
@@ -198,8 +198,8 @@ ALTER TABLE public.sample_file OWNER TO annso;
 
 CREATE TABLE public.analysis_sample
 (
-    analysis_id integer NOT NULL,
-    sample_id integer NOT NULL,
+    analysis_id serial NOT NULL,
+    sample_id serial NOT NULL,
     nickname character varying(255) COLLATE pg_catalog."C.UTF-8",
     CONSTRAINT analysis_sample_pkey PRIMARY KEY (analysis_id, sample_id),
     CONSTRAINT analysis_sample_analysis_id_fkey FOREIGN KEY (analysis_id)
@@ -215,8 +215,8 @@ ALTER TABLE public.analysis_sample OWNER TO annso;
 
 CREATE TABLE public.attribute
 (
-    analysis_id integer NOT NULL,
-    sample_id integer NOT NULL,
+    analysis_id serial NOT NULL,
+    sample_id serial NOT NULL,
     name character varying(255) COLLATE pg_catalog."C.UTF-8" NOT NULL,
     value character varying(255) COLLATE pg_catalog."C.UTF-8",
     CONSTRAINT attribute_pkey PRIMARY KEY (analysis_id, sample_id, name),
@@ -244,15 +244,15 @@ CREATE SEQUENCE public.variant_hg19_id_seq
 ALTER TABLE public.variant_hg19_id_seq OWNER TO annso;
 CREATE TABLE public.variant_hg19
 (
-    id integer NOT NULL DEFAULT nextval('variant_hg19_id_seq'::regclass),
-    bin integer,
+    id bigserial NOT NULL DEFAULT nextval('variant_hg19_id_seq'::regclass),
+    bin serial,
     chr character varying(50) COLLATE pg_catalog."C.UTF-8" NOT NULL,
-    pos integer NOT NULL,
+    pos serial NOT NULL,
     ref text NOT NULL,
     alt text NOT NULL,
     is_transition boolean,
 
-    sample_list integer[],
+    sample_list serial[],
     caller_list character varying(50)[] COLLATE pg_catalog."C.UTF-8",
     CONSTRAINT variant_hg19_pkey PRIMARY KEY (id),
     CONSTRAINT variant_hg19_ukey UNIQUE (chr, pos, ref, alt)
@@ -267,15 +267,15 @@ ALTER TABLE public.variant_hg19 OWNER TO annso;
 
 CREATE TABLE public.sample_variant_hg19
 (
-    sample_id integer NOT NULL,
-    bin integer,
+    sample_id serial NOT NULL,
+    bin serial,
     chr character varying(50) COLLATE pg_catalog."C.UTF-8" NOT NULL,
-    pos integer NOT NULL,
+    pos serial NOT NULL,
     ref text NOT NULL,
     alt text NOT NULL,
-    variant_id integer,
+    variant_id bigserial,
     genotype character varying(1),
-    depth integer,
+    depth serial,
     info character varying(255)[][] COLLATE pg_catalog."C.UTF-8",
     mosaic real,
     CONSTRAINT sample_variant_hg19_pkey PRIMARY KEY (sample_id, chr, pos, ref, alt),
@@ -297,13 +297,13 @@ ALTER TABLE public.variant_hg19 OWNER TO annso;
 CREATE SEQUENCE public.annotation_database_id_seq
     INCREMENT 1
     MINVALUE 1
-    MAXVALUE 9223372036854775807
+    MAXVALUE 2147483647
     START 1
     CACHE 1;
 ALTER TABLE public.annotation_database_id_seq OWNER TO annso;
 CREATE TABLE public.annotation_database
 (
-    id integer NOT NULL DEFAULT nextval('annotation_database_id_seq'::regclass),
+    id serial NOT NULL DEFAULT nextval('annotation_database_id_seq'::regclass),
     name character varying(255) COLLATE pg_catalog."C.UTF-8" NOT NULL,
     name_ui character varying(255) COLLATE pg_catalog."C.UTF-8",
     description text,
@@ -326,14 +326,14 @@ ALTER TABLE public.annotation_database OWNER TO annso;
 CREATE SEQUENCE public.annotation_field_id_seq
     INCREMENT 1
     MINVALUE 1
-    MAXVALUE 9223372036854775807
+    MAXVALUE 2147483647
     START 1
     CACHE 1;
 ALTER TABLE public.annotation_field_id_seq OWNER TO annso;
 CREATE TABLE public.annotation_field
 (
-    id integer NOT NULL DEFAULT nextval('annotation_field_id_seq'::regclass),
-    database_id integer,
+    id serial NOT NULL DEFAULT nextval('annotation_field_id_seq'::regclass),
+    database_id serial,
     name character varying(255) COLLATE pg_catalog."C.UTF-8" NOT NULL,
     name_ui character varying(255) COLLATE pg_catalog."C.UTF-8",
     description text,
