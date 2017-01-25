@@ -487,14 +487,16 @@ function AnnsoUIControler ()
             },
             onProgress: function(bytesUploaded, bytesTotal) 
             {
+                $('#modal_new_file_details').removeClass("hidden");
                 var percentage = (bytesUploaded / bytesTotal * 100).toFixed(2);
                 console.log(bytesUploaded, bytesTotal, percentage + "%");
                 buildProgressBar(percentage, "modal_new_file_progress");
             },
             onSuccess: function() 
             {
+                $('#modal_new_file_details').removeClass("hidden");
                 $("#modal_import_file_tus_localinput").val("");
-                $("#modal_new_file_progress").html("");
+                buildProgressBar(100, "modal_new_file_progress");
                 this.tus_uploader = null;
             }
         }

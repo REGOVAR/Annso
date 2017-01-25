@@ -7,7 +7,7 @@
 --
 
 
-CREATE TYPE field_type AS ENUM ('int', 'string', 'float', 'range');
+CREATE TYPE field_type AS ENUM ('int', 'string', 'float', 'range', 'bool');
 
 
 

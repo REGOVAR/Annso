@@ -22,6 +22,9 @@ from api_rest.tus import *
 
 
 
+
+
+
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
 # COMMON TOOLS
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
@@ -130,6 +133,13 @@ def process_generic_get(query_string, allowed_fields):
 
 
 
+def notify_all(self, msg, src=None):
+    for ws in WebsocketHandler.socket_list:
+        if src != ws[1]:
+            ws[0].send_str(msg)
+
+# Give to the core the delegate to call to notify all via websockets
+annso.notify_all = notify_all
 
 
 

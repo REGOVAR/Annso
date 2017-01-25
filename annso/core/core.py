@@ -252,8 +252,8 @@ class AnalysisManager:
         result = {
             "id" : analysis.id, 
             "name" : analysis.name, 
-            "update_date" : analysis.update_date.ctime(),
-            "creation_date" : analysis.creation_date.ctime(),
+            "update_date" : analysis.update_date.ctime() if analysis.update_date is not None else datetime.datetime.now().ctime(),
+            "creation_date" : analysis.creation_date.ctime() if analysis.creation_date is not None else datetime.datetime.now().ctime(),
             "template_id" : analysis.t_id,
             "template_name" : analysis.t_name,
             "samples" : [],
@@ -300,7 +300,7 @@ class AnalysisManager:
                 "nickname" : r.nickname, 
                 "file_id" : r.f_id, 
                 "filename" : r.filename,
-                "import_date" : r.import_date.ctime(),
+                "import_date" : r.import_date.ctime() if r.import_date is not None else datetime.datetime.now().ctime(),
                 "attributes" : {}})
             for a in result["attributes"]:
                 if r.id in a["samples_value"].keys():
