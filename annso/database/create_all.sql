@@ -181,8 +181,8 @@ ALTER TABLE public.sample OWNER TO annso;
 
 CREATE TABLE public.sample_file
 (
-    sample_id serial NOT NULL,
-    file_id serial NOT NULL,
+    sample_id integer NOT NULL,
+    file_id integer NOT NULL,
     CONSTRAINT sample_file_pkey PRIMARY KEY (sample_id, file_id),
     CONSTRAINT sample_file_sample_id_fkey FOREIGN KEY (sample_id)
         REFERENCES public."sample" (id) MATCH SIMPLE
@@ -198,8 +198,8 @@ ALTER TABLE public.sample_file OWNER TO annso;
 
 CREATE TABLE public.analysis_sample
 (
-    analysis_id serial NOT NULL,
-    sample_id serial NOT NULL,
+    analysis_id integer NOT NULL,
+    sample_id integer NOT NULL,
     nickname character varying(255) COLLATE pg_catalog."C.UTF-8",
     CONSTRAINT analysis_sample_pkey PRIMARY KEY (analysis_id, sample_id),
     CONSTRAINT analysis_sample_analysis_id_fkey FOREIGN KEY (analysis_id)
@@ -215,8 +215,8 @@ ALTER TABLE public.analysis_sample OWNER TO annso;
 
 CREATE TABLE public.attribute
 (
-    analysis_id serial NOT NULL,
-    sample_id serial NOT NULL,
+    analysis_id integer NOT NULL,
+    sample_id integer NOT NULL,
     name character varying(255) COLLATE pg_catalog."C.UTF-8" NOT NULL,
     value character varying(255) COLLATE pg_catalog."C.UTF-8",
     CONSTRAINT attribute_pkey PRIMARY KEY (analysis_id, sample_id, name),
@@ -245,14 +245,14 @@ ALTER TABLE public.variant_hg19_id_seq OWNER TO annso;
 CREATE TABLE public.variant_hg19
 (
     id bigserial NOT NULL DEFAULT nextval('variant_hg19_id_seq'::regclass),
-    bin serial,
+    bin integer,
     chr character varying(50) COLLATE pg_catalog."C.UTF-8" NOT NULL,
-    pos serial NOT NULL,
+    pos bigint NOT NULL,
     ref text NOT NULL,
     alt text NOT NULL,
     is_transition boolean,
 
-    sample_list serial[],
+    sample_list integer[],
     caller_list character varying(50)[] COLLATE pg_catalog."C.UTF-8",
     CONSTRAINT variant_hg19_pkey PRIMARY KEY (id),
     CONSTRAINT variant_hg19_ukey UNIQUE (chr, pos, ref, alt)
@@ -267,15 +267,15 @@ ALTER TABLE public.variant_hg19 OWNER TO annso;
 
 CREATE TABLE public.sample_variant_hg19
 (
-    sample_id serial NOT NULL,
-    bin serial,
+    sample_id integer NOT NULL,
+    bin integer,
     chr character varying(50) COLLATE pg_catalog."C.UTF-8" NOT NULL,
-    pos serial NOT NULL,
+    pos bigint NOT NULL,
     ref text NOT NULL,
     alt text NOT NULL,
-    variant_id bigserial,
+    variant_id bigint,
     genotype character varying(1),
-    depth serial,
+    depth integer,
     info character varying(255)[][] COLLATE pg_catalog."C.UTF-8",
     mosaic real,
     CONSTRAINT sample_variant_hg19_pkey PRIMARY KEY (sample_id, chr, pos, ref, alt),
@@ -333,7 +333,7 @@ ALTER TABLE public.annotation_field_id_seq OWNER TO annso;
 CREATE TABLE public.annotation_field
 (
     id serial NOT NULL DEFAULT nextval('annotation_field_id_seq'::regclass),
-    database_id serial,
+    database_id integer,
     name character varying(255) COLLATE pg_catalog."C.UTF-8" NOT NULL,
     name_ui character varying(255) COLLATE pg_catalog."C.UTF-8",
     description text,

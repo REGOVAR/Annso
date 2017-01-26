@@ -54,6 +54,10 @@ def import_data(file_id, filepath, core=None, db_ref_suffix="_hg19"):
 
 
     def normalize(pos, ref, alt):
+        # input pos comming from VCF are 1-based.
+        # to be consistent with UCSC databases we convert it into 0-based
+        pos -= 1
+
         if (ref == alt):
             return None,None,None
         if ref is None:
@@ -107,6 +111,82 @@ def import_data(file_id, filepath, core=None, db_ref_suffix="_hg19"):
 
 
 
+
+    # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+    # Tiers code from vtools.  Bin index calculation 
+    # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+
+
+    #
+    # Utility function to calculate bins.
+    #
+    # This function implements a hashing scheme that UCSC uses (developed by Jim Kent) to 
+    # take in a genomic coordinate range and return a set of genomic "bins" that your range
+    # intersects.  I found a Java implementation on-line (I need to find the URL) and I
+    # simply manually converted the Java code into Python code.  
+        
+    # IMPORTANT: Because this is UCSC code the start coordinates are 0-based and the end 
+    # coordinates are 1-based!!!!!!
+            
+    # BINRANGE_MAXEND_512M = 512 * 1024 * 1024
+    # binOffsetOldToExtended = 4681; #  (4096 + 512 + 64 + 8 + 1 + 0)
+
+    _BINOFFSETS = (
+        512+64+8+1,   # = 585, min val for level 0 bins (128kb binsize)    
+        64+8+1,       # =  73, min val for level 1 bins (1Mb binsize) 
+        8+1,          # =   9, min val for level 2 bins (8Mb binsize)  
+        1,            # =   1, min val for level 3 bins (64Mb binsize)  
+        0)            # =   0, only val for level 4 bin (512Mb binsize)
+         
+    #    1:   0000 0000 0000 0001    1<<0       
+    #    8:   0000 0000 0000 1000    1<<3
+    #   64:   0000 0000 0100 0000    1<<6
+    #  512:   0000 0010 0000 0000    1<<9
+     
+    _BINFIRSTSHIFT = 17;            # How much to shift to get to finest bin.
+    _BINNEXTSHIFT = 3;              # How much to shift to get to next larger bin.
+    _BINLEVELS = len(_BINOFFSETS)
+      
+    #
+    # IMPORTANT: the start coordinate is 0-based and the end coordinate is 1-based.
+    #
+    def getUcscBins(start, end):
+        bins = []
+        startBin = start >> _BINFIRSTSHIFT
+        endBin = (end-1) >> _BINFIRSTSHIFT
+        for i in range(_BINLEVELS):
+            offset = _BINOFFSETS[i];
+            if startBin == endBin:
+                bins.append(startBin + offset)
+            else:
+                for bin in range(startBin + offset, endBin + offset):
+                    bins.append(bin);
+            startBin >>= _BINNEXTSHIFT
+            endBin >>= _BINNEXTSHIFT
+        return bins
+
+    def getMaxUcscBin(start, end):
+        bin = 0
+        startBin = start >> _BINFIRSTSHIFT
+        endBin = (end-1) >> _BINFIRSTSHIFT
+        for i in range(_BINLEVELS):
+            offset = _BINOFFSETS[i];
+            if startBin == endBin:
+                if startBin + offset > bin:
+                    bin = startBin + offset
+            else:
+                for i in range(startBin + offset, endBin + offset):
+                    if i > bin:
+                        bin = i 
+            startBin >>= _BINNEXTSHIFT
+            endBin >>= _BINNEXTSHIFT
+        return bin
+
+
+
+
+
+
     # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
     # Import 
     # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
@@ -156,9 +236,11 @@ def import_data(file_id, filepath, core=None, db_ref_suffix="_hg19"):
         records_current = 0
 
         # parsing vcf file
+        table = "variant" + db_ref_suffix
         print("Importing file ", filepath, "\n\r\trecords  : ", records_count, "\n\r\tsamples  :  (", len(samples.keys()), ") ", reprlib.repr([s for s in samples.keys()]), "\n\r\tstart    : ", start)
         # bar = Bar('\tparsing  : ', max=records_count, suffix='%(percent).1f%% - %(elapsed_td)s')
-        sql_head1 = "INSERT INTO variant{0} (chr, pos, ref, alt, is_transition) VALUES ".format(db_ref_suffix)
+        
+        sql_pattern1 = "INSERT INTO {0} (chr, pos, ref, alt, is_transition, bin, sample_list) VALUES ('{1}', {2}, '{3}', '{4}', {5}, {6}, '{{{7}}}') ON CONFLICT (chr, pos, ref, alt) DO UPDATE SET sample_list=array_cat(array_remove({0}.sample_list, {7}), '{{{7}}}')  WHERE {0}.chr='{1}' AND {0}.pos={2} AND {0}.ref='{3}' AND {0}.alt='{4}';"
         sql_pattern2 = "INSERT INTO sample_variant" + db_ref_suffix + " (sample_id, variant_id, chr, pos, ref, alt, genotype, deepth) SELECT {0}, id, '{1}', {2}, '{3}', '{4}', '{5}', {6} FROM variant" + db_ref_suffix + " WHERE chr='{1}' AND pos={2} AND ref='{3}' AND alt='{4}' ON CONFLICT DO NOTHING;"
         sql_tail = " ON CONFLICT DO NOTHING;"
         sql_query1 = ""
@@ -170,27 +252,28 @@ def import_data(file_id, filepath, core=None, db_ref_suffix="_hg19"):
                 core.notify_all({'msg':'import_vcf', 'data' : {'file_id' : file_id, 'progress_total' : records_count, 'progress_current' : records_current, 'progress_percent' : records_current / max(1,records_count)}})
 
             chrm = normalize_chr(str(r.chrom))
-            
+            samples_array = ','.join([str(samples[s].id) for s in r.samples])
             for sn in r.samples:
                 s = r.samples.get(sn)
                 if (len(s.alleles) > 0) :
                     pos, ref, alt = normalize(r.pos, r.ref, s.alleles[0])
+                    bin = getMaxUcscBin(pos, pos + len(ref))
 
                     if alt != ref :
-                        sql_query1 += "('{}', {}, '{}', '{}', {}),".format(chrm, str(pos), ref, alt, is_transition(ref, alt))
+                        sql_query1 += sql_pattern1.format(table, chrm, str(pos), ref, alt, is_transition(ref, alt), bin, samples_array)
                         sql_query2 += sql_pattern2.format(str(samples[sn].id), chrm, str(pos), ref, alt, normalize_gt(s), get_info(s, 'DP'))
                         count += 1
 
                     pos, ref, alt = normalize(r.pos, r.ref, s.alleles[1])
                     if alt != ref :
-                        sql_query1 += "('{}', {}, '{}', '{}', {}),".format(chrm, str(pos), ref, alt, is_transition(ref, alt))
+                        sql_query1 += sql_pattern1.format(table, chrm, str(pos), ref, alt, is_transition(ref, alt), bin, samples_array)
                         sql_query2 += sql_pattern2.format(str(samples[sn].id), chrm, str(pos), ref, alt, normalize_gt(s), get_info(s, 'DP'))
                         count += 1
 
                     # manage split big request to avoid sql out of memory transaction
                     if count >= 50000:
                         count = 0
-                        transaction1 = sql_head1 + sql_query1[:-1] + sql_tail
+                        transaction1 = sql_query1
                         transaction2 = sql_query2
 
                         # if job_in_progress >= max_job_in_progress:
@@ -206,7 +289,7 @@ def import_data(file_id, filepath, core=None, db_ref_suffix="_hg19"):
         # bar.finish()
         end = datetime.datetime.now()
         # print("\tparsing done   : " , end, " => " , (end - start).seconds, "s")
-        transaction1 = sql_head1 + sql_query1[:-1] + sql_tail
+        transaction1 = sql_query1
         transaction2 = sql_query2
         db_engine.execute(transaction1 + transaction2)
 
