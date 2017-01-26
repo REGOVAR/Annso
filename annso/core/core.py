@@ -167,6 +167,11 @@ class FileManager:
         # TODO : check if run was waiting the end of the upload to start
 
 
+    def delete(self, file_id):
+        db_engine.execute("DELETE FROM variant")
+
+
+
  
 
 

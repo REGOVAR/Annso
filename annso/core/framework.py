@@ -184,6 +184,6 @@ class Timer(object):
 # INIT OBJECTS
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
 
-# Create pirus logger : plog
-setup_logger('pirus', os.path.join(ANNSO_DIR, "pirus.log"))
-plog = logging.getLogger('pirus')
+# Create annso logger : plog
+setup_logger('annso', os.path.join(ANNSO_DIR, "annso.log"))
+plog = logging.getLogger('annso')
