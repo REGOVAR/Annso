@@ -30,7 +30,7 @@ Annso need a postgresql database (9.5+). As ususal, you can customise value, jus
 Then clone the repository and install requirements ::
 
         git clone https://github.com/REGOVAR/Annso.git
-        cd <ANNSO_PATH>
+        cd Annso
         virtualenv -p /usr/bin/python3.5 venv
         source venv/bin/activate
         pip install -r requirements.txt
