@@ -478,20 +478,20 @@ DROP INDEX IF EXISTS public.dbnfsp_variant_hg19_idx;
 CREATE INDEX dbnfsp_variant_hg19_idx
   ON public.dbnfsp_variant
   USING btree
-  (chr_hg19 COLLATE pg_catalog."default", bin_hg19, pos_hg19, ref COLLATE pg_catalog."default", alt COLLATE pg_catalog."default");
+  (bin_hg19, chr_hg19 COLLATE pg_catalog."default", pos_hg19, ref COLLATE pg_catalog."default", alt COLLATE pg_catalog."default");
 
 
 DROP INDEX IF EXISTS public.dbnfsp_variant_hg18_idx;
 CREATE INDEX dbnfsp_variant_hg18_idx
   ON public.dbnfsp_variant
   USING btree
-  (chr_hg18 COLLATE pg_catalog."default", bin_hg18, pos_hg18, ref COLLATE pg_catalog."default", alt COLLATE pg_catalog."default");
+  (bin_hg18, chr_hg18 COLLATE pg_catalog."default", pos_hg18, ref COLLATE pg_catalog."default", alt COLLATE pg_catalog."default");
 
 DROP INDEX IF EXISTS public.dbnfsp_variant_hg38_idx;
 CREATE INDEX dbnfsp_variant_hg38_idx
   ON public.dbnfsp_variant
   USING btree
-  (chr_hg38 COLLATE pg_catalog."default", bin_hg38, pos_hg38, ref COLLATE pg_catalog."default", alt COLLATE pg_catalog."default");
+  (bin_hg38, chr_hg38 COLLATE pg_catalog."default", pos_hg38, ref COLLATE pg_catalog."default", alt COLLATE pg_catalog."default");
 
 
 
@@ -555,11 +555,11 @@ INSERT INTO public.dbnfsp_variant(
 
 SELECT 
     chr, 
-    CAST(pos AS INTEGER), 
+    CAST(pos AS INTEGER) -1, 
     NULLIF(hg19_chr, '.'),
-    CAST(NULLIF(hg19_pos, '.') AS INTEGER),
+    NULLIF(CAST(NULLIF(hg19_pos, '.') AS INTEGER)-1, -1),
     NULLIF(hg18_chr, '.'),
-    CAST(NULLIF(hg18_pos, '.') AS INTEGER),
+    NULLIF(CAST(NULLIF(hg18_pos, '.') AS INTEGER)-1, -1),
     ref, alt, aaref, aaalt, 
     rs_dbSNP147, genename, cds_strand,
     refcodon, 

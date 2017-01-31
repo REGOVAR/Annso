@@ -186,11 +186,11 @@ class AnnotationDatabaseManager:
         self.db_map = {}
         query = "SELECT d.id, d.name_ui, d.description, a.id, a.name_ui, a.type, a.description FROM annotation_field a \
                  LEFT JOIN annotation_database d ON a.database_id=d.id \
-                 WHERE d.reference_id={0} ORDER BY d.name_ui, a.name_ui".format(reference)
+                 WHERE d.reference_id={0}".format(reference)
         for row in db_session.execute(query):
             if row[0] not in self.db_map:
                 self.db_map[row[0]] = {"name" : row[1], "description": row[2], "fields" : []}
-            self.db_map[row[0]]["fields"].append({"id" : row[3], "name" : row[4], "type" : row[5]})
+            self.db_map[row[0]]["fields"].append({"id" : row[3], "name" : row[4], "type" : row[5], "description": row[6]})
             self.fields_map[row[3]] = {"name" : row[4], "type" : row[5], "db_id" : row[0], "db_name" : row[1], "description": row[6]}
 
     # build the sql query according to the annso filtering parameter and return result as json data

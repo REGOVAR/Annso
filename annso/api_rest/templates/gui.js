@@ -706,17 +706,12 @@ function AnnsoUIControler ()
 
 
         // Reset UI fields
-        $('#annotation_fields_list li').each(function(idx) {
-            $(this).removeClass('check');
-            $(this).addClass('uncheck');
+        $('#annotation_fields_list input[type=checkbox]').each(function(idx, elmt) {
+            $(elmt).prop('checked', false);
         });
         $.each(analysis.analysis.fields, function(idx, fid) 
         {
-            db_id = '#annotation_fields_db_'+ annotation_fields[fid]['db_id'];
-            $(db_id).removeClass('uncheck');
-            $(db_id).addClass('check');
-            $('#annotation_fields_field_'+fid).removeClass('uncheck');
-            $('#annotation_fields_field_'+fid).addClass('check');
+            $('#annotation_fields_field_{0}'.format(fid)).prop('checked', true);
         });
 
         // Reset UI filter
@@ -878,7 +873,7 @@ function update_filter_set_map()
     var idx=0;
     $.each(analysis.analysis.samples, function (id, sample)
     {
-        label = "sample " + (sample["nickname"] != "") ? sample["nickname"] : sample["name"];
+        label = "sample " + ((sample["nickname"] != "") ? sample["nickname"] : sample["name"]);
         json  = ["sample", sample["id"]];
         html += entry.format(idx, label);
         filter_set_map[idx] = json;
@@ -1379,6 +1374,13 @@ function filter_build_tree(json)
 
 
 
+        $('#variants_list_table input[type=checkbox]').each( function (idx, elmt)
+        {
+            if (idx == 0) return;
+            
+            $(elmt).prop('checked', checked);
+            ui.check_variant(elmt);
+        });
 
 
 
@@ -1387,38 +1389,20 @@ function filter_build_tree(json)
  
 function filter_toggle_field(elmt, f_id)
 {
-    if ($(elmt).parent().hasClass('check'))
+    var checked = $(elmt).prop('checked');
+    if (checked)
     {
-        $(elmt).parent().removeClass('check');
-        $(elmt).parent().addClass('uncheck');
-
-        analysis.analysis.fields.splice(analysis.analysis.fields.indexOf(f_id),1);
-    }
-    else
-    {
-        $(elmt).parent().addClass('check');
-        $(elmt).parent().removeClass('uncheck');
-
         analysis.analysis.fields.push(f_id);
     }
-
-    load_variants_array();
-}
-function filter_toggle_field_group(elmt)
-{
-    if ($(elmt).hasClass('minus'))
-    {
-        $(elmt).next().next().next().addClass('collapse');
-        $(elmt).removeClass('minus');
-        $(elmt).addClass('plus');
-    }
     else
     {
-        $(elmt).next().next().next().removeClass('collapse');
-        $(elmt).removeClass('plus');
-        $(elmt).addClass('minus');
+        analysis.analysis.fields.splice(analysis.analysis.fields.indexOf(f_id),1);
     }
+
+    // load_variants_array();
 }
+
+
 
 
 function filter_toggle_condition(elmt)

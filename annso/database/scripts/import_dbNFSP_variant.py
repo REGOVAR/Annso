@@ -126,7 +126,7 @@ Base.metadata.create_all(db_engine)
 
 
 chrs = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20', '21', '22', 'Y']
-step = 1000
+step = 100
 for chr in chrs:
     print ("counting row to process ...")
     records_count = db_engine.execute("SELECT COUNT(*) FROM dbnfsp_variant WHERE bin_hg38 IS NULL AND chr_hg38='{0}'".format(chr)).first()[0]
