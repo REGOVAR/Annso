@@ -247,7 +247,7 @@ def import_data(file_id, filepath, annso_core=None, db_ref_suffix="_hg19"):
         # bar = Bar('\tparsing  : ', max=records_count, suffix='%(percent).1f%% - %(elapsed_td)s')
         
         sql_pattern1 = "INSERT INTO {0} (chr, pos, ref, alt, is_transition, bin, sample_list) VALUES ('{1}', {2}, '{3}', '{4}', {5}, {6}, '{{{7}}}') ON CONFLICT (chr, pos, ref, alt) DO UPDATE SET sample_list=array_cat(array_remove({0}.sample_list, {7}), '{{{7}}}')  WHERE {0}.chr='{1}' AND {0}.pos={2} AND {0}.ref='{3}' AND {0}.alt='{4}';"
-        sql_pattern2 = "INSERT INTO sample_variant" + db_ref_suffix + " (sample_id, variant_id, chr, pos, ref, alt, genotype, deepth) SELECT {0}, id, '{1}', {2}, '{3}', '{4}', '{5}', {6} FROM variant" + db_ref_suffix + " WHERE chr='{1}' AND pos={2} AND ref='{3}' AND alt='{4}' ON CONFLICT DO NOTHING;"
+        sql_pattern2 = "INSERT INTO sample_variant" + db_ref_suffix + " (sample_id, variant_id, bin, chr, pos, ref, alt, genotype, depth) SELECT {0}, id, {1}, '{2}', {3}, '{4}', '{5}', '{6}', {7} FROM variant" + db_ref_suffix + " WHERE bin={1} AND chr='{2}' AND pos={3} AND ref='{4}' AND alt='{5}' ON CONFLICT DO NOTHING;"
         sql_tail = " ON CONFLICT DO NOTHING;"
         sql_query1 = ""
         sql_query2 = ""
@@ -267,14 +267,14 @@ def import_data(file_id, filepath, annso_core=None, db_ref_suffix="_hg19"):
                     if alt != ref :
                         bin = getMaxUcscBin(pos, pos + len(ref))
                         sql_query1 += sql_pattern1.format(table, chrm, str(pos), ref, alt, is_transition(ref, alt), bin, samples_array)
-                        sql_query2 += sql_pattern2.format(str(samples[sn].id), chrm, str(pos), ref, alt, normalize_gt(s), get_info(s, 'DP'))
+                        sql_query2 += sql_pattern2.format(str(samples[sn].id), bin, chrm, str(pos), ref, alt, normalize_gt(s), get_info(s, 'DP'))
                         count += 1
 
                     pos, ref, alt = normalize(r.pos, r.ref, s.alleles[1])
                     if alt != ref :
                         bin = getMaxUcscBin(pos, pos + len(ref))
                         sql_query1 += sql_pattern1.format(table, chrm, str(pos), ref, alt, is_transition(ref, alt), bin, samples_array)
-                        sql_query2 += sql_pattern2.format(str(samples[sn].id), chrm, str(pos), ref, alt, normalize_gt(s), get_info(s, 'DP'))
+                        sql_query2 += sql_pattern2.format(str(samples[sn].id), bin, chrm, str(pos), ref, alt, normalize_gt(s), get_info(s, 'DP'))
                         count += 1
 
                     # manage split big request to avoid sql out of memory transaction

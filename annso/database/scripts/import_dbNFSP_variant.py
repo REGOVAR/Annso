@@ -125,8 +125,8 @@ Base.metadata.create_all(db_engine)
 
 
 
-chrs = ['X'] #['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20', '21', '22', 'X', 'Y']
-step = 100
+chrs = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20', '21', '22', 'Y']
+step = 1000
 for chr in chrs:
     print ("counting row to process ...")
     records_count = db_engine.execute("SELECT COUNT(*) FROM dbnfsp_variant WHERE bin_hg38 IS NULL AND chr_hg38='{0}'".format(chr)).first()[0]
@@ -162,34 +162,3 @@ for chr in chrs:
         print("   {0} / {1} - {2}% Done".format(records_done, records_count, percent))
     print (datetime.datetime.now().ctime())
     print("finished")
-
-
-
-
-# print ("counting row to process ...")
-# records_count = db_engine.execute("SELECT COUNT(*) FROM variant_hg19 WHERE bin IS NULL".format(chr)).first()[0]
-
-# print ("Start to compute bin index for the {0} chr : {1} rows".format(chr, records_count))
-# print (datetime.datetime.now().ctime())
-
-# i=0
-# step = 10000
-# while i < records_count:
-#     query = ""
-
-#     for r in db_engine.execute("SELECT bin, chr, pos, ref FROM variant_hg19 WHERE bin IS NULL LIMIT {1} OFFSET {2}".format(chr, step, i)) :
-
-#         if r.bin is None: 
-#             length = len(r.ref) if r.ref is not None else 0
-#             bin = getMaxUcscBin(r.pos-1, r.pos-1 + length)
-
-#             query += "UPDATE variant_hg19 SET bin={0} WHERE chr='{1}' AND pos={2} AND ref='{3}'; ".format(bin, r.chr, r.pos, r.ref)
-
-#     if query is not "":
-#         db_engine.execute(query)
-#     i += step
-
-#     percent = round(i / max(1,records_count), 2) * 100
-#     print("   {0} / {1} - {2}% Done".format(i, records_count, percent))
-# print (datetime.datetime.now().ctime())
-# print("finished")
