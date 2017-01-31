@@ -64,11 +64,6 @@ def rest_error(message:str="Unknow", code:str="0", error_id:str=""):
 
 
 
-def notify_all(src, msg):
-    for ws in WebsocketHandler.socket_list:
-        if src != ws[1]:
-            ws[0].send_str(msg)
-
 
 
 
@@ -133,10 +128,11 @@ def process_generic_get(query_string, allowed_fields):
 
 
 
-def notify_all(self, msg, src=None):
+def notify_all(data):
+    msg = json.dumps(data)
+    log ("API_rest Notify All : {0}".format(msg))
     for ws in WebsocketHandler.socket_list:
-        if src != ws[1]:
-            ws[0].send_str(msg)
+        ws[0].send_str(msg)
 
 # Give to the core the delegate to call to notify all via websockets
 annso.notify_all = notify_all
@@ -403,6 +399,7 @@ class SampleFileWrapper (TusFileWrapper) :
 
     def complete(self, checksum=None, checksum_type="md5"):
         try:
+            log ('Upload of the file (id={0}) is complete.'.format(self.id))
             annso.file.upload_finish(self.id, checksum, checksum_type)
         except Exception as error:
             return TusManager.build_response(code=500, body="Unexpected error occured : {}".format(error))
@@ -434,7 +431,7 @@ class SampleHandler:
             "range_total"  : annso.sample.total(),
             "range_max"    : RANGE_MAX,
         }
-        # Return result of the query for PirusFile 
+        # Return result of the query 
         return rest_success(annso.sample.get(fields, query, order, offset, limit), range_data)
 
 
@@ -500,27 +497,27 @@ class WebsocketHandler:
         ws = web.WebSocketResponse()
         await ws.prepare(request)
 
-        print('WS connection open by', ws_id)
+        log('WS connection open by {0}'.format(ws_id))
         WebsocketHandler.socket_list.append((ws, ws_id))
-        msg = '{"action":"online_user", "data" : [' + ','.join(['"' + _ws[1] + '"' for _ws in WebsocketHandler.socket_list]) + ']}'
-        notify_all(None, msg)
+        msg = {'msg' :'online_user', 'data' : [' + ','.join(['"' + _ws[1] + '"' for _ws in WebsocketHandler.socket_list]) + ']}
+        notify_all(msg)
 
         try:
             async for msg in ws:
                 if msg.tp == aiohttp.MsgType.text:
                     if msg.data == 'close':
-                        print ('CLOSE MESSAGE RECEIVED')
+                        log ('CLOSE MESSAGE RECEIVED')
                         await ws.close()
                     else:
                         # Analyse message sent by client and send response if needed
                         data = msg.json()
-                        if data["action"] == "user_info":
-                            print("WebsocketHandler", data["action"])
+                        if data['msg'] == 'user_info':
+                            log('WebsocketHandler {0} '.format(data['msg']))
                             pass
                         elif msg.tp == aiohttp.MsgType.error:
-                            print('ws connection closed with exception %s' % ws.exception())
+                            log('ws connection closed with exception {0}'.format(ws.exception()))
         finally:
-            print('WS connection closed for', ws_id)
+            log('WS connection closed for{0}'.format(ws_id))
             WebsocketHandler.socket_list.remove((ws, ws_id))
 
         return ws
@@ -536,6 +533,6 @@ class WebsocketHandler:
 
 
 async def on_shutdown(app):
-    print("SHUTDOWN SERVER... CLOSE ALL")
+    log("SHUTDOWN SERVER... CLOSE ALL")
     for ws in WebsocketHandler.socket_list:
         await ws[0].close(code=999, message='Server shutdown')

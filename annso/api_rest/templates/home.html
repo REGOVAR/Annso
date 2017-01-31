@@ -848,7 +848,7 @@
     <script>
         var rootURL = "http://{{ hostname }}";
 
-        var ws = new WebSocket('ws://{{ hostname }}/ws');
+        var ws = null;
         var $message = $('#message');
 
 
@@ -895,53 +895,7 @@
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-        function pirus_delete(type, id)
-        {
-            $.ajax(
-            {
-                url: "{0}/{1}/{2}".format(rootURL, type, id),
-                type: "DELETE"
-            }).fail(function()
-            {
-                alert( "Unexpected error when trying to delete this " + type );
-            }).done(function(txt) 
-            {
-                location.reload();
-            })
-        }
         
-
-
-        $(document).ready(function()
-        {
-
-            $("#browser_files_table td").contextMenu({
-                menuSelector: "#context_menu",
-                menuSelected: function (invokedOn, selectedMenu) 
-                {
-                    var action = selectedMenu[0].getAttribute("id");
-                    var id = invokedOn[0].parentElement.children[6].innerHTML;
-                    if (action == "context_menu_info") show_tab("browser_file", id);
-                    else if (action == "context_menu_dl") alert("TODO : download the file " + id);
-                }
-            });
-
-            //$("#browser_files_table").tablesorter(); 
-
-            $('[data-toggle="tooltip"]').tooltip();
-
-        });
 
 
 
@@ -1023,27 +977,24 @@
         /* WEBSOCKETS SESSION
         /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-        ws.onopen = function()
+        function ws_onopen()
         {
             $message.attr("class", 'label label-success');
             $message.text('open');
 
-            ws.send('{"action" : "authent", "data" : "Chrome"}')
+            ws.send('{"msg" : "authent", "data" : "Chrome"}')
         };
-        ws.onmessage = function(ev)
+        function ws_onmessage(ev)
         {
-            debugger;
             $message.attr("class", 'label label-info');
             var json = JSON.parse(ev.data);
 
-
             dt = new Date()
-            $message.html(dt.toLocaleTimeString() + ' ' + json["action"] + ' : ' + json["data"]);
+            $message.html(dt.toLocaleTimeString() + ' ' + json["msg"] + ' : ' + json["data"]);
 
-            switch(json["action"])
+            switch(json["msg"])
             {
                 case 'import_vcf':
-
                     $('#modal_new_file_details').removeClass("hidden");
                     buildProgressBar(100, "modal_new_file_progress");
                     json["data"]['progress_percent'];
@@ -1051,24 +1002,75 @@
                     buildProgressBar(percentage, "modal_new_file_import");
                     break;
 
-                case 'run_changed':
-                    ws_run_changed(json["data"])
+                case 'import_vcf_end':
+                    debugger;
+                    // clean and close import popup
+                    $('#modal_new_file_progress').html("");
+                    $('#modal_new_file_import').html("");
+                    $('#modal_new_file_details').addClass("hidden");
+                    $('#modal_import_sample_file').modal('hide');
+                    // automaticaly add sample to the project
+                    $.each(json["data"]['samples'], function(id, elmt) 
+                    {
+                        toggle_select_sample(elmt['id']);
+                    });
+                    
                     break;
+
+
                 case 'file_changed':
                     ws_file_changed(json["data"])
                     break;
             }
         };
-        ws.onclose = function(ev)
+        function ws_onclose(ev)
         {
-            $message.attr("class", 'label label-important');
-            $message.text('closed');
+            // Try to reconnect websocket every seconds
+            setTimeout(ws_setup, 1000);
         };
-        ws.onerror = function(ev)
+        function ws_onerror(ev)
         {
             $message.attr("class", 'label label-warning');
             $message.text('error occurred');
         };
+
+
+        function ws_setup()
+        {
+            this.ws = new WebSocket('ws://{{ hostname }}/ws');
+            this.ws.onerror = ws_onerror;
+            this.ws.onopen = ws_onopen;
+            this.ws.onmessage = ws_onmessage;
+            this.ws.onclose = ws_onclose;
+        }
+
+
+
+
+
+        $(document).ready(function()
+        {
+            // Init websocket
+            ws_setup();
+
+            // Add context menu
+            $("#browser_files_table td").contextMenu({
+                menuSelector: "#context_menu",
+                menuSelected: function (invokedOn, selectedMenu) 
+                {
+                    var action = selectedMenu[0].getAttribute("id");
+                    var id = invokedOn[0].parentElement.children[6].innerHTML;
+                    if (action == "context_menu_info") show_tab("browser_file", id);
+                    else if (action == "context_menu_dl") alert("TODO : download the file " + id);
+                }
+            });
+
+            // Add tooltips
+            $('[data-toggle="tooltip"]').tooltip();
+
+        });
+        
+
         </script>
 </body>
 </html> 

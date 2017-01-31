@@ -12,7 +12,7 @@ metadata = {
 
 
 
-def import_data(file_id, filepath, core=None, db_ref_suffix="_hg19"):
+def import_data(file_id, filepath, annso_core=None, db_ref_suffix="_hg19"):
     import ipdb
 
     import os
@@ -24,7 +24,7 @@ def import_data(file_id, filepath, core=None, db_ref_suffix="_hg19"):
     from pysam import VariantFile
 
 
-    from core.framework import get_or_create
+    from core.framework import get_or_create, log, war, err
     from core.model import Sample, db_engine, db_session
 
 
@@ -97,7 +97,7 @@ def import_data(file_id, filepath, core=None, db_ref_suffix="_hg19"):
                     return '2'
                 else :
                     return '3'
-            print ("unknow : " + str(infos['GT']) )
+            log ("unknow : " + str(infos['GT']) )
         return '?'
 
 
@@ -216,9 +216,15 @@ def import_data(file_id, filepath, core=None, db_ref_suffix="_hg19"):
         # get samples in the VCF 
         samples = {i : get_or_create(db_session, Sample, name=i)[0] for i in list((vcf_reader.header.samples))}
         db_session.commit()
+        if len(samples.keys()) == 0 : 
+            war("VCF files without sample cannot be imported in the database.")
+            if annso_core is not None:
+                annso_core.notify_all({'msg':'import_vcf_end', 'data' : {'file_id' : file_id, 'msg' : "VCF files without sample cannot be imported in the database."}})
+            return;
 
-        if core is not None:
-            core.notify_all({'msg':'import_vcf_start', 'data' : {'file_id' : file_id, 'samples' : [ {'id' : samples[s].id, 'name' : samples[s].name} for s in samples.keys()]}})
+        if annso_core is not None:
+            annso_core.notify_all({'msg':'import_vcf_start', 'data' : {'file_id' : file_id, 'samples' : [ {'id' : samples[s].id, 'name' : samples[s].name} for s in samples.keys()]}})
+
 
         # Associate sample to the file
         db_engine.execute("INSERT INTO sample_file (sample_id, file_id) VALUES {0};".format( ','.join(["({0}, {1})".format(samples[sid].id, file_id) for sid in samples])))
@@ -237,7 +243,7 @@ def import_data(file_id, filepath, core=None, db_ref_suffix="_hg19"):
 
         # parsing vcf file
         table = "variant" + db_ref_suffix
-        print("Importing file ", filepath, "\n\r\trecords  : ", records_count, "\n\r\tsamples  :  (", len(samples.keys()), ") ", reprlib.repr([s for s in samples.keys()]), "\n\r\tstart    : ", start)
+        log ("Importing file {0}\n\r\trecords  : {1}\n\r\tsamples  :  ({2}) {3}\n\r\tstart    : {4}".format(filepath, records_count, len(samples.keys()), reprlib.repr([s for s in samples.keys()]), start))
         # bar = Bar('\tparsing  : ', max=records_count, suffix='%(percent).1f%% - %(elapsed_td)s')
         
         sql_pattern1 = "INSERT INTO {0} (chr, pos, ref, alt, is_transition, bin, sample_list) VALUES ('{1}', {2}, '{3}', '{4}', {5}, {6}, '{{{7}}}') ON CONFLICT (chr, pos, ref, alt) DO UPDATE SET sample_list=array_cat(array_remove({0}.sample_list, {7}), '{{{7}}}')  WHERE {0}.chr='{1}' AND {0}.pos={2} AND {0}.ref='{3}' AND {0}.alt='{4}';"
@@ -248,8 +254,8 @@ def import_data(file_id, filepath, core=None, db_ref_suffix="_hg19"):
         count = 0
         for r in vcf_reader: 
             records_current += 1 
-            if core is not None:
-                core.notify_all({'msg':'import_vcf', 'data' : {'file_id' : file_id, 'progress_total' : records_count, 'progress_current' : records_current, 'progress_percent' : records_current / max(1,records_count)}})
+            if annso_core is not None:
+                annso_core.notify_all({'msg':'import_vcf', 'data' : {'file_id' : file_id, 'progress_total' : records_count, 'progress_current' : records_current, 'progress_percent' : round(records_current / max(1,records_count) * 100, 2)}})
 
             chrm = normalize_chr(str(r.chrom))
             samples_array = ','.join([str(samples[s].id) for s in r.samples])
@@ -257,15 +263,16 @@ def import_data(file_id, filepath, core=None, db_ref_suffix="_hg19"):
                 s = r.samples.get(sn)
                 if (len(s.alleles) > 0) :
                     pos, ref, alt = normalize(r.pos, r.ref, s.alleles[0])
-                    bin = getMaxUcscBin(pos, pos + len(ref))
 
                     if alt != ref :
+                        bin = getMaxUcscBin(pos, pos + len(ref))
                         sql_query1 += sql_pattern1.format(table, chrm, str(pos), ref, alt, is_transition(ref, alt), bin, samples_array)
                         sql_query2 += sql_pattern2.format(str(samples[sn].id), chrm, str(pos), ref, alt, normalize_gt(s), get_info(s, 'DP'))
                         count += 1
 
                     pos, ref, alt = normalize(r.pos, r.ref, s.alleles[1])
                     if alt != ref :
+                        bin = getMaxUcscBin(pos, pos + len(ref))
                         sql_query1 += sql_pattern1.format(table, chrm, str(pos), ref, alt, is_transition(ref, alt), bin, samples_array)
                         sql_query2 += sql_pattern2.format(str(samples[sn].id), chrm, str(pos), ref, alt, normalize_gt(s), get_info(s, 'DP'))
                         count += 1
@@ -277,10 +284,10 @@ def import_data(file_id, filepath, core=None, db_ref_suffix="_hg19"):
                         transaction2 = sql_query2
 
                         # if job_in_progress >= max_job_in_progress:
-                        #     print ("\nto many job in progress, waiting... (" + datetime.datetime.now().ctime() + ")")
+                        #     log ("\nto many job in progress, waiting... (" + datetime.datetime.now().ctime() + ")")
                         # while job_in_progress >= max_job_in_progress:
                         #     time.sleep(100)
-                        # print ("\nStart new job " + str(job_in_progress) + "/" + str(max_job_in_progress) + " (" + datetime.datetime.now().ctime() + ")")
+                        # log ("\nStart new job " + str(job_in_progress) + "/" + str(max_job_in_progress) + " (" + datetime.datetime.now().ctime() + ")")
                         #threading.Thread(target=exec_sql_query, args=(transaction1 + transaction2, )).start() # both request cannot be executed in separated thread. sql2 must be executed after sql1
                         pool.apply_async(exec_sql_query, (transaction1 + transaction2, ))
                         sql_query1 = ""
@@ -288,7 +295,7 @@ def import_data(file_id, filepath, core=None, db_ref_suffix="_hg19"):
 
         # bar.finish()
         end = datetime.datetime.now()
-        # print("\tparsing done   : " , end, " => " , (end - start).seconds, "s")
+        # log("\tparsing done   : " , end, " => " , (end - start).seconds, "s")
         transaction1 = sql_query1
         transaction2 = sql_query2
         db_engine.execute(transaction1 + transaction2)
@@ -296,14 +303,14 @@ def import_data(file_id, filepath, core=None, db_ref_suffix="_hg19"):
         current = 0
         while job_in_progress > 0:
             if current != job_in_progress:
-                # print ("\tremaining sql job : ", job_in_progress)
+                # log ("\tremaining sql job : ", job_in_progress)
                 current = job_in_progress
             pass
 
         end = datetime.datetime.now()
-        # print("\tdb import done : " , end, " => " , (end - start).seconds, "s")
-        # print("")
+        # log("\tdb import done : " , end, " => " , (end - start).seconds, "s")
+        # log("")
 
     end = datetime.datetime.now()
-    if core is not None:
-        core.notify_all({'msg':'import_vcf_end', 'data' : {'file_id' : file_id}})
+    if annso_core is not None:
+        annso_core.notify_all({'msg':'import_vcf_end', 'data' : {'file_id' : file_id, 'msg' : 'Import done without error.', 'samples': [ {'id' : samples[s].id, 'name' : samples[s].name} for s in samples.keys()]}})

@@ -103,18 +103,15 @@ def setup_logger(logger_name, log_file, level=logging.INFO):
 def log(msg):
     global plog
     plog.info(msg)
-    print(msg)
 
 def war(msg):
     global plog
     plog.warning(msg)
-    print(msg)
 
 
 def err(msg):
     global plog
     plog.error(msg)
-    print(msg)
 
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
@@ -167,7 +164,7 @@ class Timer(object):
         self.secs = self.end - self.start
         self.msecs = self.secs * 1000  # millisecs
         if self.verbose:
-            print (self.msecs, ' ms')
+            log (self.msecs, ' ms')
             
     def __str__(self):
         if self.msecs >= 1000:
@@ -187,3 +184,17 @@ class Timer(object):
 # Create annso logger : plog
 setup_logger('annso', os.path.join(ANNSO_DIR, "annso.log"))
 plog = logging.getLogger('annso')
+
+
+
+
+
+
+
+
+
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
+# T
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
+
+

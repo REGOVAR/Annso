@@ -245,10 +245,13 @@ COPY import_dbnfsp_variant FROM '/tmp/hg19_db/dbNSFP/dbNSFP3.3a_variant.chrM' DE
 DROP TABLE IF EXISTS public.dbnfsp_variant;
 CREATE TABLE public.dbnfsp_variant
 (
+    bin_hg38 integer,
     chr_hg38 character varying(255),
     pos_hg38 bigint,
+    bin_hg19 integer,
     chr_hg19 character varying(255),
     pos_hg19 bigint,
+    bin_hg18 integer,
     chr_hg18 character varying(255),
     pos_hg18 bigint,
     ref text,
@@ -467,9 +470,6 @@ ALTER TABLE public.dbnfsp_variant
 
 
 
-
-
-
 --
 -- Create indexes
 --
@@ -478,28 +478,23 @@ DROP INDEX IF EXISTS public.dbnfsp_variant_hg19_idx;
 CREATE INDEX dbnfsp_variant_hg19_idx
   ON public.dbnfsp_variant
   USING btree
-  (chr_hg19 COLLATE pg_catalog."default", pos_hg19, ref COLLATE pg_catalog."default", alt COLLATE pg_catalog."default");
+  (chr_hg19 COLLATE pg_catalog."default", bin_hg19, pos_hg19, ref COLLATE pg_catalog."default", alt COLLATE pg_catalog."default");
+
 
 DROP INDEX IF EXISTS public.dbnfsp_variant_hg18_idx;
 CREATE INDEX dbnfsp_variant_hg18_idx
   ON public.dbnfsp_variant
   USING btree
-  (chr_hg18 COLLATE pg_catalog."default", pos_hg18, ref COLLATE pg_catalog."default", alt COLLATE pg_catalog."default");
+  (chr_hg18 COLLATE pg_catalog."default", bin_hg18, pos_hg18, ref COLLATE pg_catalog."default", alt COLLATE pg_catalog."default");
 
 DROP INDEX IF EXISTS public.dbnfsp_variant_hg38_idx;
 CREATE INDEX dbnfsp_variant_hg38_idx
   ON public.dbnfsp_variant
   USING btree
-  (chr_hg38 COLLATE pg_catalog."default", pos_hg38, ref COLLATE pg_catalog."default", alt COLLATE pg_catalog."default");
+  (chr_hg38 COLLATE pg_catalog."default", bin_hg38, pos_hg38, ref COLLATE pg_catalog."default", alt COLLATE pg_catalog."default");
 
 
 
-
-DROP INDEX IF EXISTS public.dbnfsp_variant_hg19_site_idx;
-CREATE INDEX dbnfsp_variant_hg19_site_idx
-  ON public.dbnfsp_variant
-  USING btree
-  (chr_hg19 COLLATE pg_catalog."default", pos_hg19);
 
 
 

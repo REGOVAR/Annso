@@ -51,7 +51,7 @@ class Core:
                 }
                 self.export_modules[name].update({'id' : name})
             except:
-                print("Unable to load exports.{0} module".format(name))
+                err("Unable to load exports.{0} module".format(name))
         for name in IMPORTS_MODULES:
             try:
                 m = __import__('imports.{0}'.format(name))
@@ -61,7 +61,7 @@ class Core:
                 }
                 self.import_modules[name].update({'id' : name})
             except:
-                print("Unable to load imports.{0} module".format(name))
+                err("Unable to load imports.{0} module".format(name))
         for name in REPORTS_MODULES:
             try:
                 m = __import__('reports.{0}.report'.format(name))
@@ -71,7 +71,7 @@ class Core:
                 }
                 self.report_modules[name].update({'id' : name})
             except:
-                print("Unable to load reports.{0} module".format(name))
+                err("Unable to load reports.{0} module".format(name))
 
 
 
@@ -98,9 +98,10 @@ class Core:
 
         return Gene("GJB2", [])
     
-
-    def notify_all(self, json):
-        print ("Core Notify All : " + str(json))
+    @staticmethod
+    def notify_all(data):
+        msg = json.dumps(data)
+        log ("Core Notify All : {0}".format(msg))
 
  
 
@@ -158,6 +159,7 @@ class FileManager:
         # Importing to the database according to the type (if an import module can manage it)
         for m in annso.import_modules.values():
             if file.type in m['info']['input']:
+                log('Start import of the file (id={0}) with the module {1} ({2})'.format(file_id, m['info']['name'], m['info']['description']))
                 m['do'](file.id, file.path, annso)
                 break;
 
@@ -529,7 +531,7 @@ class FilterEngine:
         query = self.build_query(analysis_id, mode, filter_json, fields, limit, offset, count)
         with Timer() as t:
             sql_result = db_engine.execute(query)
-        print ("---\nFields :\n{0}\nFilter :\n{1}\nQuery :\n{2}\nRequest query : {3}".format(fields, filter_json, query, t))
+        log ("---\nFields :\n{0}\nFilter :\n{1}\nQuery :\n{2}\nRequest query : {3}".format(fields, filter_json, query, t))
         
         
 
@@ -542,7 +544,7 @@ class FilterEngine:
                 db_engine.execute("UPDATE analysis SET {0}update_date=CURRENT_TIMESTAMP WHERE id={1}".format("setting='{0}', ".format(json.dumps(setting)), analysis_id))
             except : 
                 # TODO : log error
-                print ("Not able to save current filter")        
+                err ("Not able to save current filter")        
 
 
 
@@ -560,7 +562,7 @@ class FilterEngine:
                             variant[f_id]= FilterEngine.parse_result(s[i])
                             i += 1
                         result.append(variant)
-            print ("Result processing : {0}\nTotal result : {1}".format(t, "-"))
+            log ("Result processing : {0}\nTotal result : {1}".format(t, "-"))
         return result
 
 
@@ -747,3 +749,4 @@ class FilterEngine:
 
 
 annso = Core()
+log('# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #')

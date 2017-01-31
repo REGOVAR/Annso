@@ -38,6 +38,17 @@ def connect(user, password, db, host, port):
 
 
 
+async def init_pg(app):
+    engine = await aiopg.sa.create_engine(
+        database=conf['database'],
+        user=conf['user'],
+        password=conf['password'],
+        host=conf['host'],
+        port=conf['port'],
+        minsize=conf['minsize'],
+        maxsize=conf['maxsize'],
+        loop=app.loop)
+    app['db'] = engine
 
 
 
