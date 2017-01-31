@@ -798,7 +798,7 @@ INSERT INTO public.annotation_database(id, name, name_ui, description, url, refe
   'https://sites.google.com/site/jpopgen/dbNSFP', 
   1, 
   CURRENT_TIMESTAMP, 
-  'dbnfsp_variant ON {0}.chr=dbnfsp_variant.chr_hg19 AND {0}.pos=dbnfsp_variant.pos_hg19 AND {0}.ref=dbnfsp_variant.ref AND {0}.alt=dbnfsp_variant.alt');
+  'dbnfsp_variant ON {0}.bin=dbnfsp_variant.bin_hg19 AND {0}.chr=dbnfsp_variant.chr_hg19 AND {0}.pos=dbnfsp_variant.pos_hg19 AND {0}.ref=dbnfsp_variant.ref AND {0}.alt=dbnfsp_variant.alt');
 
 
 
@@ -808,12 +808,12 @@ INSERT INTO public.annotation_database(id, name, name_ui, description, url, refe
 
 
 INSERT INTO public.annotation_field(database_id, name, name_ui, type, description) VALUES
-  (4, 'chr_hg38',          'chr',              'string',    'Chromosome as to hg38.'),
-  (4, 'pos_hg38',          'pos',              'int',       'Physical position on the chromosome as to hg38 (1-based coordinate). For mitochondrial SNV, this position refers to the rCRS (GenBank: NC_012920).'),
-  (4, 'chr_hg19',          'chr',              'string',    'Chromosome as to hg19.'),
-  (4, 'pos_hg19',          'pos',              'int',       'Physical position on the chromosome as to hg38 (1-based coordinate).For mitochondrial SNV, this position refers to a YRI sequence (GenBank: AF347015).'),
-  (4, 'chr_hg18',          'chr',              'string',    'Chromosome as to hg38.'),
-  (4, 'pos_hg18',          'pos',              'int',       'Physical position on the chromosome as to hg38 (1-based coordinate). For mitochondrial SNV, this position refers to a YRI sequence (GenBank: AF347015).'),
+  (4, 'chr_hg38',          'chr (hg38)',       'string',    'Chromosome as to hg38.'),
+  (4, 'pos_hg38',          'pos (hg38)',       'int',       'Physical position on the chromosome as to hg38 (1-based coordinate). For mitochondrial SNV, this position refers to the rCRS (GenBank: NC_012920).'),
+  (4, 'chr_hg19',          'chr (hg19)',       'string',    'Chromosome as to hg19.'),
+  (4, 'pos_hg19',          'pos (hg19)',       'int',       'Physical position on the chromosome as to hg38 (1-based coordinate).For mitochondrial SNV, this position refers to a YRI sequence (GenBank: AF347015).'),
+  (4, 'chr_hg18',          'chr (hg18)',       'string',    'Chromosome as to hg38.'),
+  (4, 'pos_hg18',          'pos (hg18)',       'int',       'Physical position on the chromosome as to hg38 (1-based coordinate). For mitochondrial SNV, this position refers to a YRI sequence (GenBank: AF347015).'),
   (4, 'ref',               'ref',              'string',    'Reference nucleotide allele (as on the + strand).'),
   (4, 'alt',               'alt',              'string',    'Alternative nucleotide allele (as on the + strand).'),
   (4, 'aaref',             'aaref',            'string',    'Reference amino acid. "." if the variant is a splicing site SNP (2bp on each end of an intron).'),
@@ -983,18 +983,18 @@ INSERT INTO public.annotation_field(database_id, name, name_ui, type, descriptio
 
 
 
-  (4, '1000Gp3_AC',     '1000Gp3_AC',     'int',   'Alternative allele counts in the whole 1000 genomes phase 3 (1000Gp3) data.'),
-  (4, '1000Gp3_AF',     '1000Gp3_AF',     'float', 'Alternative allele frequency in the whole 1000Gp3 data.'),
-  (4, '1000Gp3_AFR_AC', '1000Gp3_AFR_AC', 'int',   'Alternative allele counts in the 1000Gp3 African descendent samples.'),
-  (4, '1000Gp3_AFR_AF', '1000Gp3_AFR_AF', 'float', 'Alternative allele frequency in the 1000Gp3 African descendent samples.'),
-  (4, '1000Gp3_EUR_AC', '1000Gp3_EUR_AC', 'int',   'Alternative allele counts in the 1000Gp3 European descendent samples.'),
-  (4, '1000Gp3_EUR_AF', '1000Gp3_EUR_AF', 'float', 'Alternative allele frequency in the 1000Gp3 European descendent samples.'),
-  (4, '1000Gp3_AMR_AC', '1000Gp3_AMR_AC', 'int',   'Alternative allele counts in the 1000Gp3 American descendent samples.'),
-  (4, '1000Gp3_AMR_AF', '1000Gp3_AMR_AF', 'float', 'Alternative allele frequency in the 1000Gp3 American descendent samples.'),
-  (4, '1000Gp3_EAS_AC', '1000Gp3_EAS_AC', 'int',   'Alternative allele counts in the 1000Gp3 East Asian descendent samples.'),
-  (4, '1000Gp3_EAS_AF', '1000Gp3_EAS_AF', 'float', 'Alternative allele frequency in the 1000Gp3 East Asian descendent samples.'),
-  (4, '1000Gp3_SAS_AC', '1000Gp3_SAS_AC', 'int',   'Alternative allele counts in the 1000Gp3 South Asian descendent samples.'),
-  (4, '1000Gp3_SAS_AF', '1000Gp3_SAS_AF', 'float', 'Alternative allele frequency in the 1000Gp3 South Asian descendent samples.'),
+  (4, '_1000Gp3_AC',     '1000Gp3_AC',     'int',   'Alternative allele counts in the whole 1000 genomes phase 3 (1000Gp3) data.'),
+  (4, '_1000Gp3_AF',     '1000Gp3_AF',     'float', 'Alternative allele frequency in the whole 1000Gp3 data.'),
+  (4, '_1000Gp3_AFR_AC', '1000Gp3_AFR_AC', 'int',   'Alternative allele counts in the 1000Gp3 African descendent samples.'),
+  (4, '_1000Gp3_AFR_AF', '1000Gp3_AFR_AF', 'float', 'Alternative allele frequency in the 1000Gp3 African descendent samples.'),
+  (4, '_1000Gp3_EUR_AC', '1000Gp3_EUR_AC', 'int',   'Alternative allele counts in the 1000Gp3 European descendent samples.'),
+  (4, '_1000Gp3_EUR_AF', '1000Gp3_EUR_AF', 'float', 'Alternative allele frequency in the 1000Gp3 European descendent samples.'),
+  (4, '_1000Gp3_AMR_AC', '1000Gp3_AMR_AC', 'int',   'Alternative allele counts in the 1000Gp3 American descendent samples.'),
+  (4, '_1000Gp3_AMR_AF', '1000Gp3_AMR_AF', 'float', 'Alternative allele frequency in the 1000Gp3 American descendent samples.'),
+  (4, '_1000Gp3_EAS_AC', '1000Gp3_EAS_AC', 'int',   'Alternative allele counts in the 1000Gp3 East Asian descendent samples.'),
+  (4, '_1000Gp3_EAS_AF', '1000Gp3_EAS_AF', 'float', 'Alternative allele frequency in the 1000Gp3 East Asian descendent samples.'),
+  (4, '_1000Gp3_SAS_AC', '1000Gp3_SAS_AC', 'int',   'Alternative allele counts in the 1000Gp3 South Asian descendent samples.'),
+  (4, '_1000Gp3_SAS_AF', '1000Gp3_SAS_AF', 'float', 'Alternative allele frequency in the 1000Gp3 South Asian descendent samples.'),
 
 
 

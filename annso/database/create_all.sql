@@ -387,24 +387,16 @@ CREATE INDEX sample_variant_hg19_idx_id
   (variant_id);
 
 DROP INDEX IF EXISTS public.sample_variant_hg19_idx_variant;
-CREATE INDEX sample_variant__hg19idx_variant
+CREATE INDEX sample_variant_hg19_idx_variant
   ON public.sample_variant_hg19
   USING btree
-  (sample_id, chr COLLATE pg_catalog."default", pos, ref COLLATE pg_catalog."default", alt COLLATE pg_catalog."default");
+  (sample_id, bin, chr COLLATE pg_catalog."default", pos, ref COLLATE pg_catalog."default", alt COLLATE pg_catalog."default");
 
 DROP INDEX IF EXISTS public.sample_variant_hg19_idx_site;
 CREATE INDEX sample_variant_hg19_idx_site
   ON public.sample_variant_hg19
   USING btree
-  (sample_id, chr COLLATE pg_catalog."default", pos);
-
-DROP INDEX IF EXISTS public.sample_variant_hg19_idx_bin;
-CREATE INDEX sample_variant_hg19_idx_bin
-  ON public.sample_variant_hg19
-  USING btree
-  (sample_id, chr COLLATE pg_catalog."default", bin, pos);
-
-
+  (sample_id, bin, chr COLLATE pg_catalog."default", pos);
 
 
 DROP INDEX IF EXISTS public.attribute_idx;
@@ -426,21 +418,13 @@ DROP INDEX IF EXISTS public.variant_hg19_idx_variant;
 CREATE INDEX variant_hg19_idx_variant
   ON public.variant_hg19
   USING btree
-  (chr COLLATE pg_catalog."default", pos, ref COLLATE pg_catalog."default", alt COLLATE pg_catalog."default");
+  (bin, chr COLLATE pg_catalog."default", pos, ref COLLATE pg_catalog."default", alt COLLATE pg_catalog."default");
 
 DROP INDEX IF EXISTS public.variant_hg19_idx_site;
 CREATE INDEX variant_hg19_idx_site
   ON public.variant_hg19
   USING btree
-  (chr COLLATE pg_catalog."default", pos);
-
-DROP INDEX IF EXISTS public.variant_hg19_idx_bin;
-CREATE INDEX variant_hg19_idx_bin
-  ON public.variant_hg19
-  USING btree
-  (chr COLLATE pg_catalog."default", bin, pos);
-
-
+  (bin, chr COLLATE pg_catalog."default", pos);
 
 
 DROP INDEX IF EXISTS public.analysis_idx;
@@ -502,7 +486,7 @@ INSERT INTO public.annotation_field(database_id, name, name_ui, type, descriptio
   (1, 'ref',       'ref',    'string', 'Reference sequence.'),
   (1, 'alt',       'alt',    'string', 'Alternative sequence of the variant.'),
   (1, 'genotype',  'GT',     'string', 'Genotype. Values can be : 0=ref/ref, 1=alt/alt, 2=ref/alt, 3=alt1/alt2'),
-  (1, 'depth',    'DP',     'float',  'Deepth.');
+  (1, 'depth',     'DP',     'float',  'Depth.');
 
 
 
