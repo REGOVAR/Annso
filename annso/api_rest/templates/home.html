@@ -570,6 +570,8 @@
                                 <p id="modal_new_file_progress" style="margin-top:20px; height:50px;"></p>
                                 <h4>File import</h4>
                                 <p id="modal_new_file_import" style="margin-top:20px; height:50px;"></p>
+                                <h4>Finishing</h4>
+                                <p>Please wait until we finish to import your file. The popup will automaticaly close when it will be done.</p>
                             </div>
                             <div class="modal-footer">
                                 <button id="modal_new_file_cancel_btn" type="button" class="btn btn-default" data-dismiss="modal">Cancel</button> &nbsp; 
@@ -839,10 +841,10 @@
         var annotation_fields = {{ annotations_fields }};
 
         var annotation_fields_formaters = { 
-            2 : annotation_format_sampleid,
+            1 : annotation_format_sampleid,
+            5 : annotation_format_sequence,
             6 : annotation_format_sequence,
-            7 : annotation_format_sequence,
-            8 : annotation_format_gt
+            7 : annotation_format_gt
         }
 
 

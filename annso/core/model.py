@@ -129,7 +129,7 @@ def analysis_to_json(self, fields=None):
 
 
 Analysis               = Base.classes.analysis
-Analysis.public_fields = ["id", "name", "template_id", "creation_date", "update_date"]
+Analysis.public_fields = ["id", "name", "template_id", "creation_date", "update_date", "settings"]
 Analysis.from_id       = analysis_from_id
 Analysis.to_json       = analysis_to_json 
 

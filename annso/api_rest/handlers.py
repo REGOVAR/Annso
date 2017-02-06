@@ -346,10 +346,13 @@ class AnalysisHandler:
         report_id = request.match_info.get('report_id', -1)
 
         try :
-            result = annso.analysis.report(analysis_id, report_id, data)
+            cache_path = annso.analysis.report(analysis_id, report_id, data)
         except Exception as err :
             return rest_error("AnalysisHandler.get_report error : " + str(err))
-        return result
+
+        # create url to access to the report
+        url = '{0}/cache{1}'.format(HOST_P, cache_path[len(CACHE_DIR):])
+        return rest_success({'url' : url})
 
 
 

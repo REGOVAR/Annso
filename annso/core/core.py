@@ -70,7 +70,8 @@ class Core:
                     "do"   : eval ('m.{0}.report.report_data'.format(name)),
                 }
                 self.report_modules[name].update({'id' : name})
-            except:
+            except Exception as error:
+                ipdb.set_trace()
                 err("Unable to load reports.{0} module".format(name))
 
 
@@ -83,20 +84,7 @@ class Core:
         """
         pass
 
-    def get_report(self, variants_ids, report_template=None, report_lang=None, report_option=None):
-        # Retrieve gene from variant ids list
-        return Gene("GJB2", [])
-        result = []
-        sql =  "SELECT v.chr, v.pos, v.ref, v.alt, array_agg(rg.name) "
-        sql += "FROM variant_hg19 v "
-        sql += "INNER JOIN refgene_hg19 rg ON v.chr = rg.chrom AND rg.txrange @> int8(v.pos) "
-        sql += "WHERE v.id IN (" + ','.join(variants_ids) + ") GROUP BY v.id"
-        for r in db_engine.execute():
-            result.append((r[1], r[0], r[3], r[4], r[5], r[6]))
 
-
-
-        return Gene("GJB2", [])
     
     @staticmethod
     def notify_all(data):
@@ -184,14 +172,17 @@ class AnnotationDatabaseManager:
     def __init__(self, reference=1):
         self.fields_map = {}
         self.db_map = {}
-        query = "SELECT d.id, d.name_ui, d.description, a.id, a.name_ui, a.type, a.description FROM annotation_field a \
+        query = "SELECT d.id AS did, d.name_ui AS dname, d.description AS ddesc, a.id, a.name_ui, a.type, a.description, a.meta FROM annotation_field a \
                  LEFT JOIN annotation_database d ON a.database_id=d.id \
                  WHERE d.reference_id={0}".format(reference)
         for row in db_session.execute(query):
-            if row[0] not in self.db_map:
-                self.db_map[row[0]] = {"name" : row[1], "description": row[2], "fields" : []}
-            self.db_map[row[0]]["fields"].append({"id" : row[3], "name" : row[4], "type" : row[5], "description": row[6]})
-            self.fields_map[row[3]] = {"name" : row[4], "type" : row[5], "db_id" : row[0], "db_name" : row[1], "description": row[6]}
+            if row.did not in self.db_map:
+                self.db_map[row.did] = {"name" : row.dname, "description": row.ddesc, "fields" : []}
+            meta = None
+            if row.meta is not None:
+                meta = json.loads(row.meta)
+            self.db_map[row.did]["fields"].append({"id" : row.id, "name" : row.name_ui, "type" : row.type, "description": row.description, "meta": meta})
+            self.fields_map[row.id] = {"name" : row.name_ui, "type" : row.type, "db_id" : row.did, "db_name" : row.dname, "description": row.ddesc, "meta": meta}
 
     # build the sql query according to the annso filtering parameter and return result as json data
     def get_databases(self):
@@ -240,7 +231,7 @@ class AnalysisManager:
         instance = None
         db_session.begin(nested=True)
         try:
-            instance = Analysis(name=name, creation_date=datetime.datetime.now(), update_date=datetime.datetime.now(), setting='{"fields" : [2,3,4,5,6,8,9], "filter":["AND", []]}')
+            instance = Analysis(name=name, creation_date=datetime.datetime.now(), update_date=datetime.datetime.now(), settings='{"fields" : [1,3,4,5,6,7,8], "filter":["AND", []]}')
             db_session.add(instance)
             db_session.commit() # commit the save point into the session (opened by the .begin() before the try:)
             db_session.commit() # commit into the database.
@@ -255,7 +246,7 @@ class AnalysisManager:
         """
             Load all data about the analysis with the provided id and return result as JSON object.
         """
-        analysis = db_session.execute("SELECT a.id, a.name, a.update_date, a.creation_date, a.setting, t.name AS t_name, t.id AS t_id FROM analysis a LEFT JOIN template t ON a.template_id = t.id WHERE a.id = {0}".format(analysis_id)).first()
+        analysis = db_session.execute("SELECT a.id, a.name, a.update_date, a.creation_date, a.settings, t.name AS t_name, t.id AS t_id FROM analysis a LEFT JOIN template t ON a.template_id = t.id WHERE a.id = {0}".format(analysis_id)).first()
         result = {
             "id" : analysis.id, 
             "name" : analysis.name, 
@@ -266,10 +257,10 @@ class AnalysisManager:
             "samples" : [],
             "attributes" : [],
             "filters" : {}}
-        if analysis.setting is not None and analysis.setting.strip() is not "":
-            result["setting"] = json.loads(analysis.setting)
+        if analysis.settings is not None and analysis.settings.strip() is not "":
+            result["settings"] = json.loads(analysis.settings)
         else:
-            result["setting"] = '{"fields" : [2,3,4,5,6,8,9], "filter":["AND", []]}'
+            result["settings"] = '{"fields" : [1,3,4,5,6,7,8], "filter":["AND", []]}'
 
         # Get predefined filters set for this analysis
         query = "SELECT * FROM filter WHERE analysis_id = {0} ORDER BY name ASC;"
@@ -328,20 +319,20 @@ class AnalysisManager:
         # BASICS SETTINGS (current filter and displayed fields)
         if "fields" in data.keys() or "filter" in data.keys() or "selection" in data.keys():
             #retrieved current settings from database
-            setting = {}
+            settings = {}
             try : 
-                setting = json.loads(db_engine.execute("SELECT setting FROM analysis WHERE id={}".format(analysis_id)).first().setting)
+                settings = json.loads(db_engine.execute("SELECT settings FROM analysis WHERE id={}".format(analysis_id)).first().settings)
             except : 
                 # TODO : log error
-                setting = {}
+                settings = {}
             if "fields" in data.keys():
-                setting["fields"] = data["fields"]
+                settings["fields"] = data["fields"]
             if "filter" in data.keys():
-                setting["filter"] = data["filter"]
+                settings["filter"] = data["filter"]
             if "selection" in data.keys():
-                setting["selection"] = data["selection"]
+                settings["selection"] = data["selection"]
             # update database
-            main_query = "setting='{0}', ".format(json.dumps(setting))
+            main_query = "settings='{0}', ".format(json.dumps(settings))
 
         # saved filters
         if "filters" in data.keys():
@@ -419,8 +410,50 @@ class AnalysisManager:
 
 
     def report(self, analysis_id, report_id, report_data):
-        return "<h1>Your report!</h1>"
+        # Working cache folder for the report generator
+        cache = os.path.join(CACHE_DIR, 'reports/', report_id)
+        if not os.path.isdir(cache):
+            os.makedirs(cache)
 
+        # Output path where the report shall be stored
+        output_path = os.path.join(CACHE_DIR, 'reports/{}-{}-{:%Y%m%d.%H%M%S}.{}'.format(analysis_id, report_id, datetime.datetime.now(), report_data['output']))
+
+        try:
+            module = annso.report_modules[report_id]
+            result = module['do'](analysis_id, report_data, cache, output_path, annso)
+        except Exception as  error:
+            # TODO : log error
+            err ("Error occured : {0}".format(error))
+
+        # Store report in database
+        # Todo
+
+        return output_path
+
+
+
+    # def get_report(self, variants_ids, report_template=None, report_lang=None, report_option=None):
+    #     # Importing to the database according to the type (if an import module can manage it)
+    #     for m in annso.report_modules.values():
+    #         if file.type in m['info']['input']:
+    #             log('Start import of the file (id={0}) with the module {1} ({2})'.format(file_id, m['info']['name'], m['info']['description']))
+    #             m['do'](file.id, file.path, annso)
+    #             break;
+
+
+    #     # Retrieve gene from variant ids list
+    #     return Gene("GJB2", [])
+    #     result = []
+    #     sql =  "SELECT v.chr, v.pos, v.ref, v.alt, array_agg(rg.name) "
+    #     sql += "FROM variant_hg19 v "
+    #     sql += "INNER JOIN refgene_hg19 rg ON v.chr = rg.chrom AND rg.txrange @> int8(v.pos) "
+    #     sql += "WHERE v.id IN (" + ','.join(variants_ids) + ") GROUP BY v.id"
+    #     for r in db_engine.execute():
+    #         result.append((r[1], r[0], r[3], r[4], r[5], r[6]))
+
+
+
+    #     return Gene("GJB2", [])
 
 
     def export(self, analysis_id, export_id, report_data):
@@ -535,13 +568,13 @@ class FilterEngine:
         
         
 
-        # Save filter in analysis setting
+        # Save filter in analysis settings
         if not count and (analysis_id > 0):
-            setting = {}
+            settings = {}
             try : 
-                setting = json.loads(db_engine.execute("SELECT setting FROM analysis WHERE id={}".format(analysis_id)).first().setting)
-                setting["filter"] = filter_json
-                db_engine.execute("UPDATE analysis SET {0}update_date=CURRENT_TIMESTAMP WHERE id={1}".format("setting='{0}', ".format(json.dumps(setting)), analysis_id))
+                settings = json.loads(db_engine.execute("SELECT settings FROM analysis WHERE id={}".format(analysis_id)).first().settings)
+                settings["filter"] = filter_json
+                db_engine.execute("UPDATE analysis SET {0}update_date=CURRENT_TIMESTAMP WHERE id={1}".format("settings='{0}', ".format(json.dumps(settings)), analysis_id))
             except : 
                 # TODO : log error
                 err ("Not able to save current filter")        

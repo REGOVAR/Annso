@@ -11,7 +11,9 @@ metadata = {
 }
 
 
-def report_data(variants):
+def report_data(analysis_id, data, cache_path, output_path, annso_core=None):
+
+    import ipdb
     import collections
     import csv
     import glob
@@ -28,6 +30,9 @@ def report_data(variants):
     import wand.color
     import wand.image
 
+    # report generation based on jinja2 template
+    import jinja2
+
     # Need some customisation to be able to request the website
     import http.client
     http.client._MAXHEADERS = 1000
@@ -36,42 +41,34 @@ def report_data(variants):
     # Need virtual display to take website snapshot with cutycapt
     import pyvirtualdisplay
     from pyvirtualdisplay.smartdisplay import SmartDisplay
+    from core.framework import log, war, err, chr_from_db
+    from core.model import db_engine
 
-
+    def notify(msg, data):
+        if annso_core is not None:
+            annso_core.notify_all({'msg':msg, 'data' : data})
 
     __version__ = '0.1.0'
 
-
-    class logger():
-        def warning(msg):
-            print(msg)
-
-
-    cache = '/tmp/annso_v1/cache'
-
+    notify('report_dims', {'analysis_id' : analysis_id, 'progress_label' : 'Initialising report data', 'progress_percent' : 0})
 
     genemap_api = 'http://api.omim.org/api/search/geneMap'
-    omim_api = 'http://api.omim.org/api/entry'
-    entrez_api = 'http://eutils.ncbi.nlm.nih.gov/entrez/eutils/{}.fcgi'
+    omim_api    = 'http://api.omim.org/api/entry'
+    entrez_api  = 'http://eutils.ncbi.nlm.nih.gov/entrez/eutils/{}.fcgi'
 
     omim_api_key_filename = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'omim_api_key')
+    strasbourg_filename   = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'db/strasbourg_di_panels.csv')
+    sfari_filename        = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'db/sfari_20160914.csv')
+    rvis_filename         = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'db/rvis_v3_20160312.csv')
+    morbid_map_filename   = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'db/Morbid-COe-Eichler_20160914.csv')
 
-
-    strasbourg_filename = '/tmp/annso_v1/strasbourg_di_panels.csv'
-    sfari_filename = '/tmp/annso_v1/sfari_20160914.csv'
-    rvis_filename = '/tmp/annso_v1/rvis_v3_20160312.csv'
-    morbid_map_filename = '/tmp/annso_v1/Morbid-COe-Eichler_20160914.csv'
-
-
-
-
-
-
+    # Check that omim api key is defined
     if os.path.exists(omim_api_key_filename):
         with open(omim_api_key_filename, 'rt') as omim_api_key_file:
             omim_api_key = omim_api_key_file.read()
     else:
         omim_api_key = None
+
 
     annotation_ids = {
         'SnpEff': ['Annotation', 'Annotation_Impact', 'Feature_Type', 'Rank', 'HGVS.c', 'HGVS.p'],
@@ -80,15 +77,15 @@ def report_data(variants):
         'dbNSFP_ExAC': ['dbNSFP_ExAC_NFE_AF', 'dbNSFP_ExAC_SAS_AF', 'dbNSFP_ExAC_Adj_AF', 'dbNSFP_ExAC_AFR_AF', 'dbNSFP_ExAC_FIN_AF', 'dbNSFP_ExAC_AMR_AF', 'dbNSFP_ExAC_EAS_AF'],
     }
     blacklisted_feature_annotations = set(['upstream_gene_variant', 'downstream_gene_variant', 'intron_variant'])
-
     publication_themes = ['autism', 'epilepsy', 'intellectual', 'mental', 'schizophrenia', 'seizures']
 
+    # Get ASDP gene list for "dims"
     id_genes_list = 'https://raw.githubusercontent.com/REGOVAR/GenesPanel/master/intellectual_disability.lst'
     r = requests.get(id_genes_list)
     if r.status_code == requests.codes.ok:
         id_genes = set(r.text.splitlines())
     else:
-        logger.warning('Unable to access the list of ID genes')
+        war('Unable to access the list of ID genes')
         id_genes = set()
 
     strasbourg_panels = {}
@@ -122,13 +119,14 @@ def report_data(variants):
     #         morbid_map_score[row[3]] = values
 
 
+
     class ModeData:
         def __init__(self, vcf_filename, min_variant_count):
             self.vcf_filename = vcf_filename
             self.min_variant_count = min_variant_count
 
     def fill_omim_info(gene_data, gene_name):
-        info_filename = os.path.join(cache, 'omim_info_{}'.format(gene_name))
+        info_filename = os.path.join(cache_path, 'omim_info_{}'.format(gene_name))
         if os.path.exists(info_filename):
             with open(info_filename, 'rt') as info_file:
                 info = json.load(info_file)
@@ -176,12 +174,12 @@ def report_data(variants):
                         for textSection in gene_entry['textSectionList']:
                             gene_data.text.append(textSection['textSection']['textSectionContent'])
                     else:
-                        logger.warning('Unable to get the OMIM entry for gene {}'.format(gene_name))
+                        war('Unable to get the OMIM entry for gene {}'.format(gene_name))
                     break
             else:
-                logger.warning('Unable to find the OMIM gene map for gene {}'.format(gene_name))
+                war('Unable to find the OMIM gene map for gene {}'.format(gene_name))
         else:
-            logger.warning('Unable to find the OMIM gene map for gene {}'.format(gene_name))
+            war('Unable to find the OMIM gene map for gene {}'.format(gene_name))
         info = {
             'mim_number': gene_data.mim_number,
             'name': gene_data.name,
@@ -415,12 +413,12 @@ def report_data(variants):
         if 'ANN' in info:
             snpeff_annotation_id = 'ANN'
             if 'EFF' in info:
-                logger.warning('Found both ANN and EFF in header, using ANN')
+                war('Found both ANN and EFF in header, using ANN')
         elif 'EFF' in info:
             snpeff_annotation_id = 'EFF'
         else:
             snpeff_annotation_id = None
-            logger.warning('Neither EFF nor ANN found in header')
+            war('Neither EFF nor ANN found in header')
         return snpeff_annotation_id
 
     def get_snpeff_annotation_columns(snpeff_metadata):
@@ -438,17 +436,17 @@ def report_data(variants):
         try:
             vcf_context = pysam.VariantFile(vcf_filename)
         except ValueError:
-            logger.warning('Error while loading {}, probably bug #259 of pysam'.format(vcf_filename))
+            war('Error while loading {}, probably bug #259 of pysam'.format(vcf_filename))
             return []
         with vcf_context as vcf_file:
             snpeff_annotation_id = get_snpeff_annotation_id(vcf_file.header.info)
             if snpeff_annotation_id is None:
-                logger.warning('SnpEff annotation ID (ANN or EFF) not found in header for {}'.format(vcf_filename))
+                war('SnpEff annotation ID (ANN or EFF) not found in header for {}'.format(vcf_filename))
                 return []
             snpeff_metadata = vcf_file.header.info[snpeff_annotation_id]
             snpeff_annotation_columns = get_snpeff_annotation_columns(snpeff_metadata)
             if 'Gene_Name' not in snpeff_annotation_columns:
-                logger.warning('Gene_Name not found in SnpEff annotation description in header for {}'.format(vcf_filename))
+                war('Gene_Name not found in SnpEff annotation description in header for {}'.format(vcf_filename))
                 return []
             gene_name_column_number = snpeff_annotation_columns['Gene_Name']
             feature_id_column_number = snpeff_annotation_columns['Feature_ID']
@@ -513,8 +511,8 @@ def report_data(variants):
 
     def get_hbt_image(gene_name):
         image_url  = 'http://hbatlas.org/hbtd/images/wholeBrain/{}.pdf'.format(gene_name)
-        image_filename = os.path.join(cache, 'hbt_image_{}.png'.format(gene_name))
-        missing_filename = os.path.join(cache, 'hbt_image_{}.missing'.format(gene_name))
+        image_filename = os.path.join(cache_path, 'hbt_image_{}.png'.format(gene_name))
+        missing_filename = os.path.join(cache_path, 'hbt_image_{}.missing'.format(gene_name))
         if os.path.exists(image_filename) :
             return image_filename
         elif os.path.exists(missing_filename):
@@ -532,17 +530,17 @@ def report_data(variants):
                             bg.save(filename=image_filename)
                 return image_filename
             else:
-                logger.warning('Unable to retrieve PDF from HBT for {}'.format(gene_name))
+                war('Unable to retrieve PDF from HBT for {}'.format(gene_name))
         except:
-            logger.warning('Unable to convert HBT PDF to PNG for the gene {}'.format(gene_name))
+            war('Unable to convert HBT PDF to PNG for the gene {}'.format(gene_name))
         with open(missing_filename, 'wb') as image:
             pass
         return None
 
     def get_sp_image(gene_name):
         image_url  = 'http://string-db.org/api/image/network?identifier={}_HUMAN'.format(gene_name)
-        image_filename = os.path.join(cache, 'sp_image_{}.png'.format(gene_name))
-        missing_filename = os.path.join(cache, 'sp_image_{}.missing'.format(gene_name))
+        image_filename = os.path.join(cache_path, 'sp_image_{}.png'.format(gene_name))
+        missing_filename = os.path.join(cache_path, 'sp_image_{}.missing'.format(gene_name))
         if os.path.exists(image_filename):
             return image_filename
         elif os.path.exists(missing_filename):
@@ -555,15 +553,15 @@ def report_data(variants):
                     shutil.copyfileobj(r.raw, image_file)
                 return image_filename
             else:
-                logger.warning('Unable to retrieve image from String Pathway for {}'.format(gene_name))
+                war('Unable to retrieve image from String Pathway for {}'.format(gene_name))
         except:
-            logger.warning('Unable to retrieve image from String Pathway for {}'.format(gene_name))
+            war('Unable to retrieve image from String Pathway for {}'.format(gene_name))
         with open(missing_filename, 'wb') as image:
             pass
         return None
 
     def get_decipher_image(gene_name):
-        dec_filename = os.path.join(cache, 'decipher_image_{}.png'.format(gene_name))
+        dec_filename = os.path.join(cache_path, 'decipher_image_{}.png'.format(gene_name))
         dec_url  = 'https://decipher.sanger.ac.uk/search?q=%s#consented-patients/results' % gene_name
 
         if os.path.isfile(dec_filename) :
@@ -583,12 +581,12 @@ def report_data(variants):
                     os.remove(dec_filename + '_source.png')
                     return dec_filename
         else:
-            logger.warning('Unable to retrieve image from Decipher for the gene {}'.format(gene_name))
+            war('Unable to retrieve image from Decipher for the gene {}'.format(gene_name))
 
         return None
 
     def get_ta_image(gene_name):
-        ta_filename = os.path.join(cache, 'ta_image_{}.html'.format(gene_name))
+        ta_filename = os.path.join(cache_path, 'ta_image_{}.html'.format(gene_name))
         ta_url  = 'http://www.proteinatlas.org/search/%s' % gene_name
 
         if os.path.isfile(ta_filename) :
@@ -608,9 +606,8 @@ def report_data(variants):
             soup = BeautifulSoup(r.text, 'html.parser')
 
             html = """<script language="javascript" src="http://www.proteinatlas.org/utils/jquery.min.js?version=15.0.0" type="text/javascript"></script>
-    <script language="javascript" src="http://www.proteinatlas.org/common.js?version=15.0.0" type="text/javascript"></script>
-    <script language="javascript" src="http://www.proteinatlas.org/utils/d3.min.js?version=15.0.0" type="text/javascript"></script>
-    """
+                      <script language="javascript" src="http://www.proteinatlas.org/common.js?version=15.0.0" type="text/javascript"></script>
+                      <script language="javascript" src="http://www.proteinatlas.org/utils/d3.min.js?version=15.0.0" type="text/javascript"></script>"""
             p = soup.find(text='RNA EXPRESSION OVERVIEW')
             while p.name != 'p':
                 p = p.parent
@@ -640,7 +637,7 @@ def report_data(variants):
             self.articles = []
 
     def fill_pubmed_articles(pubmed_data, gene_name, theme=''):
-        info_filename = os.path.join(cache, 'pubmed_info_{}_{}'.format(gene_name, theme))
+        info_filename = os.path.join(cache_path, 'pubmed_info_{}_{}'.format(gene_name, theme))
         if os.path.exists(info_filename):
             with open(info_filename, 'rt') as info_file:
                 info = json.load(info_file)
@@ -662,7 +659,7 @@ def report_data(variants):
             pubmed_ids = data['esearchresult']['idlist']
             pubmed_data.article_count = int(data['esearchresult']['count'])
         else:
-            logger.warning('Unable to get the PubMed publications for gene {} and theme {}'.format(gene_name, theme))
+            war('Unable to get the PubMed publications for gene {} and theme {}'.format(gene_name, theme))
             return
         r = requests.get(entrez_api.format('esummary'), params = {
             'id': ','.join(pubmed_ids),
@@ -674,7 +671,7 @@ def report_data(variants):
             for pubmed_id in pubmed_ids:
                 pubmed_data.articles.append(data['result'][pubmed_id])
         else:
-            logger.warning('Unable to get the PubMed publication details for gene {} and theme {}'.format(gene_name, theme))
+            war('Unable to get the PubMed publication details for gene {} and theme {}'.format(gene_name, theme))
             return
 
         info = {
@@ -689,12 +686,33 @@ def report_data(variants):
 
 
 
+    # For each variant, find gene
+    samples  = data['samples']
+    sql =  "SELECT DISTINCT v.chr, v.pos, v.ref, v.alt, rg.name2 FROM variant_hg19 v "
+    sql += "INNER JOIN refgene_hg19 rg ON v.chr = rg.chr AND rg.txrange @> int8(v.pos) "
+    sql += "WHERE v.id IN (" + ','.join(data['variants']) + ") ORDER BY rg.name2"
+
+    genes     = []
+    variants  = []
+    gene_name = ""
+    for r in db_engine.execute(sql):
+        if gene_name != r.name2:
+            if gene_name != "":
+                genes.append(Gene(gene_name, variants))
+            gene_name = r.name2
+            variants  = []
+        variants.append( Variant(chr_from_db(r.chr), r.pos, r.ref, r.alt, [], [], gene_name))
+    genes.append(Gene(gene_name, variants))
 
 
+    # Generate report
+    def render_jinja_html(template_loc, file_name,**context):
+        return jinja2.Environment(loader=jinja2.FileSystemLoader(template_loc+'/')).get_template(file_name).render(context)
 
 
-
-
+    html = render_jinja_html(os.path.dirname(os.path.abspath(__file__)), 'report.html', genes=genes)
+    with open(output_path, "w") as f:
+        f.write(html)
 
 
 
@@ -730,3 +748,5 @@ def report_data(variants):
     #         pool.close()
     #         pool.join()
     #         logger.info('{} reports generated.'.format(len(data)))
+
+

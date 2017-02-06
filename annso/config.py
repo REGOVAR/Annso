@@ -32,9 +32,9 @@ DATABASE_NAME   = "annso"
 
 
 # FILESYSTEM
-FILES_DIR       = "/tmp/annso_" + VERSION + "/files"
-TEMP_DIR        = "/tmp/annso_" + VERSION + "/downloads"
-CACHE_DIR       = "/tmp/annso_" + VERSION + "/cache"
+FILES_DIR       = "/var/regovar/annso/files"
+TEMP_DIR        = "/var/regovar/annso/downloads"
+CACHE_DIR       = "/var/regovar/annso/cache"
 
 
 
@@ -48,7 +48,7 @@ REPORTS_MODULES = ["dims"]
 # AUTOCOMPUTED VALUES
 ANNSO_DIR           = os.path.dirname(os.path.abspath(__file__))
 TEMPLATE_DIR        = os.path.join(ANNSO_DIR, "api_rest/templates/")
-ERROR_ROOT_URL      = "api.pirus.org/errorcode/"
+ERROR_ROOT_URL      = "api.annso.org/errorcode/"
 
 
 # INTERNAL CONSTANT

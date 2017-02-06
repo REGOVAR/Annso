@@ -273,10 +273,11 @@ function AnnsoControler () {
         $.ajax({ 
             url: "{0}/analysis/{1}/report/{2}".format(rootURL, analysis.analysis.id, 'dims'),
             type: "POST", 
-            data: JSON.stringify({}),
+            data: JSON.stringify({'variants' : analysis.analysis.selection, 'samples' : analysis.analysis.samples, 'output' : 'html'}),
             async: false}).fail(function() { display_error("TODO : network error"); })
         .done(function(report)
         {
+            // Retrieve data
             $('#selection_list').html(report);
         });
     };

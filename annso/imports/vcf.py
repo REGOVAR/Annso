@@ -37,12 +37,25 @@ def import_data(file_id, filepath, annso_core=None, db_ref_suffix="_hg19"):
 
     def normalize_chr(chrm):
         chrm = chrm.upper()
-        if (chrm.startswith("CHROM")):
+        if chrm.startswith("CHROM"):
             chrm = chrm[5:]
-        if (chrm.startswith("CHRM")):
+        if chrm.startswith("CHRM"):
             chrm = chrm[4:]
-        if (chrm.startswith("CHR")):
+        if chrm.startswith("CHR"):
             chrm = chrm[3:]
+
+        if chrm == "X":
+            chrm = 23
+        elif chrm == "Y":
+            chrm = 24
+        elif chrm == "M":
+            chrm = 25
+        else:
+            try:
+                chrm = int(chrm)
+            except Exception as error:
+                # TODO log /report error
+                chrm = None
         return chrm
 
 

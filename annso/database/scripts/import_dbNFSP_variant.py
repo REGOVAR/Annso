@@ -125,7 +125,7 @@ Base.metadata.create_all(db_engine)
 
 
 
-chrs = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20', '21', '22', 'Y']
+chrs = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20', '21', '22', '23', '24', '25']
 step = 100
 for chr in chrs:
     print ("counting row to process ...")
@@ -159,6 +159,6 @@ for chr in chrs:
 
         records_done += result.rowcount
         percent = round(records_done / max(1,records_count), 2) * 100
-        print("   {0} / {1} - {2}% Done".format(records_done, records_count, percent))
+        print("   {0} / {1} - {2}% Done on chr {3}".format(records_done, records_count, percent, chr))
     print (datetime.datetime.now().ctime())
     print("finished")

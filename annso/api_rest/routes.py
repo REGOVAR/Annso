@@ -82,4 +82,5 @@ app.router.add_route('DELETE', "/v1/sample/upload/{file_id}", sampleHandler.tus_
 
 # DEV/DEBUG - Routes that should be manages directly by NginX
 app.router.add_static('/assets', TEMPLATE_DIR)
+
 app.router.add_static('/cache', CACHE_DIR)
