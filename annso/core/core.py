@@ -706,13 +706,14 @@ class FilterEngine:
                     return "{0}.{1}".format(self.fields_map[data[1]]["db_name"], self.fields_map[data[1]]["name"])
 
             if data[0] == 'value':
-                if ftype in ['int', 'float']:
+                if ftype in ['int', 'float', 'enum', 'percent']:
                     return str(data[1])
                 elif ftype == 'string':
                     return "'{0}'".format(data[1])
                 elif ftype == 'range' and len(data) == 3:
                     return 'int8range({0}, {1})'.format(data[1], data[2])
-            raise AnnsoException("FilterEngine.request : Impossible to compare arguments without same type : {0} ({1}) and {2} ({3})")
+
+            raise AnnsoException("FilterEngine.request.parse_value - Unknow type : {0} ({1})".format(ftype, data))
 
 
         q_where = ""

@@ -1,6 +1,6 @@
 #!env/python3
 # coding: utf-8
-
+import ipdb
 import os
 import datetime
 import logging
@@ -130,12 +130,10 @@ class AnnsoException(Exception):
     id   = None
     date = None
 
-    def __str__(self):
-        return "[ERROR:" + ("%05i" % code) + "] " + str(self.id) + " : " + self.msg
 
     def __init__(self,  msg:str, code:int=0, logger=None):
-        self.code = code
-        self.msg = msg
+        self.code = AnnsoException.code
+        self.msg = AnnsoException.msg
         self.id = str(uuid.uuid4())
         self.date = datetime.datetime.utcnow().timestamp()
 
@@ -143,6 +141,8 @@ class AnnsoException(Exception):
             logger.err(msg)
 
 
+    def __str__(self):
+        return "[ERROR:{:05}] {} : {}".format(self.code, self.id, self.msg)
 
 
 
