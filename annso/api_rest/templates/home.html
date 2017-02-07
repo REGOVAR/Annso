@@ -737,20 +737,14 @@
                             <!-- NEW FILTER - FIELDS  -->
                             <!--                      -->
                             <div id="modal_filter_add_condition_vfield" class="tab-pane fade" style="height:500px;">
-                                <input type="text" id="modal_filter_field_name" placeholder="Field to test"/>
+                                <input type="text" id="modal_filter_field_name" placeholder="Field to test" onchange="javascript:display_filter_form(this);"/>
 
-                                <select name="select" id="modal_filter_field_operator">
-                                    <option value="==">=</option> 
-                                    <option value="!=">&#8800;</option>
-                                    <option value="<">&lt;</option>
-                                    <option value="<=">&#8804;</option>
-                                    <option value=">=">&#8805;</option>
-                                    <option value=">">&gt;</option>
-                                </select>
-                                <input type="text" id="modal_filter_field_value" placeholder="Field value"/>
+                                <div id="modal_filter_field_form" style="display:inline-block;">
+                                </div>
+                                
 
                                 <div class="modal-footer">
-                                    <button type="button" class="btn btn-primary" onclick="javascript:add_filter_ui()">Add</button>
+                                    <button type="button" class="btn btn-primary" onclick="javascript:add_filter_ui();">Add</button>
                                     <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
                                 </div>
                             </div>

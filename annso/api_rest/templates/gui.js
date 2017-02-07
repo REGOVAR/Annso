@@ -856,7 +856,70 @@ var ui = new AnnsoUIControler;
 
 
 
+var filter_form_map_operator = {
+    'int' : ['=', ]
+}
 
+function display_filter_form(elmt)
+{
+    // retrieve fields info according to selected field's name
+    var field_name = $(elmt).val();
+    for (var key in annotation_fields)
+    {
+        if (field_name == '{0}.{1}'.format(annotation_fields[key]['db_name'], annotation_fields[key]['name'])) 
+        {
+            var field_id   = key;
+            var field_type = annotation_fields[key]['type'];
+            var field_meta = annotation_fields[key]['meta'];
+            var html = "";
+            var field_default = "";
+            if (field_meta != undefined && field_meta["default"] != undefined)
+            {
+                field_default = field_meta["default"];
+            }
+
+            switch(field_type)
+            {
+                case 'int':
+                    html = filter_form_operators_type_int.format(field_default);
+                break;
+                case 'float':
+                    html = filter_form_operators_type_float.format(field_default);
+                break;
+                case 'string':
+                    html = filter_form_operators_type_string.format(field_default);
+                break;
+                case 'percent':
+                    html = filter_form_operators_type_percent.format(field_default);
+                break;
+                case 'enum':
+                    enum_options = "";
+                    if (field_meta != undefined)
+                    {
+                        for (var key in field_meta["enum"])
+                        {
+                            enum_options += filter_form_operators_type_enum_option.format(key, field_meta["enum"][key]);
+                        }
+                    }
+                    html = filter_form_operators_type_enum.format(enum_options);
+                break;
+                case 'bool':
+                    if (field_default == true)
+                    {
+                        field_default = " checked";
+                    }
+                    else
+                    {
+                        field_default = "";
+                    }
+                    html = filter_form_operators_type_bool.format(field_default);
+                break;
+            }
+            $('#modal_filter_field_form').html(html);
+            break;
+        }
+    }
+}
 
 
 

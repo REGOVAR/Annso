@@ -74,3 +74,47 @@ var variants_table_row_start = "<tr id=\"variant_{0}\" style=\"cursor: pointer;\
 var variants_table_row_cell  = "<td>{0}</td>";
 var variants_table_row_end   = "</tr>";
 
+
+
+
+var filter_form_operators_type_int = "<select name=\"select\" id=\"modal_filter_field_operator\">\
+                                    <option value=\"==\">=</option> \
+                                    <option value=\"!=\">&#8800;</option>\
+                                    <option value=\"<\">&lt;</option>\
+                                    <option value=\"<=\">&#8804;</option>\
+                                    <option value=\">=\">&#8805;</option>\
+                                    <option value=\">\">&gt;</option></select>\
+                                <input type=\"text\" id=\"modal_filter_field_value\" placeholder=\"Field value\" value=\"{0}\"/>"
+
+var filter_form_operators_type_float = "<select name=\"select\" id=\"modal_filter_field_operator\">\
+                                    <option value=\"==\">=</option> \
+                                    <option value=\"!=\">&#8800;</option>\
+                                    <option value=\"<\">&lt;</option>\
+                                    <option value=\"<=\">&#8804;</option>\
+                                    <option value=\">=\">&#8805;</option>\
+                                    <option value=\">\">&gt;</option></select>\
+                                <input type=\"text\" id=\"modal_filter_field_value\" placeholder=\"Field value\" value=\"{0}\"/>"
+
+var filter_form_operators_type_string = "<select name=\"select\" id=\"modal_filter_field_operator\">\
+                                    <option value=\"==\">=</option> \
+                                    <option value=\"!=\">&#8800;</option></select>\
+                                <input type=\"text\" id=\"modal_filter_field_value\" placeholder=\"Field value\" value=\"{0}\"/>"
+
+var filter_form_operators_type_percent = "<select name=\"select\" id=\"modal_filter_field_operator\">\
+                                    <option value=\"==\">=</option> \
+                                    <option value=\"!=\">&#8800;</option>\
+                                    <option value=\"<\">&lt;</option>\
+                                    <option value=\"<=\">&#8804;</option>\
+                                    <option value=\">=\">&#8805;</option>\
+                                    <option value=\">\">&gt;</option></select>\
+                                <input type=\"text\" id=\"modal_filter_field_value\" placeholder=\"Field value\" value=\"{0}\"/>"
+
+var filter_form_operators_type_enum = "<select name=\"select\" id=\"modal_filter_field_operator\">\
+                                    <option value=\"==\">=</option> \
+                                    <option value=\"!=\">&#8800;</option></select>\
+                                    <select name=\"select\" id=\"modal_filter_field_value\">\
+                                    {0} </select>"
+var filter_form_operators_type_enum_option = "<option value=\"{0}\">{1}</option>"
+
+
+var filter_form_operators_type_bool = "is <input type=\"checkbox\" id=\"modal_filter_field_value\"{0}/>"
