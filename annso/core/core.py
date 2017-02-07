@@ -553,6 +553,9 @@ class FilterEngine:
 
 
     def request(self, analysis_id, mode, filter_json, fields=None, limit=100, offset=0, count=False):
+        # Check parameters
+        if fields is None: fields = [2]
+
         # Generate the temp hash name corresponding to the query
         hashname = FilterEngine.get_hasname(analysis_id, mode, fields, filter_json)
         query = ""
@@ -574,6 +577,7 @@ class FilterEngine:
             try : 
                 settings = json.loads(db_engine.execute("SELECT settings FROM analysis WHERE id={}".format(analysis_id)).first().settings)
                 settings["filter"] = filter_json
+                settings["fields"] = fields
                 db_engine.execute("UPDATE analysis SET {0}update_date=CURRENT_TIMESTAMP WHERE id={1}".format("settings='{0}', ".format(json.dumps(settings)), analysis_id))
             except : 
                 # TODO : log error
@@ -607,7 +611,7 @@ class FilterEngine:
 
 
 
-    def build_query(self, analysis_id, mode, filter_json, fields=None, limit=100, offset=0, count=False):
+    def build_query(self, analysis_id, mode, filter_json, fields, limit=100, offset=0, count=False):
         """
             Build the sql query according to the annso filtering parameter and return the query and the name of the associated temps table
         """
@@ -656,9 +660,9 @@ class FilterEngine:
                 tmp_table = get_tmp_table(data[1], data[2])
                 temporary_to_import[tmp_table]['where'] = FilterEngine.op_map[operator].format(tmp_table, self.fields_map[1]["db_name"])
                 if data[1] == 'site' :
-                    temporary_to_import[tmp_table]['from']  = " LEFT JOIN {1} ON {0}.chr={1}.chr AND {0}.pos={1}.pos".format(self.fields_map[1]["db_name"], tmp_table)
+                    temporary_to_import[tmp_table]['from']  = " LEFT JOIN {1} ON {0}.bin={1}.bin AND {0}.chr={1}.chr AND {0}.pos={1}.pos".format(self.fields_map[1]["db_name"], tmp_table)
                 else: #if data[1] == 'variant' :
-                    temporary_to_import[tmp_table]['from']  = " LEFT JOIN {1} ON {0}.chr={1}.chr AND {0}.pos={1}.pos AND {0}.ref={1}.ref AND {0}.alt={1}.alt".format(self.fields_map[1]["db_name"], tmp_table)
+                    temporary_to_import[tmp_table]['from']  = " LEFT JOIN {1} ON {0}.bin={1}.bin AND {0}.chr={1}.chr AND {0}.pos={1}.pos AND {0}.ref={1}.ref AND {0}.alt={1}.alt".format(self.fields_map[1]["db_name"], tmp_table)
                 return temporary_to_import[tmp_table]['where']
 
 
@@ -673,9 +677,9 @@ class FilterEngine:
             if data[0] == 'sample' :
                 tmp_table_name    = "tmp_sample_{0}_{1}".format(data[1], mode)
                 if mode == 'site':
-                    tmp_table_query = ttable_quer_map.format(tmp_table_name, "SELECT DISTINCT {0}.chr, {0}.pos FROM {0} WHERE {0}.sample_id={1}".format(self.variant_table, data[1]))
+                    tmp_table_query = ttable_quer_map.format(tmp_table_name, "SELECT DISTINCT {0}.bin, {0}.chr, {0}.pos FROM {0} WHERE {0}.sample_id={1}".format(self.variant_table, data[1]))
                 else : # if mode = 'variant' :
-                    tmp_table_query = ttable_quer_map.format(tmp_table_name, "SELECT DISTINCT {0}.chr, {0}.pos, {0}.ref, {0}.alt FROM {0} WHERE {0}.sample_id={1}".format(self.variant_table, data[1]))
+                    tmp_table_query = ttable_quer_map.format(tmp_table_name, "SELECT DISTINCT {0}.bin, {0}.chr, {0}.pos, {0}.ref, {0}.alt FROM {0} WHERE {0}.sample_id={1}".format(self.variant_table, data[1]))
 
             elif (data[0] == 'filter') :
                 tmp_table_name  = "tmp_filter_{0}".format(data[1])
@@ -685,9 +689,9 @@ class FilterEngine:
                 key, value = data[1].split(':')
                 tmp_table_name    = "tmp_attribute_{0}_{1}_{2}_{3}".format(analysis_id, key, value, mode)
                 if mode == 'site':
-                    tmp_table_query = ttable_quer_map.format(tmp_table_name, "SELECT DISTINCT {0}.chr, {0}.pos FROM {0} INNER JOIN {1} ON {0}.sample_id={1}.sample_id AND {1}.analysis_id={2} AND {1}.name='{3}' AND {1}.value='{4}'".format(self.variant_table, 'attribute', analysis_id, key, value))
+                    tmp_table_query = ttable_quer_map.format(tmp_table_name, "SELECT DISTINCT {0}.bin, {0}.chr, {0}.pos FROM {0} INNER JOIN {1} ON {0}.sample_id={1}.sample_id AND {1}.analysis_id={2} AND {1}.name='{3}' AND {1}.value='{4}'".format(self.variant_table, 'attribute', analysis_id, key, value))
                 else : # if mode = 'variant' :
-                    tmp_table_query = ttable_quer_map.format(tmp_table_name, "SELECT DISTINCT {0}.chr, {0}.pos, {0}.ref, {0}.alt FROM {0} INNER JOIN {1} ON {0}.sample_id={1}.sample_id AND {1}.analysis_id={2} AND {1}.name='{3}' AND {1}.value='{4}'".format(self.variant_table, 'attribute', analysis_id, key, value))
+                    tmp_table_query = ttable_quer_map.format(tmp_table_name, "SELECT DISTINCT {0}.bin, {0}.chr, {0}.pos, {0}.ref, {0}.alt FROM {0} INNER JOIN {1} ON {0}.sample_id={1}.sample_id AND {1}.analysis_id={2} AND {1}.name='{3}' AND {1}.value='{4}'".format(self.variant_table, 'attribute', analysis_id, key, value))
 
             temporary_to_import[tmp_table_name] = {'query' : tmp_table_query}
             return tmp_table_name

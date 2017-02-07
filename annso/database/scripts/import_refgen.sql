@@ -180,15 +180,13 @@ ALTER TABLE public.refgene_exon_hg19 DROP COLUMN i_exonend;
 DROP INDEX IF EXISTS public.refgene_hg19_chrom_txrange_idx;
 CREATE INDEX refgene_hg19_chrom_txrange_idx
   ON public.refgene_hg19
-  USING btree
-  (chr, txrange);
+  USING btree (bin, chr, txrange);
 
 
 DROP INDEX IF EXISTS public.refgene_hg19_txrange_idx;
 CREATE INDEX refgene_hg19_txrange_idx
   ON public.refgene_hg19
-  USING gist
-  (txrange);
+  USING gist (txrange);
 
 
 
@@ -196,15 +194,13 @@ CREATE INDEX refgene_hg19_txrange_idx
 DROP INDEX IF EXISTS public.refgene_exon_hg19_chrom_exonange_idx;
 CREATE INDEX refgene_exon_hg19_chrom_exonange_idx
   ON public.refgene_exon_hg19
-  USING btree
-  (chr, exonrange);
+  USING btree (bin, chr, exonrange);
 
 
 DROP INDEX IF EXISTS public.refgene_exon_hg19_exonange_idx;
 CREATE INDEX refgene_exon_hg19_exonange_idx
   ON public.refgene_exon_hg19
-  USING gist
-  (exonrange);
+  USING gist (exonrange);
 
 
 
@@ -221,7 +217,7 @@ INSERT INTO public.annotation_database(id, name, name_ui, description, url, refe
   'http://hgdownload.soe.ucsc.edu/goldenPath/hg19/database/refGene.txt.gz', 
   1, 
   CURRENT_TIMESTAMP, 
-  'refgene_hg19 ON {0}.chr=refgene_hg19.chr AND refgene_hg19.txrange @> int8({0}.pos)'),
+  'refgene_hg19 ON {0}.bin=refgene_hg19.bin AND {0}.chr=refgene_hg19.chr AND refgene_hg19.txrange @> int8({0}.pos)'),
 
   (3, 'refgene_exon_hg19', 
   'refGeneExon', 
@@ -229,7 +225,7 @@ INSERT INTO public.annotation_database(id, name, name_ui, description, url, refe
   'http://hgdownload.soe.ucsc.edu/goldenPath/hg19/database/refGene.txt.gz', 
   1, 
   CURRENT_TIMESTAMP, 
-  'refgene_exon_hg19 ON {0}.chr=refgene_exon_hg19.chr AND refgene_exon_hg19.exonrange @> int8({0}.pos)');
+  'refgene_exon_hg19 ON {0}.bin=refgene_hg19.bin AND {0}.chr=refgene_exon_hg19.chr AND refgene_exon_hg19.exonrange @> int8({0}.pos)');
 
 
 
