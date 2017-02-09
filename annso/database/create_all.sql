@@ -55,6 +55,20 @@ ALTER TABLE public.analysis OWNER TO annso;
 
 
 
+CREATE TABLE public.report
+(
+    analysis_id integer NOT NULL,
+    name character varying(50) COLLATE pg_catalog."C.UTF-8",
+    path character varying(250) COLLATE pg_catalog."C.UTF-8",
+    type character varying(50) COLLATE pg_catalog."C.UTF-8",
+    module_id character varying(50) COLLATE pg_catalog."C.UTF-8",
+    creation_date timestamp without time zone,
+    CONSTRAINT report_pkey PRIMARY KEY (id)
+);
+ALTER TABLE public.report OWNER TO annso;
+
+
+
 
 CREATE TABLE public.filter
 (
@@ -240,7 +254,9 @@ ALTER TABLE public.variant_hg19 OWNER TO annso;
 
 CREATE TABLE public.annotation_database
 (
+    uid character varying(32) COLLATE pg_catalog."C.UTF-8",
     id integer NOT NULL,
+    version character varying(255) COLLATE pg_catalog."C.UTF-8",
     name character varying(255) COLLATE pg_catalog."C.UTF-8" NOT NULL,
     name_ui character varying(255) COLLATE pg_catalog."C.UTF-8",
     description text,
@@ -248,7 +264,7 @@ CREATE TABLE public.annotation_database
     url character varying(255) COLLATE pg_catalog."C.UTF-8" ,
     update_date timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
     jointure character varying(255) COLLATE pg_catalog."C.UTF-8",
-    CONSTRAINT annotation_database_pkey PRIMARY KEY (id),
+    CONSTRAINT annotation_database_pkey PRIMARY KEY (id, version),
     CONSTRAINT annotation_database_reference_id_fkey FOREIGN KEY (reference_id)
         REFERENCES public."reference" (id) MATCH SIMPLE
         ON UPDATE NO ACTION ON DELETE NO ACTION
@@ -261,14 +277,16 @@ ALTER TABLE public.annotation_database OWNER TO annso;
 
 CREATE TABLE public.annotation_field
 (
+    uid character varying(32) COLLATE pg_catalog."C.UTF-8",
+    database_id integer NOT NULL,
+    database_version character varying(255) COLLATE pg_catalog."C.UTF-8",
     id integer NOT NULL,
-    database_id integer,
     name character varying(255) COLLATE pg_catalog."C.UTF-8" NOT NULL,
     name_ui character varying(255) COLLATE pg_catalog."C.UTF-8",
     description text,
     type field_type,
     meta character varying(1000) COLLATE pg_catalog."C.UTF-8",
-    CONSTRAINT annotation_field_pkey PRIMARY KEY (id),
+    CONSTRAINT annotation_field_pkey PRIMARY KEY (database_id, database_version, id),
     CONSTRAINT annotation_field_database_id_fkey FOREIGN KEY (database_id)
         REFERENCES public."annotation_database" (id) MATCH SIMPLE
         ON UPDATE NO ACTION ON DELETE NO ACTION
@@ -312,6 +330,12 @@ CREATE INDEX sample_variant_hg19_idx_id
   ON public.sample_variant_hg19
   USING btree
   (variant_id);
+
+DROP INDEX IF EXISTS public.sample_variant_hg19_idx_samplevar;
+CREATE INDEX sample_variant_hg19_idx_samplevar
+  ON public.sample_variant_hg19
+  USING btree
+  (sample_id);
 
 DROP INDEX IF EXISTS public.sample_variant_hg19_idx_site;
 CREATE INDEX sample_variant_hg19_idx_site
@@ -359,8 +383,16 @@ CREATE INDEX filter_idx
     
 
 
-
-
+DROP INDEX IF EXISTS public.annotation_database_idx;
+CREATE INDEX annotation_database_idx
+  ON public.filter
+  USING btree
+  (id, version);
+DROP INDEX IF EXISTS public.annotation_field_idx;
+CREATE INDEX annotation_field_idx
+  ON public.filter
+  USING btree
+  (database_id, database_version, id);
 
 
 --
@@ -385,8 +417,7 @@ INSERT INTO public."parameter" (key, description, value) VALUES
 
 
 
--- DB_id              : 1
--- Field ids reserved : 1-50
+
 
 INSERT INTO public.annotation_database(id, name, name_ui, description, url, reference_id, update_date, jointure) VALUES
   (1, 'sample_variant_hg19', 
@@ -409,5 +440,6 @@ INSERT INTO public.annotation_field(database_id, id, name, name_ui, type, descri
 
 
 
-
+UPDATE public.annotation_database SET uid=MD5(concat(id, version)) WHERE uid IS NULL;
+UPDATE public.annotation_field SET uid=MD5(concat(database_id, database_version, name)) WHERE uid IS NULL;
 

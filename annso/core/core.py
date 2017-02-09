@@ -172,17 +172,33 @@ class AnnotationDatabaseManager:
     def __init__(self, reference=1):
         self.fields_map = {}
         self.db_map = {}
-        query = "SELECT d.id AS did, d.name_ui AS dname, d.description AS ddesc, a.id, a.name_ui, a.type, a.description, a.meta FROM annotation_field a \
-                 LEFT JOIN annotation_database d ON a.database_id=d.id \
-                 WHERE d.reference_id={0}".format(reference)
+        query = "SELECT d.uid AS duid, d.id AS did, d.version AS dversion, d.name_ui AS dname, d.description AS ddesc, a.uid AS fuid, a.name_ui AS name, a.type AS type, a.description AS desc, a.meta AS meta \
+                 FROM annotation_field a \
+                 LEFT JOIN annotation_database d ON a.database_id=d.id AND a.database_version=d.version \
+                 WHERE d.reference_id={0} ORDER BY d.id, a.id, d.version".format(reference)
+
+        current_db_id = 0
+        current_field = None
         for row in db_session.execute(query):
             if row.did not in self.db_map:
-                self.db_map[row.did] = {"name" : row.dname, "description": row.ddesc, "fields" : []}
-            meta = None
-            if row.meta is not None:
-                meta = json.loads(row.meta)
-            self.db_map[row.did]["fields"].append({"id" : row.id, "name" : row.name_ui, "type" : row.type, "description": row.description, "meta": meta})
-            self.fields_map[row.id] = {"name" : row.name_ui, "type" : row.type, "db_id" : row.did, "db_name" : row.dname, "description": row.ddesc, "meta": meta}
+                self.db_map[row.did] = {"uid" : row.duid, "name" : row.dname, "description": row.ddesc, "fields" : [], "versions" : []}
+            meta = None if row.meta is None else json.loads(row.meta)
+            if current_field is None:
+                current_field = {"uid" : row.fuid, "name" : row.name, "type" : row.type, "versions" : { row.dversion : {"description": row.desc, "meta": meta}}}
+            elif current_field["name"] != row.name:
+                self.db_map[current_db_id]["fields"].append(current_field)
+                current_field.update({"db_id" : current_db_id})
+                self.fields_map[current_field["uid"]] = current_field
+                current_field = {"uid" : row.fuid, "name" : row.name, "type" : row.type, "versions" : { row.dversion : {"description": row.desc, "meta": meta}}}
+            elif current_field["name"] == row.name:
+                current_field['versions'].update({ row.dversion : {"description": row.desc, "meta": meta}})
+            current_db_id = row.did
+            if row.dversion not in self.db_map[current_db_id]["versions"] : self.db_map[current_db_id]["versions"].append( row.dversion)
+        # save the last one
+        self.db_map[current_db_id]["fields"].append(current_field)
+        current_field.update({"db_id" : current_db_id})
+        self.fields_map[current_field["uid"]] = current_field
+
 
     # build the sql query according to the annso filtering parameter and return result as json data
     def get_databases(self):
@@ -534,30 +550,28 @@ class FilterEngine:
         """
             Init Annso Filtering engine. (reference=1 mean "hg19", see database import script)
             Init mapping collection for annotations databases and fields
-            Drop all temporary table as are no more mapped 
         """
         refname = db_session.execute("SELECT table_suffix FROM reference WHERE id="+str(reference)).first()["table_suffix"]
         self.reference = reference
         self.fields_map = {}
         self.db_map = {}
         self.variant_table = "sample_variant_{0}".format(refname)
-        query = "SELECT d.id, d.name, d.jointure, a.id, a.name, a.type FROM annotation_field a LEFT JOIN annotation_database d ON a.database_id=d.id WHERE d.reference_id=" + str(reference)
+        query = "SELECT d.uid AS duid, d.name AS dname, d.jointure, a.uid AS fuid, a.name AS fname, a.type FROM annotation_field a LEFT JOIN annotation_database d ON a.database_id=d.id WHERE d.reference_id={0} ORDER BY d.id".format(reference)
         for row in db_session.execute(query):
-            if row[0] not in self.db_map:
-                self.db_map[row[0]] = {"name" : row[1], "join": row[2].format(self.variant_table), "fields" : {}}
-            self.db_map[row[0]]["fields"][row[3]] = {"name" : row[4], "type" : row[5]}
-            self.fields_map[row[3]] = {"name" : row[4], "type" : row[5], "db_id" : row[0], "db_name" : row[1], "join": row[2].format(self.variant_table)}
+            if row.duid not in self.db_map:
+                self.db_map[row.duid] = {"name" : row.dname, "join": row.jointure.format(self.variant_table), "fields" : {}}
+            self.db_map[row.duid]["fields"][row.fuid] = {"name" : row.fname, "type" : row.type}
+            self.fields_map[row.fuid] = {"name" : row.fname, "type" : row.type, "db_id" : row.duid, "db_name" : row.dname, "join": row.jointure.format(self.variant_table)}
 
 
 
 
 
     def request(self, analysis_id, mode, filter_json, fields=None, limit=100, offset=0, count=False):
-        # Check parameters
-        if fields is None: fields = [2]
+        # Check parameters : if no field, select by default the first field avalaible to avoir error
+        if fields is None: fields = [next(iter(self.fields_map.keys()))]
 
         # Generate the temp hash name corresponding to the query
-        hashname = FilterEngine.get_hasname(analysis_id, mode, fields, filter_json)
         query = ""
         sql_result = None
 
@@ -627,15 +641,15 @@ class FilterEngine:
                 sample_ids.append(str(row.sample_id))
 
         # Build SELECT
-        q_select = 'variant_id, ' + ', '.join(["{0}.{1}".format(self.fields_map[f_id]["db_name"], self.fields_map[f_id]["name"]) for f_id in fields])
+        q_select = 'variant_id, ' + ', '.join(["{0}.{1}".format(self.fields_map[fuid]["db_name"], self.fields_map[fuid]["name"]) for fuid in fields])
 
 
         # Build FROM/JOIN
-        tables_to_import = [1] # 1 is for the sample_variant_{ref} table. We always need this table as it's used for the join with other tables
-        for f_id in fields:
-            if self.fields_map[f_id]["db_id"] not in tables_to_import :
-                tables_to_import.append(self.fields_map[f_id]["db_id"])
-
+        # TODO : uid of the sample_variant_{ref} shall be retrieved from database according to the selected referencial.
+        tables_to_import = ['c4ca4238a0b923820dcc509a6f75849b'] # This id is the uid for the sample_variant_{ref} table. We always need this table as it's used for the join with other tables
+        for fuid in fields:
+            if self.fields_map[fuid]["db_id"] not in tables_to_import :
+                tables_to_import.append(self.fields_map[fuid]["db_id"])
         # Build WHERE 
         temporary_to_import = {}
 
@@ -658,11 +672,11 @@ class FilterEngine:
 
             elif operator in ['IN', 'NOTIN']:
                 tmp_table = get_tmp_table(data[1], data[2])
-                temporary_to_import[tmp_table]['where'] = FilterEngine.op_map[operator].format(tmp_table, self.fields_map[1]["db_name"])
+                temporary_to_import[tmp_table]['where'] = FilterEngine.op_map[operator].format(tmp_table, self.variant_table)
                 if data[1] == 'site' :
-                    temporary_to_import[tmp_table]['from']  = " LEFT JOIN {1} ON {0}.bin={1}.bin AND {0}.chr={1}.chr AND {0}.pos={1}.pos".format(self.fields_map[1]["db_name"], tmp_table)
+                    temporary_to_import[tmp_table]['from']  = " LEFT JOIN {1} ON {0}.bin={1}.bin AND {0}.chr={1}.chr AND {0}.pos={1}.pos".format(self.variant_table, tmp_table)
                 else: #if data[1] == 'variant' :
-                    temporary_to_import[tmp_table]['from']  = " LEFT JOIN {1} ON {0}.bin={1}.bin AND {0}.chr={1}.chr AND {0}.pos={1}.pos AND {0}.ref={1}.ref AND {0}.alt={1}.alt".format(self.fields_map[1]["db_name"], tmp_table)
+                    temporary_to_import[tmp_table]['from']  = " LEFT JOIN {1} ON {0}.bin={1}.bin AND {0}.chr={1}.chr AND {0}.pos={1}.pos AND {0}.ref={1}.ref AND {0}.alt={1}.alt".format(self.variant_table, tmp_table)
                 return temporary_to_import[tmp_table]['where']
 
 
@@ -726,7 +740,7 @@ class FilterEngine:
         if  len(q_where2.strip()) > 0:
             q_where += " AND " + q_where2
 
-        
+
         # Build FROM/JOIN according to the list of used annotations databases
         q_from  = " LEFT JOIN ".join([self.db_map[d_id]["join"] for d_id in tables_to_import])
         q_from += " " + " ".join([t['from'] for t in temporary_to_import.values()])

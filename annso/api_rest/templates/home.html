@@ -836,14 +836,19 @@
 
         var annotation_fields_formaters = { 
             1 : annotation_format_sampleid,
+            3 : annotation_format_chr,
             5 : annotation_format_sequence,
             6 : annotation_format_sequence,
-            7 : annotation_format_gt
+            7 : annotation_format_gt,
+
+            1001 : annotation_format_chr,
+            1003 : annotation_format_chr,
+            1005 : annotation_format_chr
         }
 
 
         var annotation_fields_autocomplete = [{% for db_id, db in annotations_db.items() %}{% for f in db["fields"] %}"{{db["name"]}}.{{f["name"]}}",{% endfor %}{% endfor %}];
-        var annotation_fields_autocomplete_info = [{% for db_id, db in annotations_db.items() %}{% for f in db["fields"] %}{"db_id" :  {{db_id}}, "id" : {{f["id"]}} },{% endfor %}{% endfor %}];
+        var annotation_fields_autocomplete_info = [{% for db_id, db in annotations_db.items() %}{% for f in db["fields"] %}{"db_id" :  "{{db_id}}", "id" : "{{f["uid"]}}" },{% endfor %}{% endfor %}];
 
 
 

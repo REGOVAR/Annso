@@ -207,11 +207,11 @@ CREATE INDEX refgene_exon_hg19_exonange_idx
 --
 -- Register refGen into annso database
 -- 
--- DB_id              : 2 & 3
--- Field ids reserved : 51-100
 
-INSERT INTO public.annotation_database(id, name, name_ui, description, url, reference_id, update_date, jointure) VALUES
-  (2, 'refgene_hg19', 
+INSERT INTO public.annotation_database(id, version, name, name_ui, description, url, reference_id, update_date, jointure) VALUES
+  (2, 
+  '2017-02-05 18:50', 
+  'refgene_hg19', 
   'refGene', 
   'Known human protein-coding and non-protein-coding genes taken from the NCBI RNA reference sequences collection (RefSeq).', 
   'http://hgdownload.soe.ucsc.edu/goldenPath/hg19/database/refGene.txt.gz', 
@@ -219,7 +219,9 @@ INSERT INTO public.annotation_database(id, name, name_ui, description, url, refe
   CURRENT_TIMESTAMP, 
   'refgene_hg19 ON {0}.bin=refgene_hg19.bin AND {0}.chr=refgene_hg19.chr AND refgene_hg19.txrange @> int8({0}.pos)'),
 
-  (3, 'refgene_exon_hg19', 
+  (3,
+  '2017-02-05 18:50',
+  'refgene_exon_hg19', 
   'refGeneExon', 
   'Known human protein-coding and non-protein-coding genes taken from the NCBI RNA reference sequences collection (RefSeq). This database contains all exome regions of the refSeq genes.', 
   'http://hgdownload.soe.ucsc.edu/goldenPath/hg19/database/refGene.txt.gz', 
@@ -229,35 +231,39 @@ INSERT INTO public.annotation_database(id, name, name_ui, description, url, refe
 
 
 
-INSERT INTO public.annotation_field(database_id, id, name, name_ui, type, description, meta) VALUES
-  (2, 51, 'name',         'name',         'string', 'Gene name.', NULL),
-  (2, 52, 'chr',          'chr',          'enum',   'Chromosome.', '{"enum": {"1": "1", "2": "2", "3": "3", "4": "4", "5": "5", "6": "6", "7": "7", "8": "8", "9": "9", "10": "10", "11": "11", "12": "12", "13": "13", "14": "14", "15": "15", "16": "16", "17": "17", "18": "18", "19": "19", "20": "20", "21": "21", "22": "22", "23": "X", "24": "Y", "25": "M"}}'),
-  (2, 53, 'strand',       'strand',       'string', 'Which DNA strand contains the observed alleles.', NULL),
-  (2, 54, 'txstart',      'txstart',      'int',    'Transcription start position.', NULL),
-  (2, 55, 'txend',        'txend',        'int',    'Transcription end position.', NULL),
-  (2, 56, 'txrange',      'txrange',      'range',  'Transcription region [start-end].', NULL),
-  (2, 57, 'cdsstart',     'cdsstart',     'int',    'Coding region start.', NULL),
-  (2, 58, 'cdsend',       'cdsend',       'int',    'Coding region end.', NULL),
-  (2, 59, 'cdsrange',     'cdsrange',     'range',  'Coding region [start-end].', NULL),
-  (2, 60, 'exoncount',    'exoncount',    'int',    'Number of exons in the gene.', NULL),
-  (2, 61, 'score',        'score',        'int',    'Score ?', NULL),
-  (2, 62, 'name2',        'name2',        'string', 'Alternative name.', NULL),
-  (2, 63, 'cdsstartstat', 'cdsstartstat', 'string', 'Cds start stat, can be "non", "unk", "incompl" or "cmp1".', NULL),
-  (2, 64, 'cdsendstat',   'cdsendstat',   'string', 'Cds end stat, can be "non", "unk", "incompl" or "cmp1".', NULL),
-  (3, 65, 'name',         'name',         'string', 'Gene name.', NULL),
-  (3, 66, 'chr',          'chr',          'enum',   'Chromosome.', '{"enum": {"1": "1", "2": "2", "3": "3", "4": "4", "5": "5", "6": "6", "7": "7", "8": "8", "9": "9", "10": "10", "11": "11", "12": "12", "13": "13", "14": "14", "15": "15", "16": "16", "17": "17", "18": "18", "19": "19", "20": "20", "21": "21", "22": "22", "23": "X", "24": "Y", "25": "M"}}'),
-  (3, 67, 'strand',       'strand',       'string', 'Which DNA strand contains the observed alleles.', NULL),
-  (3, 68, 'txstart',      'txstart',      'int',    'Transcription start position.', NULL),
-  (3, 69, 'txend',        'txend',        'int',    'Transcription end position.', NULL),
-  (3, 70, 'txrange',      'txrange',      'range',  'Transcription region [start-end].', NULL),
-  (3, 71, 'cdsstart',     'cdsstart',     'int',    'Coding region start.', NULL),
-  (3, 72, 'cdsend',       'cdsend',       'int',    'Coding region end.', NULL),
-  (3, 73, 'cdsrange',     'cdsrange',     'range',  'Coding region [start-end].', NULL),
-  (3, 74, 'exoncount',    'exoncount',    'int',    'Number of exons in the gene.', NULL),
-  (3, 75, 'exonstart',    'exonstart',    'int',    'Exon start position.', NULL),
-  (3, 76, 'exonend',      'exonend',      'int',    'Exon end position.', NULL),
-  (3, 77, 'exonrange',    'exonrange',    'range',  'Exon region [start-end].', NULL),
-  (3, 78, 'score',        'score',        'int',    'Score ?', NULL),
-  (3, 79, 'name2',        'name2',        'string', 'Alternative name.', NULL),
-  (3, 80, 'cdsstartstat', 'cdsstartstat', 'string', 'Cds start stat, can be "non", "unk", "incompl" or "cmp1".', NULL),
-  (3, 81, 'cdsendstat',   'cdsendstat',   'string', 'Cds end stat, can be "non", "unk", "incompl" or "cmp1".', NULL);
+INSERT INTO public.annotation_field(database_id, database_version, id, name, name_ui, type, description, meta) VALUES
+  (2, '2017-02-05 18:50', 1, 'name',          'name',         'string', 'Gene name.', NULL),
+  -- (2, '2017-02-05 18:50', 2, 'chr',          'chr',          'enum',   'Chromosome.', '{"enum": {"1": "1", "2": "2", "3": "3", "4": "4", "5": "5", "6": "6", "7": "7", "8": "8", "9": "9", "10": "10", "11": "11", "12": "12", "13": "13", "14": "14", "15": "15", "16": "16", "17": "17", "18": "18", "19": "19", "20": "20", "21": "21", "22": "22", "23": "X", "24": "Y", "25": "M"}}'),
+  (2, '2017-02-05 18:50', 3, 'strand',        'strand',       'string', 'Which DNA strand contains the observed alleles.', NULL),
+  (2, '2017-02-05 18:50', 4, 'txstart',       'txstart',      'int',    'Transcription start position.', NULL),
+  (2, '2017-02-05 18:50', 5, 'txend',         'txend',        'int',    'Transcription end position.', NULL),
+  (2, '2017-02-05 18:50', 6, 'txrange',       'txrange',      'range',  'Transcription region [start-end].', NULL),
+  (2, '2017-02-05 18:50', 7, 'cdsstart',      'cdsstart',     'int',    'Coding region start.', NULL),
+  (2, '2017-02-05 18:50', 8, 'cdsend',        'cdsend',       'int',    'Coding region end.', NULL),
+  (2, '2017-02-05 18:50', 9, 'cdsrange',      'cdsrange',     'range',  'Coding region [start-end].', NULL),
+  (2, '2017-02-05 18:50', 10, 'exoncount',    'exoncount',    'int',    'Number of exons in the gene.', NULL),
+  (2, '2017-02-05 18:50', 11, 'score',        'score',        'int',    'Score ?', NULL),
+  (2, '2017-02-05 18:50', 12, 'name2',        'name2',        'string', 'Alternative name.', NULL),
+  (2, '2017-02-05 18:50', 13, 'cdsstartstat', 'cdsstartstat', 'string', 'Cds start stat, can be "non", "unk", "incompl" or "cmp1".', NULL),
+  (2, '2017-02-05 18:50', 14, 'cdsendstat',   'cdsendstat',   'string', 'Cds end stat, can be "non", "unk", "incompl" or "cmp1".', NULL),
+  (3, '2017-02-05 18:50', 1, 'name',          'name',         'string', 'Gene name.', NULL),
+  -- (3, '2017-02-05 18:50', 2, 'chr',          'chr',          'enum',   'Chromosome.', '{"enum": {"1": "1", "2": "2", "3": "3", "4": "4", "5": "5", "6": "6", "7": "7", "8": "8", "9": "9", "10": "10", "11": "11", "12": "12", "13": "13", "14": "14", "15": "15", "16": "16", "17": "17", "18": "18", "19": "19", "20": "20", "21": "21", "22": "22", "23": "X", "24": "Y", "25": "M"}}'),
+  (3, '2017-02-05 18:50', 3, 'strand',        'strand',       'string', 'Which DNA strand contains the observed alleles.', NULL),
+  (3, '2017-02-05 18:50', 4, 'txstart',       'txstart',      'int',    'Transcription start position.', NULL),
+  (3, '2017-02-05 18:50', 5, 'txend',         'txend',        'int',    'Transcription end position.', NULL),
+  (3, '2017-02-05 18:50', 6, 'txrange',       'txrange',      'range',  'Transcription region [start-end].', NULL),
+  (3, '2017-02-05 18:50', 7, 'cdsstart',      'cdsstart',     'int',    'Coding region start.', NULL),
+  (3, '2017-02-05 18:50', 8, 'cdsend',        'cdsend',       'int',    'Coding region end.', NULL),
+  (3, '2017-02-05 18:50', 9, 'cdsrange',      'cdsrange',     'range',  'Coding region [start-end].', NULL),
+  (3, '2017-02-05 18:50', 10, 'exoncount',    'exoncount',    'int',    'Number of exons in the gene.', NULL),
+  (3, '2017-02-05 18:50', 11, 'exonstart',    'exonstart',    'int',    'Exon start position.', NULL),
+  (3, '2017-02-05 18:50', 12, 'exonend',      'exonend',      'int',    'Exon end position.', NULL),
+  (3, '2017-02-05 18:50', 13, 'exonrange',    'exonrange',    'range',  'Exon region [start-end].', NULL),
+  (3, '2017-02-05 18:50', 14, 'score',        'score',        'int',    'Score ?', NULL),
+  (3, '2017-02-05 18:50', 15, 'name2',        'name2',        'string', 'Alternative name.', NULL),
+  (3, '2017-02-05 18:50', 16, 'cdsstartstat', 'cdsstartstat', 'string', 'Cds start stat, can be "non", "unk", "incompl" or "cmp1".', NULL),
+  (3, '2017-02-05 18:50', 17, 'cdsendstat',   'cdsendstat',   'string', 'Cds end stat, can be "non", "unk", "incompl" or "cmp1".', NULL);
+
+
+UPDATE public.annotation_database SET uid=MD5(concat(id, version)) WHERE uid IS NULL;
+UPDATE public.annotation_field SET uid=MD5(concat(database_id, database_version, name)) WHERE uid IS NULL;

@@ -1327,7 +1327,11 @@ function init_variants_list(json, container_id)
 
     for (var i=0; i<analysis.analysis.fields.length; i++)
     {
-        html += variants_table_header_cell.format(annotation_fields[analysis.analysis.fields[i]]["name"]);
+        var id = analysis.analysis.fields[i];
+        if (annotation_fields[id] != undefined)
+            html += variants_table_header_cell.format(annotation_fields[id]["name"]);
+        else
+            console.debug("nothing for " + id);
     }
     html += variants_table_header_end;
 
@@ -1353,6 +1357,10 @@ function init_variants_list(json, container_id)
                 // format according to the type
                 if (ftype == "int" || ftype == "float")
                     html += annotation_format_number(v[fid]);
+                else if (ftype == 'percent')
+                {
+                    html += annotation_format_percent(v[fid]);
+                }
                 else 
                     html += variants_table_row_cell.format(v[fid]);
             }
@@ -1405,6 +1413,21 @@ function annotation_format_gt(gt)
     return "<td class=\"seq\">{0}</td>".format(['Ref/Ref <span style="font-weight:100">Homo</span>', 'Alt/Alt <span style="font-weight:100">Homo</span>', 'Ref/Alt <span style="font-weight:100">Hetero</span>', 'Alt1/Aly2 <span style="font-weight:100">Hetero</span>'][gt]);
 }
 
+function annotation_format_chr(chr)
+{
+    return "<td>{0}</td>".format(annotation_fields[3]['meta']['enum'][chr]);
+}
+
+function annotation_format_percent(value)
+{
+    var model = "<td class=\"number\" style=\"position:relative;\"><div style=\"position:absolute; top:0; left:0; bottom:0; width:{0}%; background-color: #a5b0c3;\"></div><div style=\"position:absolute; top:0; left:0; right:0; bottom:0; padding: 8px;\">{0} %</div></td>";
+    var percent = Math.round(value * 100, 2);
+    return model.format(percent);
+    
+}
+
+
+
 
 
 
@@ -1438,14 +1461,14 @@ function filter_build_tree(json)
 
 
 
-        $('#variants_list_table input[type=checkbox]').each( function (idx, elmt)
+/*        $('#variants_list_table input[type=checkbox]').each( function (idx, elmt)
         {
             if (idx == 0) return;
             
             $(elmt).prop('checked', checked);
             ui.check_variant(elmt);
         });
-
+*/
 
 
 

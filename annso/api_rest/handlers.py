@@ -73,11 +73,11 @@ def rest_error(message:str="Unknow", code:str="0", error_id:str=""):
 def process_generic_get(query_string, allowed_fields):
         # 1- retrieve query parameters
         get_params = MultiDict(parse_qsl(query_string))
-        r_range  = get_params.get('range', "0-" + str(RANGE_DEFAULT))
-        r_fields = get_params.get('fields', None)
-        r_sort  = get_params.get('sort_by', None)
-        r_order = get_params.get('sort_order', None)
-        r_filter = get_params.get('filter', None)
+        r_range    = get_params.get('range', "0-" + str(RANGE_DEFAULT))
+        r_fields   = get_params.get('fields', None)
+        r_sort     = get_params.get('sort_by', None)
+        r_order    = get_params.get('sort_order', None)
+        r_filter   = get_params.get('filter', None)
 
         # 2- fields to extract
         fields = allowed_fields
@@ -130,7 +130,8 @@ def process_generic_get(query_string, allowed_fields):
 
 def notify_all(data):
     msg = json.dumps(data)
-    log ("API_rest Notify All : {0}".format(msg))
+    if data['msg'] != 'hello':
+        log ("API_rest Notify All : {0}".format(msg))
     for ws in WebsocketHandler.socket_list:
         ws[0].send_str(msg)
 
@@ -286,7 +287,7 @@ class AnalysisHandler:
         if "mode" in data: mode = data["mode"]
         if limit<0 or limit > RANGE_MAX : limit = 100
         if offset<0 : offset = 0
-
+        
         # 3- Execute filtering request
         try :
             result = annso.filter.request(int(analysis_id), mode, filter_json, fields, int(limit), int(offset), count)
@@ -500,9 +501,8 @@ class WebsocketHandler:
         ws = web.WebSocketResponse()
         await ws.prepare(request)
 
-        log('WS connection open by {0}'.format(ws_id))
         WebsocketHandler.socket_list.append((ws, ws_id))
-        msg = {'msg' :'online_user', 'data' : [' + ','.join(['"' + _ws[1] + '"' for _ws in WebsocketHandler.socket_list]) + ']}
+        msg = {'msg' :'hello', 'data' : [[str(_ws[1]) for _ws in WebsocketHandler.socket_list]]}
         notify_all(msg)
 
         try:
@@ -520,7 +520,6 @@ class WebsocketHandler:
                         elif msg.tp == aiohttp.MsgType.error:
                             log('ws connection closed with exception {0}'.format(ws.exception()))
         finally:
-            log('WS connection closed for{0}'.format(ws_id))
             WebsocketHandler.socket_list.remove((ws, ws_id))
 
         return ws
