@@ -1,9 +1,9 @@
 .sidebar-nav
 {
-    float: left;
-    display: block;
+    position: absolute;
+    bottom: 35px;
+    top: 55px;
     width: 75px;
-    height:500px;
     background-color: #e8e8e8;
 }
 
@@ -65,6 +65,11 @@
 
 
 
+
+#contextMenu {
+  position: absolute;
+  display:none;
+}
 
 
 

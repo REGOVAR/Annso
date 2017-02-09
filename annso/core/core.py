@@ -169,35 +169,39 @@ class FileManager:
 # ANNOTATION DATABASE MANAGER
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
 class AnnotationDatabaseManager:
-    def __init__(self, reference=1):
+    def __init__(self):
         self.fields_map = {}
         self.db_map = {}
-        query = "SELECT d.uid AS duid, d.id AS did, d.version AS dversion, d.name_ui AS dname, d.description AS ddesc, a.uid AS fuid, a.name_ui AS name, a.type AS type, a.description AS desc, a.meta AS meta \
-                 FROM annotation_field a \
-                 LEFT JOIN annotation_database d ON a.database_id=d.id AND a.database_version=d.version \
-                 WHERE d.reference_id={0} ORDER BY d.id, a.id, d.version".format(reference)
+        self.db_list = {}
+        self.ref_list  = {}
 
-        current_db_id = 0
-        current_field = None
+        query = "SELECT d.uid, d.reference_id, d.version, d.name_ui, d.description, d.url, r.name \
+                 FROM annotation_database d INNER JOIN reference r ON r.id=d.reference_id \
+                 ORDER BY r.name ASC, d.ord ASC, version DESC"
         for row in db_session.execute(query):
-            if row.did not in self.db_map:
-                self.db_map[row.did] = {"uid" : row.duid, "name" : row.dname, "description": row.ddesc, "fields" : [], "versions" : []}
+            self.ref_list.update({row.reference_id : row.name})
+            if row.reference_id in self.db_list.keys():
+                if row.name_ui in self.db_list[row.reference_id].keys():
+                    self.db_list[row.reference_id][row.name_ui]["versions"][row.version] = row.uid
+                else:
+                    self.db_list[row.reference_id][row.name_ui] = { "name" : row.name_ui, "desc" : row.description, "versions" : { row.version : row.uid } }
+            else:
+                self.db_list[row.reference_id] = { row.name_ui : { "name" : row.name_ui, "desc" : row.description, "versions" : { row.version : row.uid } } }
+
+
+
+        query = "SELECT d.uid AS duid, d.reference_id AS ref, d.version, d.ord AS dord, d.name_ui AS dname, d.description AS ddesc, d.update_date AS ddate, a.uid AS fuid, a.name_ui AS name, a.ord AS ford, a.type AS type, a.description AS desc, a.meta AS meta \
+                 FROM annotation_field a \
+                 INNER JOIN annotation_database d ON a.database_uid=d.uid \
+                 ORDER BY d.uid, a.ord"
+        for row in db_session.execute(query):
             meta = None if row.meta is None else json.loads(row.meta)
-            if current_field is None:
-                current_field = {"uid" : row.fuid, "name" : row.name, "type" : row.type, "versions" : { row.dversion : {"description": row.desc, "meta": meta}}}
-            elif current_field["name"] != row.name:
-                self.db_map[current_db_id]["fields"].append(current_field)
-                current_field.update({"db_id" : current_db_id})
-                self.fields_map[current_field["uid"]] = current_field
-                current_field = {"uid" : row.fuid, "name" : row.name, "type" : row.type, "versions" : { row.dversion : {"description": row.desc, "meta": meta}}}
-            elif current_field["name"] == row.name:
-                current_field['versions'].update({ row.dversion : {"description": row.desc, "meta": meta}})
-            current_db_id = row.did
-            if row.dversion not in self.db_map[current_db_id]["versions"] : self.db_map[current_db_id]["versions"].append( row.dversion)
-        # save the last one
-        self.db_map[current_db_id]["fields"].append(current_field)
-        current_field.update({"db_id" : current_db_id})
-        self.fields_map[current_field["uid"]] = current_field
+            self.fields_map[row.fuid] = {"uid"   : row.fuid, "name"  : row.name, "description": row.desc, "type" : row.type, "meta": meta, "order" : row.ford, "dbuid" : row.duid}
+            if row.duid in self.db_map.keys():
+                self.db_map[row.duid]["fields"].append(row.fuid)
+            else:
+                self.db_map[row.duid] = {"uid"   : row.duid, "name"  : row.dname, "description": row.ddesc, "order" : row.dord, "update" : row.ddate, "fields" : [row.fuid], "version" : row.version, "ref" : row.ref }
+
 
 
     # build the sql query according to the annso filtering parameter and return result as json data
@@ -546,9 +550,9 @@ class FilterEngine:
 
 
 
-    def __init__(self, reference=1):
+    def __init__(self, reference=2):
         """
-            Init Annso Filtering engine. (reference=1 mean "hg19", see database import script)
+            Init Annso Filtering engine. (reference=2 mean "hg19", see database import script)
             Init mapping collection for annotations databases and fields
         """
         refname = db_session.execute("SELECT table_suffix FROM reference WHERE id="+str(reference)).first()["table_suffix"]
@@ -556,7 +560,7 @@ class FilterEngine:
         self.fields_map = {}
         self.db_map = {}
         self.variant_table = "sample_variant_{0}".format(refname)
-        query = "SELECT d.uid AS duid, d.name AS dname, d.jointure, a.uid AS fuid, a.name AS fname, a.type FROM annotation_field a LEFT JOIN annotation_database d ON a.database_id=d.id WHERE d.reference_id={0} ORDER BY d.id".format(reference)
+        query = "SELECT d.uid AS duid, d.name AS dname, d.jointure, a.uid AS fuid, a.name AS fname, a.type FROM annotation_field a LEFT JOIN annotation_database d ON a.database_uid=d.uid"
         for row in db_session.execute(query):
             if row.duid not in self.db_map:
                 self.db_map[row.duid] = {"name" : row.dname, "join": row.jointure.format(self.variant_table), "fields" : {}}
@@ -646,7 +650,7 @@ class FilterEngine:
 
         # Build FROM/JOIN
         # TODO : uid of the sample_variant_{ref} shall be retrieved from database according to the selected referencial.
-        tables_to_import = ['c4ca4238a0b923820dcc509a6f75849b'] # This id is the uid for the sample_variant_{ref} table. We always need this table as it's used for the join with other tables
+        tables_to_import = ['d9121852fc1a279b95cb7e18c976f112'] # This id is the uid for the sample_variant_{ref} table. We always need this table as it's used for the join with other tables
         for fuid in fields:
             if self.fields_map[fuid]["db_id"] not in tables_to_import :
                 tables_to_import.append(self.fields_map[fuid]["db_id"])

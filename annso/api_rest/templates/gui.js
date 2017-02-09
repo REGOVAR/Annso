@@ -1368,6 +1368,19 @@ function init_variants_list(json, container_id)
         html += variants_table_row_end;
     });
     $(container_id).html(html + "</tbody></table>");
+
+    // Add context menu
+    $(container_id + " tr").contextMenu({
+        menuSelector: "#contextmenu_genename",
+        menuSelected: function (invokedOn, selectedMenu) 
+        {
+            var action = selectedMenu[0].getAttribute("id");
+            var id = invokedOn[0].parentElement.children[6].innerHTML;
+            if (action == "context_menu_info") show_tab("browser_file", id);
+            else if (action == "context_menu_dl") alert("TODO : download the file " + id);
+        }
+    });
+
     return count;
 }
 
@@ -1415,15 +1428,19 @@ function annotation_format_gt(gt)
 
 function annotation_format_chr(chr)
 {
-    return "<td>{0}</td>".format(annotation_fields[3]['meta']['enum'][chr]);
+    return "<td>{0}</td>".format(annotation_fields['816ce7a58b6918652399342e46143386']['meta']['enum'][chr]);
+}
+function annotation_format_pos(pos)
+{
+    return annotation_format_number(pos+1);
 }
 
 function annotation_format_percent(value)
 {
-    var model = "<td class=\"number\" style=\"position:relative;\"><div style=\"position:absolute; top:0; left:0; bottom:0; width:{0}%; background-color: #a5b0c3;\"></div><div style=\"position:absolute; top:0; left:0; right:0; bottom:0; padding: 8px;\">{0} %</div></td>";
+    var model = "<td class=\"number\" style=\"position:relative;\"><div style=\"position:absolute; top:0; left:0; bottom:0; width:{0}%; background-color: #a5b0c3;\"></div><div style=\"position:absolute; top:0; left:0; right:0; bottom:0; padding: 8px;{1}\">{0} %</div></td>";
     var percent = Math.round(value * 100, 2);
-    return model.format(percent);
-    
+    var color = (percent == 0) ? ' color:#aaa;' : "";
+    return model.format(percent, color);
 }
 
 

@@ -22,6 +22,8 @@ website = WebsiteHandler()
 dbHandler = AnnotationDBHandler()
 analysisHandler = AnalysisHandler()
 sampleHandler = SampleHandler()
+variantHandler = VariantHandler()
+
 
 # Config server app
 app['websockets'] = []
@@ -41,8 +43,14 @@ app.router.add_route('GET',    "/v1/config", website.get_config)                
 app.router.add_route('GET',    "/v1/ws", websocket.get)                                                         # Init a websockets connection
 
 
-app.router.add_route('GET',    "/v1/db", dbHandler.get_databases)                                               # Get list of annotation's databases and their fields
+app.router.add_route('GET',    "/v1/db/ref", dbHandler.get_referencials)                                        # Get list of genom's referencials supported
+app.router.add_route('GET',    "/v1/db/{ref_id}", dbHandler.get_databases)                                      # Get list of all annotation's databases and for each the list of availables versions and the list of their fields for the latest version
 app.router.add_route('GET',    "/v1/db/fields", dbHandler.get_fields)                                           # Get flat list of all annotation's fields available
+app.router.add_route('GET',    "/v1/db/{db_id}", dbHandler.get_database)                                        # Get the database description and the list of available versions
+app.router.add_route('GET',    "/v1/db/{db_id}/{db_version}", dbHandler.get_database_fields)                    # Get the database details and the list of all its fields
+
+
+app.router.add_route('GET',    "/v1/variant/{variant_id}", variantHandler.get_variant)                          # Get all available information about the given variant
 
 
 app.router.add_route('GET',    "/v1/sample", sampleHandler.get_samples)                                         # Get list of all samples in database

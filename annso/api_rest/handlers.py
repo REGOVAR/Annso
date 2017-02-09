@@ -195,17 +195,78 @@ class WebsiteHandler:
 # ANNOTATION DATABASES HANDLER
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
 class AnnotationDBHandler:
+    def get_referencials(self, request):
+        """ 
+            Return list of genom's referencials supported
+        """
+        return rest_success(annso.annotation_db.ref_list)
+
+
     def get_databases(self, request):
         """ 
-            Return list of annotation databases and for each, available fields
+            Return list of all annotation's databases and, for each, the list of availables versions and the list of their fields for the latest version
         """
+        db_id = request.match_info.get('ref_id', -1)
+
+
+        annso.annotation_db.db_list[2]['refGene']['versions'][max(annso.annotation_db.db_list[2]['refGene']['versions'].keys())]
+
         return rest_success(annso.annotation_db.get_databases())
+
+
 
     def get_fields(self, request):
         """
             Return flat list of all fields with their meta data (description, database id, ...)
         """
         return rest_success(annso.annotation_db.get_fields())
+
+
+
+    def get_database(self, request):
+        """
+            Return the database description and the list of available versions
+        """
+        db_id = request.match_info.get('db_id', -1)
+        return rest_success(annso.annotation_db.get_database(db_id))
+
+
+
+    def get_database_fields(self, request):
+        """
+            Return the database details and the list of all its fields
+        """
+        db_id = request.match_info.get('db_id', -1)
+        db_version = request.match_info.get('db_version', -1)
+        return rest_success(annso.annotation_db.get_database(db_id, db_version))
+
+
+
+
+
+
+
+    
+
+
+
+
+
+
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
+# ANALYSIS HANDLER
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
+class VariantHandler:
+
+    def get_variant(self, request):
+        return rest_success('to be implemented')
+
+
+
+
+
+
+
 
 
 
