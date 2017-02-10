@@ -707,13 +707,14 @@ function AnnsoUIControler ()
 
 
         // Reset UI fields according to the referencial
-
+        $('#filters_panel_menu_filter_c > ul').html("");
         $.ajax({ url: "{0}/ref/{1}".format(rootURL, analysis.analysis.ref), type: "GET", async: true}).fail(function()
         {
             alert( "ERROR" );
         }).done(function(json) 
         {
             var data = json['data'];
+            annotation_fields = [];
             annotation_fields_autocomplete = [];
             annotation_fields_autocomplete_info = [];
             // Indicate which referencial is used for this project 
@@ -742,11 +743,24 @@ function AnnsoUIControler ()
                     db_fields_html += fields_selection_row_template.format(f['uid'], f['name'], f['description']);
 
                     // update internal data for autocomplete form used to filter fields
-                    annotation_fields_autocomplete.concat("{}.{}".format(db['name'], f['name']));
-                    annotation_fields_autocomplete_info.concat({"db_id" :  db['uid'], "id" : f['uid'] });
+                    annotation_fields[f['uid']] = f;
+                    annotation_fields_autocomplete = annotation_fields_autocomplete.concat("{0}.{1}".format(db['name'], f['name']));
+                    annotation_fields_autocomplete_info = annotation_fields_autocomplete_info.concat(f['uid']);
                 });
 
                 html += fields_selection_template.format(db['name'], db_version_form, db['description'], db_fields_html);
+
+                // reload autocomplete_form for field selector
+                $('#modal_filter_field_name').typeahead(
+                {
+                    hint: true,
+                    highlight: true,
+                    minLength: 1
+                },
+                {
+                    name: 'fields',
+                    source: substringMatcher(annotation_fields_autocomplete)
+                });
             });
             $('#annotation_fields_list').html(html);
 
@@ -761,11 +775,13 @@ function AnnsoUIControler ()
             {
                 $('#annotation_fields_field_{0}'.format(fid)).prop('checked', true);
             });
+
+            // Reset UI filter
+            $('#filters_panel_menu_filter_c > ul').html(build_filter_ui(analysis.analysis.filter));
         });
         
 
-        // Reset UI filter
-        $('#filters_panel_menu_filter_c > ul').html(build_filter_ui(analysis.analysis.filter));
+        
         // Reset UI saved filters
         ui.display_saved_filter();
         ui.update_selection();
@@ -927,65 +943,62 @@ var filter_form_map_operator = {
     'int' : ['=', ]
 }
 
-function display_filter_form(elmt)
+function display_filter_form(fuid)
 {
-    // retrieve fields info according to selected field's name
-    var field_name = $(elmt).val();
-    for (var key in annotation_fields)
+    debugger;
+    if (fuid == undefined )
     {
-        if (field_name == '{0}.{1}'.format(annotation_fields[key]['db_name'], annotation_fields[key]['name'])) 
-        {
-            var field_id   = key;
-            var field_type = annotation_fields[key]['type'];
-            var field_meta = annotation_fields[key]['meta'];
-            var html = "";
-            var field_default = "";
-            if (field_meta != undefined && field_meta["default"] != undefined)
-            {
-                field_default = field_meta["default"];
-            }
-
-            switch(field_type)
-            {
-                case 'int':
-                    html = filter_form_operators_type_int.format(field_default);
-                break;
-                case 'float':
-                    html = filter_form_operators_type_float.format(field_default);
-                break;
-                case 'string':
-                    html = filter_form_operators_type_string.format(field_default);
-                break;
-                case 'percent':
-                    html = filter_form_operators_type_percent.format(field_default);
-                break;
-                case 'enum':
-                    enum_options = "";
-                    if (field_meta != undefined)
-                    {
-                        for (var key in field_meta["enum"])
-                        {
-                            enum_options += filter_form_operators_type_enum_option.format(key, field_meta["enum"][key]);
-                        }
-                    }
-                    html = filter_form_operators_type_enum.format(enum_options);
-                break;
-                case 'bool':
-                    if (field_default == true)
-                    {
-                        field_default = " checked";
-                    }
-                    else
-                    {
-                        field_default = "";
-                    }
-                    html = filter_form_operators_type_bool.format(field_default);
-                break;
-            }
-            $('#modal_filter_field_form').html(html);
-            break;
-        }
+        $('#modal_filter_field_form').html("");
+        return;
     }
+    var field_type = annotation_fields[fuid]['type'];
+    var field_meta = annotation_fields[fuid]['meta'];
+    var html = "";
+    var field_default = "";
+    if (field_meta != undefined && field_meta["default"] != undefined)
+    {
+        field_default = field_meta["default"];
+    }
+
+    switch(field_type)
+    {
+        case 'int':
+            html = filter_form_operators_type_int.format(field_default);
+        break;
+        case 'float':
+            html = filter_form_operators_type_float.format(field_default);
+        break;
+        case 'string':
+            html = filter_form_operators_type_string.format(field_default);
+        break;
+        case 'percent':
+            html = filter_form_operators_type_percent.format(field_default);
+        break;
+        case 'enum':
+            enum_options = "";
+            if (field_meta != undefined)
+            {
+                for (var fuid in field_meta["enum"])
+                {
+                    enum_options += filter_form_operators_type_enum_option.format(fuid, field_meta["enum"][fuid]);
+                }
+            }
+            html = filter_form_operators_type_enum.format(enum_options);
+        break;
+        case 'bool':
+            if (field_default == true)
+            {
+                field_default = " checked";
+            }
+            else
+            {
+                field_default = "";
+            }
+            html = filter_form_operators_type_bool.format(field_default);
+        break;
+    }
+    $('#modal_filter_field_form').html(html);
+
 }
 
 
@@ -1121,8 +1134,8 @@ function add_filter_ui(operator)
         var operator = $('#modal_filter_field_operator').find(":selected").val();
 
         // retrieve field
-        f_id = annotation_fields_autocomplete_info[annotation_fields_autocomplete.indexOf($('#modal_filter_field_name').val())]["id"];
-        var op1 = ['field', f_id];
+        fuid = annotation_fields_autocomplete_info[annotation_fields_autocomplete.indexOf($('#modal_filter_field_name').val())];
+        var op1 = ['field', fuid];
         
         // retrieve value
         var op2 = ['value', $('#modal_filter_field_value').val()];

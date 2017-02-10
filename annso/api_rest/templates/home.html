@@ -528,6 +528,10 @@
                                     <span class="input-group-addon"><i class="fa fa-folder" aria-hidden="true"></i></span>
                                     <input type="text" id="modal_new_analysis_name" placeholder="The name of your analysis" class="form-control">
                                 </div>
+                                <div class="input-group">
+                                    <span class="input-group-addon"><i class="fa fa-folder" aria-hidden="true"></i></span>
+                                    <input type="text" id="modal_new_analysis_name" placeholder="The name of your analysis" class="form-control">
+                                </div>
                             </form>
 
                             <div class="modal-footer">
@@ -725,7 +729,7 @@
                             <!-- NEW FILTER - FIELDS  -->
                             <!--                      -->
                             <div id="modal_filter_add_condition_vfield" class="tab-pane fade" style="height:500px;">
-                                <input type="text" id="modal_filter_field_name" placeholder="Field to test" onchange="javascript:display_filter_form(this);"/>
+                                <input type="text" id="modal_filter_field_name" placeholder="Field to test"/>
 
                                 <div id="modal_filter_field_form" style="display:inline-block;">
                                 </div>
@@ -841,8 +845,6 @@
 
 
         // Annotation fields/databases metadata
-        var annotation_fields = {{ annotations_fields }};
-
         var annotation_fields_formaters = { 
             'f90212dbcd64e391f5569794fbdfe68a' : annotation_format_sampleid,
             '816ce7a58b6918652399342e46143386' : annotation_format_chr,
@@ -861,6 +863,7 @@
 
 
         // Internal data for autocomplete form used to filter fields (populated in the ui.start_analysis() js method )
+        var annotation_fields = [];
         var annotation_fields_autocomplete = [];
         var annotation_fields_autocomplete_info = [];
 
@@ -868,15 +871,7 @@
 
 
 
-        $('#modal_filter_field_name').typeahead({
-            hint: true,
-            highlight: true,
-            minLength: 1
-        },
-        {
-            name: 'fields',
-            source: substringMatcher(annotation_fields_autocomplete)
-        });
+        
 
 
 
@@ -888,7 +883,12 @@
         { 
             ui.quick_filter_fields_selection($('#browserNavFieldsPanel_filter_input').val());
         });
-
+        $('#modal_filter_field_name').blur(function () 
+        { 
+            var fuid = annotation_fields_autocomplete_info[annotation_fields_autocomplete.indexOf($('#modal_filter_field_name').val())];
+            display_filter_form(fuid);
+        });
+        
 
 
 
