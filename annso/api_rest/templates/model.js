@@ -29,7 +29,7 @@ function Analysis(json)
     this.attributes = json["attributes"];
     this.template_id = json["template_id"];
     this.template_name = json["template_name"];
-
+    this.ref = json["reference_id"];
     // samples
     var samples = {};
     json["samples"].forEach(function(sp) {

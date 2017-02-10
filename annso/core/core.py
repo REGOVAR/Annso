@@ -168,12 +168,28 @@ class FileManager:
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
 # ANNOTATION DATABASE MANAGER
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
+# Format of data
+# ref_list   : contains the list of available genome referencial
+#              { <ref_id> : <ref_name> }
+# db_list    : contains the list of available annotation databases according to the referencial
+#              { <ref_id> :  {
+#                   'order' : [<db_name_ui>, ...],
+#                   'db'    : { 
+#                       <db_name_ui> : {
+#                           'versions': { <version_name> : <db_uid>, ... }, 
+#                           'desc': <db_description>
+#              }}}
+# db_map     : contains the data for all annotation databases
+#              { <db_uid> : {
+#                   'uid' : <db_uid>
+#               }}
+# fields_map :
 class AnnotationDatabaseManager:
     def __init__(self):
-        self.fields_map = {}
-        self.db_map = {}
-        self.db_list = {}
         self.ref_list  = {}
+        self.db_list = {}
+        self.db_map = {}
+        self.fields_map = {}
 
         query = "SELECT d.uid, d.reference_id, d.version, d.name_ui, d.description, d.url, r.name \
                  FROM annotation_database d INNER JOIN reference r ON r.id=d.reference_id \
@@ -184,9 +200,10 @@ class AnnotationDatabaseManager:
                 if row.name_ui in self.db_list[row.reference_id].keys():
                     self.db_list[row.reference_id][row.name_ui]["versions"][row.version] = row.uid
                 else:
-                    self.db_list[row.reference_id][row.name_ui] = { "name" : row.name_ui, "desc" : row.description, "versions" : { row.version : row.uid } }
+                    self.db_list[row.reference_id]['order'].append(row.name_ui)
+                    self.db_list[row.reference_id]['db'][row.name_ui] = { "name" : row.name_ui, "description" : row.description, "versions" : { row.version : row.uid }}
             else:
-                self.db_list[row.reference_id] = { row.name_ui : { "name" : row.name_ui, "desc" : row.description, "versions" : { row.version : row.uid } } }
+                self.db_list[row.reference_id] = { 'order' : [row.name_ui], 'db' : { row.name_ui : { "name" : row.name_ui, "description" : row.description, "versions" : { row.version : row.uid }}}}
 
 
 
@@ -276,6 +293,7 @@ class AnalysisManager:
             "template_name" : analysis.t_name,
             "samples" : [],
             "attributes" : [],
+            "reference_id" : 2, # TODO : reference_id shall be associated to the analysis and retrieved in the database
             "filters" : {}}
         if analysis.settings is not None and analysis.settings.strip() is not "":
             result["settings"] = json.loads(analysis.settings)

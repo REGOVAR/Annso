@@ -56,3 +56,8 @@ EXPORTS_MODULES_PATH = "exports.{0}"
 IMPORTS_MODULES_PATH = "imports.{0}"
 REPORTS_MODULES_PATH = "reports.{0}.report"
 
+
+
+
+
+DEFAULT_REFERENCIAL_ID = 2 # hg19

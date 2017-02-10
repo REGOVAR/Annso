@@ -706,14 +706,63 @@ function AnnsoUIControler ()
 
 
 
-        // Reset UI fields
-        $('#annotation_fields_list input[type=checkbox]').each(function(idx, elmt) {
-            $(elmt).prop('checked', false);
-        });
-        $.each(analysis.analysis.fields, function(idx, fid) 
+        // Reset UI fields according to the referencial
+
+        $.ajax({ url: "{0}/ref/{1}".format(rootURL, analysis.analysis.ref), type: "GET", async: true}).fail(function()
         {
-            $('#annotation_fields_field_{0}'.format(fid)).prop('checked', true);
+            alert( "ERROR" );
+        }).done(function(json) 
+        {
+            var data = json['data'];
+            annotation_fields_autocomplete = [];
+            annotation_fields_autocomplete_info = [];
+            // Indicate which referencial is used for this project 
+            $('#analysis_title').html($('#analysis_title').html() + " ({0})".format(data['ref_name']));
+            // Build html 
+            html = "";
+            $.each(data['db'], function(db_idx, db) 
+            {
+                // possibility to select different database's version
+                var db_version_form = "";
+                if (db['selected'] != "")
+                {
+                    var options = "";
+                    $.each(db['versions'], function(v_name, v_id) 
+                    {
+                        selected = (v_name == db['selected']) ? " selected" : "";
+                        options += fields_selection_db_version_option_template.format(v_id, v_name, selected);
+                    });
+                    db_version_form = fields_selection_db_version_template.format(options);
+                }
+
+                // display fields for the selected version of the database
+                var db_fields_html = "";
+                $.each(db['fields'], function(f_idx, f) 
+                {
+                    db_fields_html += fields_selection_row_template.format(f['uid'], f['name'], f['description']);
+
+                    // update internal data for autocomplete form used to filter fields
+                    annotation_fields_autocomplete.concat("{}.{}".format(db['name'], f['name']));
+                    annotation_fields_autocomplete_info.concat({"db_id" :  db['uid'], "id" : f['uid'] });
+                });
+
+                html += fields_selection_template.format(db['name'], db_version_form, db['description'], db_fields_html);
+            });
+            $('#annotation_fields_list').html(html);
+
+
+        
+
+            // Check selected fields
+            $('#annotation_fields_list input[type=checkbox]').each(function(idx, elmt) {
+                $(elmt).prop('checked', false);
+            });
+            $.each(analysis.analysis.fields, function(idx, fid) 
+            {
+                $('#annotation_fields_field_{0}'.format(fid)).prop('checked', true);
+            });
         });
+        
 
         // Reset UI filter
         $('#filters_panel_menu_filter_c > ul').html(build_filter_ui(analysis.analysis.filter));
@@ -725,6 +774,24 @@ function AnnsoUIControler ()
 
 
 
+    this.quick_filter_fields_selection = function(search)
+    {
+        if (search == "" || search == undefined || search == null)
+        {
+            $('#annotation_fields_list tr').each(function(idx, elmt) { $(elmt).show(); });
+        }
+        else
+        {
+            $('#annotation_fields_list tr').each(function(idx, elmt) 
+            {
+                if ($(elmt).text().indexOf(search) !== -1 )
+                    $(elmt).show();
+                else
+                    $(elmt).hide();
+            });
+        }
+        
+    };
 
 
 

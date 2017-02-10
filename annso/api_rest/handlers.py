@@ -156,7 +156,7 @@ class WebsiteHandler:
             "hostname" : HOST_P,
             "templates" : [], # return by default last 10 templates
             "analysis" : annso.analysis.get(),  # return by default last 10 analyses
-            "annotations_db" :     annso.annotation_db.get_databases(),
+            "annotations_db_ref"     : annso.annotation_db.ref_list,
             "annotations_fields" : json.dumps(annso.annotation_db.get_fields()),
             "export_modules" : [annso.export_modules[m]['info'] for m in annso.export_modules], 
             "import_modules" : [annso.import_modules[m]['info'] for m in annso.import_modules], 
@@ -202,25 +202,27 @@ class AnnotationDBHandler:
         return rest_success(annso.annotation_db.ref_list)
 
 
-    def get_databases(self, request):
+    def get_ref_db(self, request):
         """ 
             Return list of all annotation's databases and, for each, the list of availables versions and the list of their fields for the latest version
         """
-        db_id = request.match_info.get('ref_id', -1)
+        ref_id = request.match_info.get('ref_id', None)
+        if ref_id is None or ref_id not in annso.annotation_db.ref_list.keys():
+            ref_id = DEFAULT_REFERENCIAL_ID 
 
+        result = { "ref_id" : ref_id, "ref_name" : annso.annotation_db.ref_list[ref_id], "db" : []}
 
-        annso.annotation_db.db_list[2]['refGene']['versions'][max(annso.annotation_db.db_list[2]['refGene']['versions'].keys())]
+        for db_name in annso.annotation_db.db_list[ref_id]["order"] :
+            db_data = annso.annotation_db.db_list[ref_id]['db'][db_name]
+            db_data.update({"selected" : next(iter(db_data['versions'].keys()))})
+            db_data['fields'] = []
+            for fuid in annso.annotation_db.db_map[db_data['versions'][db_data['selected']]]['fields']:
+                db_data['fields'].append(annso.annotation_db.fields_map[fuid])
 
-        return rest_success(annso.annotation_db.get_databases())
+            result["db"].append(db_data)
+        #annso.annotation_db.db_list[2]['refGene']['versions'][max(annso.annotation_db.db_list[2]['refGene']['versions'].keys())]
 
-
-
-    def get_fields(self, request):
-        """
-            Return flat list of all fields with their meta data (description, database id, ...)
-        """
-        return rest_success(annso.annotation_db.get_fields())
-
+        return rest_success(result)
 
 
     def get_database(self, request):
@@ -228,17 +230,8 @@ class AnnotationDBHandler:
             Return the database description and the list of available versions
         """
         db_id = request.match_info.get('db_id', -1)
-        return rest_success(annso.annotation_db.get_database(db_id))
+        return rest_success(annso.annotation_db.db_map[db_id])
 
-
-
-    def get_database_fields(self, request):
-        """
-            Return the database details and the list of all its fields
-        """
-        db_id = request.match_info.get('db_id', -1)
-        db_version = request.match_info.get('db_version', -1)
-        return rest_success(annso.annotation_db.get_database(db_id, db_version))
 
 
 

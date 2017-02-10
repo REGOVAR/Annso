@@ -636,9 +636,9 @@
 
 
 
-            <!--                                -->
-            <!-- MODAL POPUP - sample attribute -->
-            <!--                                -->
+            <!--                                  -->
+            <!-- MODAL POPUP - Fields annotations -->
+            <!--                                  -->
             <div id="modal_field_selector" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
                 <div class="modal-dialog" role="document" style="width:1000px;">
                     <div class="modal-content">
@@ -650,24 +650,12 @@
                             <form class="form-inline" style="margin:10px;">
                                 <div class="input-group">
                                     <span class="input-group-addon"><i class="fa fa-search" aria-hidden="true"></i></span>
-                                    <input id="browserNavFieldsPanel_filter_input" type="text" class="form-control" placeholder="Search field" aria-describedby="sizing-addon1">
+                                    <input id="browserNavFieldsPanel_filter_input" type="text" class="form-control" placeholder="Search field">
                                 </div>
                             </form>
                             
                             <div id="annotation_fields_list" style="overflow:scroll; height:500px; overflow-x:hidden;">
-                            {% for db_id, db in annotations_db.items() %}
-                            <h3>{{db["name"]}} <span>({{db["version"]}})</span></h3>
-                            <p style="font-style:italic;">{{db["description"]}}</p>
-                            <table>
-                                {% for f in db["fields"] %}
-                                <tr>
-                                    <td style="width:20px; vertical-align:top;"><input type="checkbox" id="annotation_fields_field_{{f["id"]}}" onchange="javascript:filter_toggle_field(this, {{f["id"]}});"/></td>
-                                    <td style="width:250px; vertical-align:top;">{{f["name"]}}</td>
-                                    <td style="font-style:italic; color:#999;">{{ f["desc"]}}</td>
-                                </tr>
-                                {% endfor %}
-                            </table>
-                            {% endfor %}
+                            
                             </div>
                             <div class="modal-footer">
                                 <button type="button" class="btn btn-default" data-dismiss="modal" onclick="javascript:load_variants_array();">Apply</button>
@@ -872,8 +860,9 @@
         }
 
 
-        var annotation_fields_autocomplete = [{% for db_id, db in annotations_db.items() %}{% for f in db["fields"] %}"{{db["name"]}}.{{f["name"]}}",{% endfor %}{% endfor %}];
-        var annotation_fields_autocomplete_info = [{% for db_id, db in annotations_db.items() %}{% for f in db["fields"] %}{"db_id" :  "{{db_id}}", "id" : "{{f["uid"]}}" },{% endfor %}{% endfor %}];
+        // Internal data for autocomplete form used to filter fields (populated in the ui.start_analysis() js method )
+        var annotation_fields_autocomplete = [];
+        var annotation_fields_autocomplete_info = [];
 
 
 
@@ -895,7 +884,10 @@
 
 
 
-
+        $('#browserNavFieldsPanel_filter_input').keyup(function () 
+        { 
+            ui.quick_filter_fields_selection($('#browserNavFieldsPanel_filter_input').val());
+        });
 
 
 
