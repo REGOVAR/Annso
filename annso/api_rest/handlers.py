@@ -130,7 +130,7 @@ def process_generic_get(query_string, allowed_fields):
 
 def notify_all(data):
     msg = json.dumps(data)
-    if data['msg'] != 'hello':
+    if 'msg' not in data.keys() or data['msg'] != 'hello':
         log ("API_rest Notify All : {0}".format(msg))
     for ws in WebsocketHandler.socket_list:
         ws[0].send_str(msg)

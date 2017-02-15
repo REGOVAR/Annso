@@ -946,7 +946,6 @@ var filter_form_map_operator = {
 
 function display_filter_form(fuid)
 {
-    debugger;
     if (fuid == undefined )
     {
         $('#modal_filter_field_form').html("");

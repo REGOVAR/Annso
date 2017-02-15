@@ -38,6 +38,25 @@ def humansize(nbytes):
 
 
 
+def array_diff(array1, array2):
+    """
+        Return the list of element in array2 that are not in array1
+    """
+    return [f for f in array2 if f not in array1]
+
+
+def array_merge(array1, array2):
+    """
+        Merge the two arrays in one (by removing duplicates)
+    """
+    result = []
+    for f in array1:
+        if f not in result:
+            result.append(f)
+    for f in array2:
+        if f not in result:
+            result.append(f)
+    return result
 
 
 
