@@ -293,11 +293,10 @@ class AnalysisHandler:
         # 1- Retrieve data from request
         data = await request.json()
         name = data["name"]
-        template_id = None # data["template_id"] # TODO
-        # data["samples"] # TODO ?
-        # data["attributes"] # TODO ?
+        ref_id = data["ref_id"]
+        template_id = data["template_id"]
         # Create the project 
-        analysis, success = annso.analysis.create(name, template_id)
+        analysis, success = annso.analysis.create(name, ref_id, template_id)
         if not success or analysis is None:
             return rest_error("Unable to create an analsis with provided information.")
         return rest_success(analysis)
@@ -390,6 +389,24 @@ class AnalysisHandler:
         except Exception as err :
             return rest_error("AnalysisHandler.get_selection error : " + str(err))
         return rest_success(result)
+
+
+    async def load_ped(self, request):
+        ped = await request.content.read()
+        analysis_id = request.match_info.get('analysis_id', -1)
+        # write ped file in temporary cache directory
+        file_path = os.path.join(DOWNLOAD_DIR, "tpm_{}.ped".format(analysis_id))
+        with open(file_path, "w") as f:
+            f.write(ped)
+        # update model
+        try:
+            annso.analysis.load_ped(file_path)
+        except Exception as err :
+            os.remove(file_path)
+            return rest_error("Error occured ! Wrong Ped file : " + str(err))
+        os.remove(file_path)
+        return rest_success(result)
+        
 
 
 

@@ -58,6 +58,7 @@ app.router.add_route('GET',    "/v1/sample/{sample_id}", sampleHandler.get_sampl
 app.router.add_route('POST',   "/v1/analysis", analysisHandler.create_analysis)                                 # Create new analysis
 app.router.add_route('GET',    "/v1/analysis/{analysis_id}", analysisHandler.get_analysis)                      # Get analysis metadata
 app.router.add_route('PUT',    "/v1/analysis/{analysis_id}", analysisHandler.set_analysis)                      # Save analysis metadata
+app.router.add_route('POST',   "/v1/analysis/{analysis_id}/ped", analysisHandler.load_ped)                      # Load ped file and update sample attributes accordingly
 app.router.add_route('GET',    "/v1/analysis/{analysis_id}/setting", analysisHandler.get_setting)               # TODO : Get analysis setting (NEED ??)
 app.router.add_route('GET',    "/v1/analysis/{analysis_id}/filter", analysisHandler.get_filters)                # Get list of available filter for the provided analysis
 app.router.add_route('POST',   "/v1/analysis/{analysis_id}/filter", analysisHandler.new_filter)                 # Create a new filter for the analisis

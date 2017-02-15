@@ -10,7 +10,8 @@
 --
 
 
-CREATE TYPE field_type AS ENUM ('int', 'string', 'float', 'percent', 'enum', 'range', 'bool');
+CREATE TYPE field_type AS ENUM ('int', 'string', 'float', 'percent', 'enum', 'range', 'bool', 'list_i', 'list_s', 'list_f', 'list_p', 'list_b');
+CREATE TYPE annotation_db_type AS ENUM ('variant', 'site');
 
 
 
@@ -45,6 +46,8 @@ CREATE TABLE public.analysis
     creation_date timestamp without time zone,
     update_date timestamp without time zone,
     total_variants integer DEFAULT 0,
+    status character varying(20) COLLATE pg_catalog."C.UTF-8",
+    reference_id integer DEFAULT 2,  -- 2 is for Hg19
     CONSTRAINT analysis_pkey PRIMARY KEY (id),
     CONSTRAINT analysis_template_id_fkey FOREIGN KEY (template_id)
         REFERENCES public."template" (id) MATCH SIMPLE
@@ -57,7 +60,8 @@ ALTER TABLE public.analysis OWNER TO annso;
 
 CREATE TABLE public.report
 (
-    analysis_id integer NOT NULL,
+    id serial NOT NULL,
+    analysis_id integer,
     name character varying(50) COLLATE pg_catalog."C.UTF-8",
     path character varying(250) COLLATE pg_catalog."C.UTF-8",
     type character varying(50) COLLATE pg_catalog."C.UTF-8",
@@ -211,9 +215,7 @@ CREATE TABLE public.variant_hg19
     ref text NOT NULL,
     alt text NOT NULL,
     is_transition boolean,
-
     sample_list integer[],
-    caller_list character varying(50)[] COLLATE pg_catalog."C.UTF-8",
     CONSTRAINT variant_hg19_pkey PRIMARY KEY (id),
     CONSTRAINT variant_hg19_ukey UNIQUE (chr, pos, ref, alt)
 );
@@ -260,6 +262,7 @@ CREATE TABLE public.annotation_database
     version character varying(255) COLLATE pg_catalog."C.UTF-8" NOT NULL,
     name_ui character varying(255) COLLATE pg_catalog."C.UTF-8",
     description text,
+    type annotation_db_type,
     ord integer,
     url character varying(255) COLLATE pg_catalog."C.UTF-8" ,
     update_date timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
@@ -280,7 +283,8 @@ CREATE TABLE public.annotation_field
     ord integer,
     description text,
     type field_type,
-    meta character varying(1000) COLLATE pg_catalog."C.UTF-8",
+    meta text,
+    wt_default boolean DEFAULT False,
     CONSTRAINT annotation_field_pkey PRIMARY KEY (database_uid, name)
 );
 ALTER TABLE public.annotation_field OWNER TO annso;
@@ -425,41 +429,87 @@ INSERT INTO public."parameter" (key, description, value) VALUES
 -- 8beee586e1cd098bc64b48403ed7755d = SELECT MD5(concat(reference_id=1, name='Variant', version=NULL))
 -- d9121852fc1a279b95cb7e18c976f112 = SELECT MD5(concat(reference_id=2, name='Variant', version=NULL))
 -- 7363e34fee56d2cb43583f9bd19d3980 = SELECT MD5(concat(reference_id=3, name='Variant', version=NULL))
-INSERT INTO public.annotation_database(uid, reference_id, name, version, name_ui, description, url, ord, update_date, jointure) VALUESINSERT INTO public.annotation_database(uid, reference_id, name, version, name_ui, description, url, ord, update_date, jointure) VALUES
-      ('8beee586e1cd098bc64b48403ed7755d', 1, 'sample_variant_hg18', '', 'Variant', 'Basic information about the variant.', '',  0, CURRENT_TIMESTAMP, 'sample_variant_hg18'),
-      ('d9121852fc1a279b95cb7e18c976f112', 2, 'sample_variant_hg19', '', 'Variant', 'Basic information about the variant.', '',  0, CURRENT_TIMESTAMP, 'sample_variant_hg19'),
-      ('7363e34fee56d2cb43583f9bd19d3980', 3, 'sample_variant_hg38', '', 'Variant', 'Basic information about the variant.', '',  0, CURRENT_TIMESTAMP, 'sample_variant_hg38');
+INSERT INTO public.annotation_database(uid, reference_id, name, version, name_ui, description, url, ord, update_date, jointure, type) VALUES
+      ('8beee586e1cd098bc64b48403ed7755d', 1, 'sample_variant_hg18', '', 'Variant', 'Basic information about the variant.', '',  0, CURRENT_TIMESTAMP, 'sample_variant_hg18', 'variant'),
+      ('d9121852fc1a279b95cb7e18c976f112', 2, 'sample_variant_hg19', '', 'Variant', 'Basic information about the variant.', '',  0, CURRENT_TIMESTAMP, 'sample_variant_hg19', 'variant'),
+      ('7363e34fee56d2cb43583f9bd19d3980', 3, 'sample_variant_hg38', '', 'Variant', 'Basic information about the variant.', '',  0, CURRENT_TIMESTAMP, 'sample_variant_hg38', 'variant');
 
 
-INSERT INTO public.annotation_field(database_uid, ord, name, name_ui, type, description, meta) VALUES
-  ('8beee586e1cd098bc64b48403ed7755d', 1,  'sample_id', 'sample', 'int',    'Sample that have the variant.', NULL),
-  ('8beee586e1cd098bc64b48403ed7755d', 2,  'variant_id','id',     'int',    'Variant unique id in the database.', NULL),
-  ('8beee586e1cd098bc64b48403ed7755d', 3,  'chr',       'chr',    'enum',   'Chromosome.', '{"enum": {"1": "1", "2": "2", "3": "3", "4": "4", "5": "5", "6": "6", "7": "7", "8": "8", "9": "9", "10": "10", "11": "11", "12": "12", "13": "13", "14": "14", "15": "15", "16": "16", "17": "17", "18": "18", "19": "19", "20": "20", "21": "21", "22": "22", "23": "X", "24": "Y", "25": "M"}}'),
-  ('8beee586e1cd098bc64b48403ed7755d', 4,  'pos',       'pos',    'int',    'Position of the variant in the chromosome.', NULL),
-  ('8beee586e1cd098bc64b48403ed7755d', 5,  'ref',       'ref',    'string', 'Reference sequence.', NULL),
-  ('8beee586e1cd098bc64b48403ed7755d', 6,  'alt',       'alt',    'string', 'Alternative sequence of the variant.', NULL),
-  ('8beee586e1cd098bc64b48403ed7755d', 10, 'genotype',  'GT',     'enum',   'Genotype.', '{"enum" : {"0":"ref/ref", "1":"alt/alt", "2":"ref/alt", "3":"alt1/alt2"}}'),
-  ('8beee586e1cd098bc64b48403ed7755d', 20, 'depth',     'DP',     'float',  'Depth.', NULL);
+INSERT INTO public.annotation_field(database_uid, ord, wt_default, name, name_ui, type, description, meta) VALUES
+  ('8beee586e1cd098bc64b48403ed7755d', 1,  True, 'variant_id','id',     'int',    'Variant unique id in the database.', NULL),
+  ('8beee586e1cd098bc64b48403ed7755d', 2,  True, 'sample_id', 'sample', 'int',    'Sample that have the variant.', NULL),
+  ('8beee586e1cd098bc64b48403ed7755d', 3,  True, 'chr',       'chr',    'enum',   'Chromosome.', '{"enum": {"1": "1", "2": "2", "3": "3", "4": "4", "5": "5", "6": "6", "7": "7", "8": "8", "9": "9", "10": "10", "11": "11", "12": "12", "13": "13", "14": "14", "15": "15", "16": "16", "17": "17", "18": "18", "19": "19", "20": "20", "21": "21", "22": "22", "23": "X", "24": "Y", "25": "M"}}'),
+  ('8beee586e1cd098bc64b48403ed7755d', 4,  True, 'pos',       'pos',    'int',    'Position of the variant in the chromosome.', NULL),
+  ('8beee586e1cd098bc64b48403ed7755d', 5,  True, 'ref',       'ref',    'string', 'Reference sequence.', NULL),
+  ('8beee586e1cd098bc64b48403ed7755d', 6,  True, 'alt',       'alt',    'string', 'Alternative sequence of the variant.', NULL),
+  ('8beee586e1cd098bc64b48403ed7755d', 7,  True, 'sample_tlist',  'samples total',          'string', 'List of sample (whole database) that have the variant.', NULL),
+  ('8beee586e1cd098bc64b48403ed7755d', 8,  True, 'sample_tcount', 'samples total count',    'int',    'Number of sample (whole database) that have the variant.', NULL),
+  ('8beee586e1cd098bc64b48403ed7755d', 9,  True, 'sample_alist',  'samples analysis',       'string', 'List of sample (in the analysis) that have the variant.', NULL),
+  ('8beee586e1cd098bc64b48403ed7755d', 10, True, 'sample_acount', 'samples analysis count', 'int',    'Number of sample (in the analysis) that have the variant.', NULL),
+  ('8beee586e1cd098bc64b48403ed7755d', 20, True, 'genotype',  'GT',     'enum',   'Genotype.', '{"enum" : {"0":"ref/ref", "1":"alt/alt", "2":"ref/alt", "3":"alt1/alt2"}}'),
+  ('8beee586e1cd098bc64b48403ed7755d', 30, True, 'depth',     'DP',     'float',  'Depth.', NULL);
 
-INSERT INTO public.annotation_field(database_uid, ord, name, name_ui, type, description, meta) VALUES
-  ('d9121852fc1a279b95cb7e18c976f112', 1,  'sample_id', 'sample', 'int',    'Sample that have the variant.', NULL),
-  ('d9121852fc1a279b95cb7e18c976f112', 2,  'variant_id','id',     'int',    'Variant unique id in the database.', NULL),
-  ('d9121852fc1a279b95cb7e18c976f112', 3,  'chr',       'chr',    'enum',   'Chromosome.', '{"enum": {"1": "1", "2": "2", "3": "3", "4": "4", "5": "5", "6": "6", "7": "7", "8": "8", "9": "9", "10": "10", "11": "11", "12": "12", "13": "13", "14": "14", "15": "15", "16": "16", "17": "17", "18": "18", "19": "19", "20": "20", "21": "21", "22": "22", "23": "X", "24": "Y", "25": "M"}}'),
-  ('d9121852fc1a279b95cb7e18c976f112', 4,  'pos',       'pos',    'int',    'Position of the variant in the chromosome.', NULL),
-  ('d9121852fc1a279b95cb7e18c976f112', 5,  'ref',       'ref',    'string', 'Reference sequence.', NULL),
-  ('d9121852fc1a279b95cb7e18c976f112', 6,  'alt',       'alt',    'string', 'Alternative sequence of the variant.', NULL),
-  ('d9121852fc1a279b95cb7e18c976f112', 10, 'genotype',  'GT',     'enum',   'Genotype.', '{"enum" : {"0":"ref/ref", "1":"alt/alt", "2":"ref/alt", "3":"alt1/alt2"}}'),
-  ('d9121852fc1a279b95cb7e18c976f112', 20, 'depth',     'DP',     'float',  'Depth.', NULL);
+INSERT INTO public.annotation_field(database_uid, ord, wt_default, name, name_ui, type, description, meta) VALUES
+  ('d9121852fc1a279b95cb7e18c976f112', 1,  True, 'variant_id','id',     'int',    'Variant unique id in the database.', NULL),
+  ('d9121852fc1a279b95cb7e18c976f112', 2,  True, 'sample_id', 'sample', 'int',    'Sample that have the variant.', NULL),
+  ('d9121852fc1a279b95cb7e18c976f112', 3,  True, 'chr',       'chr',    'enum',   'Chromosome.', '{"enum": {"1": "1", "2": "2", "3": "3", "4": "4", "5": "5", "6": "6", "7": "7", "8": "8", "9": "9", "10": "10", "11": "11", "12": "12", "13": "13", "14": "14", "15": "15", "16": "16", "17": "17", "18": "18", "19": "19", "20": "20", "21": "21", "22": "22", "23": "X", "24": "Y", "25": "M"}}'),
+  ('d9121852fc1a279b95cb7e18c976f112', 4,  True, 'pos',       'pos',    'int',    'Position of the variant in the chromosome.', NULL),
+  ('d9121852fc1a279b95cb7e18c976f112', 5,  True, 'ref',       'ref',    'string', 'Reference sequence.', NULL),
+  ('d9121852fc1a279b95cb7e18c976f112', 6,  True, 'alt',       'alt',    'string', 'Alternative sequence of the variant.', NULL),
+  ('d9121852fc1a279b95cb7e18c976f112', 7,  True, 'sample_tlist',  'samples total',          'string', 'List of sample (whole database) that have the variant.', NULL),
+  ('d9121852fc1a279b95cb7e18c976f112', 8,  True, 'sample_tcount', 'samples total count',    'int',    'Number of sample (whole database) that have the variant.', NULL),
+  ('d9121852fc1a279b95cb7e18c976f112', 9,  True, 'sample_alist',  'samples analysis',       'string', 'List of sample (in the analysis) that have the variant.', NULL),
+  ('d9121852fc1a279b95cb7e18c976f112', 10, True, 'sample_acount', 'samples analysis count', 'int',    'Number of sample (in the analysis) that have the variant.', NULL),
+  ('d9121852fc1a279b95cb7e18c976f112', 20, True, 'genotype',  'GT',     'enum',   'Genotype.', '{"enum" : {"0":"ref/ref", "1":"alt/alt", "2":"ref/alt", "3":"alt1/alt2"}}'),
+  ('d9121852fc1a279b95cb7e18c976f112', 30, True, 'depth',     'DP',     'float',  'Depth.', NULL);
 
-INSERT INTO public.annotation_field(database_uid, ord, name, name_ui, type, description, meta) VALUES
-  ('7363e34fee56d2cb43583f9bd19d3980', 1,  'sample_id', 'sample', 'int',    'Sample that have the variant.', NULL),
-  ('7363e34fee56d2cb43583f9bd19d3980', 2,  'variant_id','id',     'int',    'Variant unique id in the database.', NULL),
-  ('7363e34fee56d2cb43583f9bd19d3980', 3,  'chr',       'chr',    'enum',   'Chromosome.', '{"enum": {"1": "1", "2": "2", "3": "3", "4": "4", "5": "5", "6": "6", "7": "7", "8": "8", "9": "9", "10": "10", "11": "11", "12": "12", "13": "13", "14": "14", "15": "15", "16": "16", "17": "17", "18": "18", "19": "19", "20": "20", "21": "21", "22": "22", "23": "X", "24": "Y", "25": "M"}}'),
-  ('7363e34fee56d2cb43583f9bd19d3980', 4,  'pos',       'pos',    'int',    'Position of the variant in the chromosome.', NULL),
-  ('7363e34fee56d2cb43583f9bd19d3980', 5,  'ref',       'ref',    'string', 'Reference sequence.', NULL),
-  ('7363e34fee56d2cb43583f9bd19d3980', 6,  'alt',       'alt',    'string', 'Alternative sequence of the variant.', NULL),
-  ('7363e34fee56d2cb43583f9bd19d3980', 10, 'genotype',  'GT',     'enum',   'Genotype.', '{"enum" : {"0":"ref/ref", "1":"alt/alt", "2":"ref/alt", "3":"alt1/alt2"}}'),
-  ('7363e34fee56d2cb43583f9bd19d3980', 20, 'depth',     'DP',     'float',  'Depth.', NULL);
+INSERT INTO public.annotation_field(database_uid, ord, wt_default, name, name_ui, type, description, meta) VALUES
+  ('7363e34fee56d2cb43583f9bd19d3980', 1,  True, 'variant_id','id',     'int',    'Variant unique id in the database.', NULL),
+  ('7363e34fee56d2cb43583f9bd19d3980', 2,  True, 'sample_id', 'sample', 'int',    'Sample that have the variant.', NULL),
+  ('7363e34fee56d2cb43583f9bd19d3980', 3,  True, 'chr',       'chr',    'enum',   'Chromosome.', '{"enum": {"1": "1", "2": "2", "3": "3", "4": "4", "5": "5", "6": "6", "7": "7", "8": "8", "9": "9", "10": "10", "11": "11", "12": "12", "13": "13", "14": "14", "15": "15", "16": "16", "17": "17", "18": "18", "19": "19", "20": "20", "21": "21", "22": "22", "23": "X", "24": "Y", "25": "M"}}'),
+  ('7363e34fee56d2cb43583f9bd19d3980', 4,  True, 'pos',       'pos',    'int',    'Position of the variant in the chromosome.', NULL),
+  ('7363e34fee56d2cb43583f9bd19d3980', 5,  True, 'ref',       'ref',    'string', 'Reference sequence.', NULL),
+  ('7363e34fee56d2cb43583f9bd19d3980', 6,  True, 'alt',       'alt',    'string', 'Alternative sequence of the variant.', NULL),
+  ('7363e34fee56d2cb43583f9bd19d3980', 7,  True, 'sample_tlist',  'samples total',          'string', 'List of sample (whole database) that have the variant.', NULL),
+  ('7363e34fee56d2cb43583f9bd19d3980', 8,  True, 'sample_tcount', 'samples total count',    'int',    'Number of sample (whole database) that have the variant.', NULL),
+  ('7363e34fee56d2cb43583f9bd19d3980', 9,  True, 'sample_alist',  'samples analysis',       'string', 'List of sample (in the analysis) that have the variant.', NULL),
+  ('7363e34fee56d2cb43583f9bd19d3980', 10, True, 'sample_acount', 'samples analysis count', 'int',    'Number of sample (in the analysis) that have the variant.', NULL),
+  ('7363e34fee56d2cb43583f9bd19d3980', 20, True, 'genotype',  'GT',     'enum',   'Genotype.', '{"enum" : {"0":"ref/ref", "1":"alt/alt", "2":"ref/alt", "3":"alt1/alt2"}}'),
+  ('7363e34fee56d2cb43583f9bd19d3980', 30, True, 'depth',     'DP',     'float',  'Depth.', NULL);
 
 
 UPDATE annotation_field SET uid=MD5(concat(database_uid, name))
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+-- --------------------------------------------
+-- FUNCTIONS
+-- --------------------------------------------
+CREATE FUNCTION array_intersect(anyarray, anyarray)
+  RETURNS integer ARRAY
+  language sql
+as $FUNCTION$
+    SELECT ARRAY(
+        SELECT UNNEST($1)
+        INTERSECT
+        SELECT UNNEST($2)
+    );
+$FUNCTION$;

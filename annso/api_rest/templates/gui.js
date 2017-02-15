@@ -53,13 +53,13 @@ function AnnsoControler () {
 
     // ------------------------------------------------------------------
     // New analysis
-    this.new_analysis = function (name, template_id)
+    this.new_analysis = function (name, ref_id, template_id)
     {
         $.ajax(
         {
             url: "{0}/analysis".format(rootURL),
             type: "POST",
-            data: '{"name" : "{0}", "template_id" : {1}}'.format(name, template_id),
+            data: '{"name" : "{0}", "ref_id":{1}, "template_id" : {2}}'.format(name, ref_id, template_id),
             async: false
         }).fail(function() { display_error("TODO : network error"); })
         .done(function(json)
@@ -430,11 +430,12 @@ function AnnsoUIControler ()
     this.create_analysis = function ()
     {
         var analysis_name = $('#modal_new_analysis_name').val();
-        var template_id = -1;
+        var analysis_ref  = $('#modal_import_file_ref').find(":selected").val();
+        var template_id = null;
 
         if (analysis_name != "")
         {
-            analysis.new_analysis(analysis_name, template_id);
+            analysis.new_analysis(analysis_name, analysis_ref, template_id);
         }
         else
         {

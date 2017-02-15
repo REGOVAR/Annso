@@ -89,14 +89,6 @@
                         <!-- SAMPLE TOOLBAR -->
                         <!--                -->
                         <div id="sample_toolbar" class="collapse">
-                            <form class="form-inline" style="display:block; float: right; margin: 9px 9px 0 9px;">
-                                <span id="sample_qfilter_message" style="color:#999" style="font-style:italic"></span>
-                                <span id="sample_qfilter_warning" class="text-danger" style="font-style:italic"></span>
-                                <div class="input-group">
-                                    <span class="input-group-addon"><i class="fa fa-search" aria-hidden="true"></i></span>
-                                    <input id="sample_qfilter_input" type="text" class="form-control" placeholder="Filter samples" aria-describedby="sizing-addon1">
-                                </div>
-                            </form>
 
                             <div style="padding:10px; margin-left:75px; border-left: 1px solid #ddd;">
                                 <div class="btn-group ">
@@ -109,8 +101,11 @@
                                 </div>
                                 &nbsp;
                                 <div id="" class="btn-group ">
-                                    <a class="btn btn-default" href="#modal_import_local_file" title="Import sample data" data-toggle="modal" onclick="javascript:ui.new_attribute();">
-                                        <i class="fa fa-tag" style="width:20px; text-align:center;" aria-hidden="true"></i> New attribute
+                                    <a class="btn btn-default" href="#modal_import_ped_file" title="Import PED file" data-toggle="modal">
+                                        <i class="fa fa-tag" style="width:20px; text-align:center;" aria-hidden="true"></i> Load PED file
+                                    </a>
+                                    <a class="btn btn-default" href="#" title="Add custom attribute to sample" onclick="javascript:ui.new_attribute();">
+                                        <i class="fa fa-tag" style="width:20px; text-align:center;" aria-hidden="true"></i> Custom attribute
                                     </a>
                                 </div>
                             </div>
@@ -528,9 +523,13 @@
                                     <span class="input-group-addon"><i class="fa fa-folder" aria-hidden="true"></i></span>
                                     <input type="text" id="modal_new_analysis_name" placeholder="The name of your analysis" class="form-control">
                                 </div>
-                                <div class="input-group">
-                                    <span class="input-group-addon"><i class="fa fa-folder" aria-hidden="true"></i></span>
-                                    <input type="text" id="modal_new_analysis_name" placeholder="The name of your analysis" class="form-control">
+                                <div class="input-group" style="margin-top:5px;">
+                                    Referencial :
+                                    <select id="modal_import_file_ref">
+                                    {% for ref_id, refname in annotations_db_ref.items() %}
+                                        <option value="{{ref_id}}">{{refname}}</option>
+                                    {% endfor %}
+                                    </select>
                                 </div>
                             </form>
 
@@ -562,11 +561,11 @@
                             <form class="form">
                                 <div class="input-group">
 
-                                    <input type="hidden" id="modal_new_file_tus_endpoint" name="modal_new_file_tus_endpoint" value="http://{{ hostname }}/sample/upload">
-                                    <input type="hidden" id="modal_new_file_tus_chunksize" name="modal_new_file_tus_chunksize" value="256000">
+                                    <input type="hidden" id="modal_new_file_tus_endpoint" name="modal_new_file_tus_endpoint" value="http://{{ hostname }}/sample/upload"/>
+                                    <input type="hidden" id="modal_new_file_tus_chunksize" name="modal_new_file_tus_chunksize" value="256000"/>
 
                                     <span class="input-group-addon"><i class="fa fa-file" aria-hidden="true"></i></span>
-                                    <input type="file" id="modal_import_file_tus_localinput" class="form-control">
+                                    <input type="file" id="modal_import_file_tus_localinput" class="form-control" />
                                 </div>
                             </form>
                             <div id="modal_new_file_details" class="hidden">
@@ -588,9 +587,6 @@
 
 
 
-
-
-
             <!--                                   -->
             <!-- MODAL POPUP - DB Sample selection -->
             <!--                                   -->
@@ -608,6 +604,38 @@
                         </div>
                         <div class="modal-footer">
                             <button id="modal_new_file_cancel_btn" type="button" class="btn btn-default" data-dismiss="modal">Done</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
+
+            <!--                                    -->
+            <!-- MODAL POPUP - PED Sample selection -->
+            <!--                                    -->
+            <div id="modal_import_ped_file" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+                <div class="modal-dialog" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                            <h4 class="modal-title"><i class="fa fa-folder-open-o" aria-hidden="true"></i> Import PED file for this analysis</h4>
+                        </div>
+                        <div id="modal_import_ped_file_content" class="modal-body" style="height:450px;">
+                            <form class="form">
+                                <div class="input-group">
+
+                                    <span class="input-group-addon"><i class="fa fa-file" aria-hidden="true"></i></span>
+                                    <input type="file" id="modal_import_ped_file" class="form-control">
+                                </div>
+                            </form>
+                            
+
+                        </div>
+
+                        <div class="modal-footer">
+                            <button id="modal_import_ped_file_cancel_btn" type="button" class="btn btn-default" data-dismiss="modal">Cancel</button> &nbsp; 
+                            <button id="modal_import_ped_file_start_btn" type="button" class="btn btn-success" onclick="javascript:ui.ped_upload();">Load PED file</button>
                         </div>
                     </div>
                 </div>
