@@ -211,7 +211,7 @@ function AnnsoControler () {
         }
 
         $.ajax({ 
-            url: "{0}/analysis/{1}/savefilter".format(rootURL, analysis.analysis.id), 
+            url: "{0}/analysis/{1}/filter".format(rootURL, analysis.analysis.id), 
             type: "POST", 
             data: JSON.stringify({'name': name, 'filter':analysis.analysis.filter}),
             async: false}).fail(function() { display_error("TODO : network error"); })

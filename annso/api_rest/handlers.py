@@ -345,6 +345,7 @@ class AnalysisHandler:
         try :
             result = annso.filter.request(int(analysis_id), mode, filter_json, fields, int(limit), int(offset), count)
         except Exception as err :
+            ipdb.set_trace()
             return rest_error("Filtering error : " + str(err))
         return rest_success(result)
 

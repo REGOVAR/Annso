@@ -690,7 +690,8 @@ class FilterEngine:
             Update annotation of the working table of an analysis. The working table shall already exists
         """
         # Get list of fields to add in the wt
-        total = db_engine.execute("SELECT total_variants from analysis WHERE id={}".format (analysis_id)).first().total_variants
+        analysis = Analysis.from_id(analysis_id)
+        total = analysis.total_variants
         diff_fields = []
         diff_dbs = []
         progress = { "msg" : "wt_processing", "start" : datetime.datetime.now().ctime(), "analysis_id" : analysis_id, "step" : 2, "progress_total" : total, "progress_current" : 0 }
@@ -762,13 +763,18 @@ class FilterEngine:
         # Loop to update working table filter
         progress.update({"step" : 5})
         annso.notify_all(progress)
-        query = ""
-        for fid in filter_ids:
+        
+        for f_id in filter_ids:
             if 'filter_{}'.format(f_id) not in current_fields:
-                q = self.build_query(analysis_id, mode, json.loads(db_engine.execute("SELECT filter FROM filter WHERE id={}".format(fid)).first().filter), ['variant_id'], limit)
-                query += "UPDATE wt_{} SET filter_{}=True WHERE variant_id IN ({}); ".format(analysis_id, fid, q[0] )
-        if query != "":
-            db_engine.execute(query)
+                f_filter = json.loads(db_engine.execute("SELECT filter FROM filter WHERE id={}".format(f_id)).first().filter)
+                q = self.build_query(analysis_id, analysis.reference_id, 'table', f_filter, [], None)
+                queries = q[0]
+                if len(queries) > 0:
+                    query = ""
+                    for q in queries[:-1]:
+                        query += q
+                    query += "UPDATE wt_{} SET filter_{}=True WHERE variant_id IN ({}); ".format(analysis_id, f_id, queries[-1].strip()[:-1] )
+                    db_engine.execute(query)
 
 
         progress.update({"step" : 6})
@@ -799,7 +805,6 @@ class FilterEngine:
         if type(analysis_id) != int or analysis_id <=0 : analysis_id = None
         if mode not in ["table", "list"]: mode = "table"
 
-
         # Get analysis data and check status if ok to do filtering
         analysis = Analysis.from_id(analysis_id)
         if analysis is None:
@@ -817,11 +822,9 @@ class FilterEngine:
         # Execute query
         sql_result = None
         with Timer() as t:
-            sql_result = db_engine.execute(query)
-        log ("---\nFields :\n{0}\nFilter :\n{1}\nQuery :\n{2}\nRequest query : {3}".format(fields, filter_json, query, t))
+            sql_result = db_engine.execute(' '.join(query))
+        log ("---\nFields :\n{0}\nFilter :\n{1}\nQuery :\n{2}\nRequest query : {3}".format(fields, filter_json, '\n'.join(query), t))
         
-        
-
         # Save filter in analysis settings
         if not count and (analysis_id > 0):
             settings = {}
@@ -833,8 +836,6 @@ class FilterEngine:
             except : 
                 # TODO : log error
                 err ("Not able to save current filter")        
-
-
 
         # Get result
         if count:
@@ -863,7 +864,7 @@ class FilterEngine:
             fields, databases, sample, etc... all information that could be used by the analysis to work.
         """
         # Data that will be computed and returned by this method !
-        query      = "" # sql query that correspond to the provided parameters
+        query      = [] # sql queries that correspond to the provided parameters (we will have several queries if need to create temp tables)
         field_uids = [] # list of annotation field's uids that need to be present in the analysis working table
         db_uids    = [] # list of annotation databases uids used for the analysis
         sample_ids = [] # list of sample's ids used for the analysis
@@ -887,15 +888,15 @@ class FilterEngine:
                 db_uids.append(row.duid)
             field_uids.append(row.uid)
 
-        # Retrieve saved filter's ids of the analysis
+        # Retrieve saved filter's ids of the analysis - and parse their filter to get list of dbs/fields used by filters
         for row in db_session.execute("select id, filter from filter where analysis_id={0} ORDER BY id ASC".format(analysis_id)): # ORDER BY is important as a filter can "called" an oldest filter to be build.
             filter_ids.append(row.id)
-            q, f, d = self.parse_filter(analysis_id, mode, sample_ids, row.filter, fields)
+            q, f, d = self.parse_filter(analysis_id, mode, sample_ids, row.filter, fields, None)
             field_uids = array_merge(field_uids, f)
             db_uids = array_merge(db_uids, d)
 
         # Parse the current filter
-        query, f, d = self.parse_filter(analysis_id, mode, sample_ids, filter, fields)
+        query, f, d = self.parse_filter(analysis_id, mode, sample_ids, filter, fields, limit, offset, count)
         field_uids = array_merge(field_uids, f)
         db_uids    = array_merge(db_uids, d)
         
@@ -906,7 +907,7 @@ class FilterEngine:
 
 
 
-    def parse_filter(self, analysis_id, mode, sample_ids, filter, fields, limit=100, offset=0, count=False):
+    def parse_filter(self, analysis_id, mode, sample_ids, filters, fields=[], limit=100, offset=0, count=False):
         # Get working table
         wt = 'wt_{}'.format(analysis_id)
         query = ""
@@ -923,7 +924,7 @@ class FilterEngine:
                 fields_names.append('{}.{}'.format(wt, self.fields_map[f_uid]["name"]))
             else:
                 fields_names.append('{}._{}'.format(wt, f_uid))
-        q_select = 'variant_id, ' + ', '.join(fields_names)
+        q_select = 'variant_id{} {}'.format(',' if len(fields_names)>0 else '', ', '.join(fields_names))
 
         # Build FROM/JOIN
         q_from = wt 
@@ -978,7 +979,10 @@ class FilterEngine:
                     tmp_table_query = ttable_quer_map.format(tmp_table_name, "SELECT DISTINCT {0}.bin, {0}.chr, {0}.pos, {0}.ref, {0}.alt FROM {0} WHERE {0}.sample_id={1}".format(wt, data[1]))
             elif (data[0] == 'filter') :
                 tmp_table_name  = "tmp_filter_{0}".format(data[1])
-                tmp_table_query = ttable_quer_map.format(tmp_table_name, "#Retrieve query in database" ) 
+                if mode == 'site':
+                    tmp_table_query = ttable_quer_map.format(tmp_table_name, "SELECT DISTINCT {0}.bin, {0}.chr, {0}.pos FROM {0} WHERE {0}.filter_{1}=True".format(wt, data[1]))
+                else : # if mode = 'variant' :
+                    tmp_table_query = ttable_quer_map.format(tmp_table_name, "SELECT DISTINCT {0}.bin, {0}.chr, {0}.pos, {0}.ref, {0}.alt FROM {0} WHERE {0}.filter_{1}=True".format(wt, data[1]))
             elif (data[0] == 'attribute') :
                 key, value = data[1].split(':')
                 tmp_table_name    = "tmp_attribute_{0}_{1}_{2}_{3}".format(analysis_id, key, value, mode)
@@ -1011,8 +1015,8 @@ class FilterEngine:
         elif len(sample_ids) > 1:
             q_where = "{0}.sample_id IN ({1})".format(wt, ','.join(sample_ids))
 
-        q_where2 = build_filter(filter)
-        if  len(q_where2.strip()) > 0:
+        q_where2 = build_filter(filters)
+        if q_where2 is not None and len(q_where2.strip()) > 0:
             q_where += " AND " + q_where2
 
 
@@ -1022,157 +1026,19 @@ class FilterEngine:
         
 
         # build final query
-        query_tpm = "".join([t['query'] for t in temporary_to_import.values()])
+        query_tpm = [t['query'] for t in temporary_to_import.values()]
         if count:
             query_req = "SELECT DISTINCT {0} FROM {1} WHERE {2}".format(q_select, q_from, q_where)
-            query =  '{0} SELECT COUNT(*) FROM ({1}) AS sub;'.format(query_tpm, query_req)
+            query =  query_tpm + ['SELECT COUNT(*) FROM ({0}) AS sub;'.format(query_req)]
         else: 
-            query_req = "SELECT DISTINCT {0} FROM {1} WHERE {2} LIMIT {3} OFFSET {4};".format(q_select, q_from, q_where, limit, offset)
-            query =  query_tpm + query_req
+            query_req = "SELECT DISTINCT {0} FROM {1} WHERE {2} {3} {4};".format(q_select, q_from, q_where, 'LIMIT {}'.format(limit) if limit is not None else '', 'OFFSET {}'.format(offset) if offset is not None else '')
+            query =  query_tpm + [query_req]
 
 
         return query, field_uids, db_uids
 
 
 
-
-
-
-
-
-
-
-
-
-    def build_query_old(self, analysis_id, mode, filter_json, fields, limit=100, offset=0, count=False):
-        """
-            Build the sql query according to the annso filtering parameter and return the query and the name of the associated temps table
-        """
-        # Check parameter
-        if type(analysis_id) != int or analysis_id <=0 : analysis_id = None
-        if mode not in ["table", "list"]: mode = "table"
-
-        # Get sample ids used for the analysis
-        sample_ids = []
-        if analysis_id is not None : 
-            # Retrieve sample ids for the analysis 
-            for row in db_session.execute("select sample_id from analysis_sample where analysis_id = {0}".format(analysis_id)):
-                sample_ids.append(str(row.sample_id))
-
-        # Build SELECT
-        q_select = 'variant_id, ' + ', '.join(["{0}.{1}".format(self.fields_map[fuid]["db_name"], self.fields_map[fuid]["name"]) for fuid in fields])
-
-
-        # Build FROM/JOIN
-        # TODO : uid of the sample_variant_{ref} shall be retrieved from database according to the selected referencial.
-        tables_to_import = ['d9121852fc1a279b95cb7e18c976f112'] # This id is the uid for the sample_variant_{ref} table. We always need this table as it's used for the join with other tables
-        for fuid in fields:
-            if self.fields_map[fuid]["db_uid"] not in tables_to_import :
-                tables_to_import.append(self.fields_map[fuid]["db_uid"])
-        # Build WHERE 
-        temporary_to_import = {}
-
-        def build_filter(data):
-            """ Recursive method that build the query from the filter json data at operator level """
-            operator = data[0]
-            if operator in ['AND', 'OR']:
-                if len(data[1]) == 0 :
-                    return ''
-                return ' (' + FilterEngine.op_map[operator].join([build_filter(f) for f in data[1]]) + ') '
-
-            elif operator in ['==', '!=', '>', '<', '>=', '<=']:
-                if data[1][0] == 'field' :
-                    t = self.fields_map[data[1][1]]["type"]
-                elif (data[2][0] == 'field') :
-                    t = self.fields_map[data[2][1]]["type"]
-                else:
-                    t = 'string'
-                return '{0}{1}{2}'.format(parse_value(t, data[1]), FilterEngine.op_map[operator], parse_value(t, data[2]))
-
-            elif operator in ['IN', 'NOTIN']:
-                tmp_table = get_tmp_table(data[1], data[2])
-                temporary_to_import[tmp_table]['where'] = FilterEngine.op_map[operator].format(tmp_table, self.variant_table)
-                if data[1] == 'site' :
-                    temporary_to_import[tmp_table]['from']  = " LEFT JOIN {1} ON {0}.bin={1}.bin AND {0}.chr={1}.chr AND {0}.pos={1}.pos".format(self.variant_table, tmp_table)
-                else: #if data[1] == 'variant' :
-                    temporary_to_import[tmp_table]['from']  = " LEFT JOIN {1} ON {0}.bin={1}.bin AND {0}.chr={1}.chr AND {0}.pos={1}.pos AND {0}.ref={1}.ref AND {0}.alt={1}.alt".format(self.variant_table, tmp_table)
-                return temporary_to_import[tmp_table]['where']
-
-
-        def get_tmp_table(mode, data):
-            """ 
-                Parse json data to build temp table for ensemblist operation IN/NOTIN 
-                    mode : site or variant
-                    data : json data about the temp table to create
-            """
-            ttable_quer_map = "CREATE TEMP TABLE IF NOT EXISTS {0} WITHOUT OIDS ON COMMIT DROP AS {1}; "
-
-            if data[0] == 'sample' :
-                tmp_table_name    = "tmp_sample_{0}_{1}".format(data[1], mode)
-                if mode == 'site':
-                    tmp_table_query = ttable_quer_map.format(tmp_table_name, "SELECT DISTINCT {0}.bin, {0}.chr, {0}.pos FROM {0} WHERE {0}.sample_id={1}".format(self.variant_table, data[1]))
-                else : # if mode = 'variant' :
-                    tmp_table_query = ttable_quer_map.format(tmp_table_name, "SELECT DISTINCT {0}.bin, {0}.chr, {0}.pos, {0}.ref, {0}.alt FROM {0} WHERE {0}.sample_id={1}".format(self.variant_table, data[1]))
-
-            elif (data[0] == 'filter') :
-                tmp_table_name  = "tmp_filter_{0}".format(data[1])
-                tmp_table_query = ttable_quer_map.format(tmp_table_name, "#Retrieve query in database" ) 
-                
-            elif (data[0] == 'attribute') :
-                key, value = data[1].split(':')
-                tmp_table_name    = "tmp_attribute_{0}_{1}_{2}_{3}".format(analysis_id, key, value, mode)
-                if mode == 'site':
-                    tmp_table_query = ttable_quer_map.format(tmp_table_name, "SELECT DISTINCT {0}.bin, {0}.chr, {0}.pos FROM {0} INNER JOIN {1} ON {0}.sample_id={1}.sample_id AND {1}.analysis_id={2} AND {1}.name='{3}' AND {1}.value='{4}'".format(self.variant_table, 'attribute', analysis_id, key, value))
-                else : # if mode = 'variant' :
-                    tmp_table_query = ttable_quer_map.format(tmp_table_name, "SELECT DISTINCT {0}.bin, {0}.chr, {0}.pos, {0}.ref, {0}.alt FROM {0} INNER JOIN {1} ON {0}.sample_id={1}.sample_id AND {1}.analysis_id={2} AND {1}.name='{3}' AND {1}.value='{4}'".format(self.variant_table, 'attribute', analysis_id, key, value))
-
-            temporary_to_import[tmp_table_name] = {'query' : tmp_table_query}
-            return tmp_table_name
-
-
-        def parse_value(ftype, data):
-            if data[0] == 'field':
-                if self.fields_map[data[1]]["db_uid"] not in tables_to_import :
-                    tables_to_import.append(self.fields_map[data[1]]["db_uid"])
-
-                if self.fields_map[data[1]]["type"] == ftype :
-                    return "{0}.{1}".format(self.fields_map[data[1]]["db_name"], self.fields_map[data[1]]["name"])
-
-            if data[0] == 'value':
-                if ftype in ['int', 'float', 'enum', 'percent']:
-                    return str(data[1])
-                elif ftype == 'string':
-                    return "'{0}'".format(data[1])
-                elif ftype == 'range' and len(data) == 3:
-                    return 'int8range({0}, {1})'.format(data[1], data[2])
-
-            raise AnnsoException("FilterEngine.request.parse_value - Unknow type : {0} ({1})".format(ftype, data))
-
-
-        q_where = ""
-        if len(sample_ids) == 1 :
-            q_where = "{0}.sample_id={1}".format(self.variant_table, sample_ids[0])
-        elif len(sample_ids) > 1:
-            q_where = "{0}.sample_id IN ({1})".format(self.variant_table, ','.join(sample_ids))
-
-        q_where2 = build_filter(filter_json)
-        if  len(q_where2.strip()) > 0:
-            q_where += " AND " + q_where2
-
-
-        # Build FROM/JOIN according to the list of used annotations databases
-        q_from  = " LEFT JOIN ".join([self.db_map[d_id]["join"] for d_id in tables_to_import])
-        q_from += " " + " ".join([t['from'] for t in temporary_to_import.values()])
-        
-
-        # build final query
-        query_tpm = "".join([t['query'] for t in temporary_to_import.values()])
-        if count:
-            query_req = "SELECT DISTINCT {0} FROM {1} WHERE {2}".format(q_select, q_from, q_where)
-            return '{0} SELECT COUNT(*) FROM ({1}) AS sub;'.format(query_tpm, query_req)
-        else: 
-            query_req = "SELECT DISTINCT {0} FROM {1} WHERE {2} LIMIT {3} OFFSET {4};".format(q_select, q_from, q_where, limit, offset)
-            return query_tpm + query_req
 
 
 

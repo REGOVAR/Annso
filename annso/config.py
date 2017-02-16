@@ -16,7 +16,7 @@ HOSTNAME        = HOST + ":" + PORT + "/" + VERSION
 
 
 # HOST (public)
-HOST_P          = "rego2.absolumentg.fr/" + VERSION
+HOST_P          = "annso.absolumentg.fr/" + VERSION
 RANGE_DEFAULT   = 100
 RANGE_MAX       = 1000
 
