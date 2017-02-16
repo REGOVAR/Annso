@@ -34,6 +34,7 @@ class Core:
         self.annotation_db = AnnotationDatabaseManager()
         self.analysis = AnalysisManager()
         self.sample = SampleManager()
+        self.variant = VariantManager()
         self.filter = FilterEngine()
         self.file = FileManager()
         
@@ -587,6 +588,68 @@ class SampleManager:
 
 
 
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
+# Samples MANAGER
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
+class VariantManager:
+    def __init__(self):
+        pass
+
+
+
+    def get(self, reference_id, variant_id, analysis_id=None):
+        """
+            return all data available about a variant
+        """
+        ref_name = annso.annotation_db.ref_list[int(reference_id)]
+        query = "SELECT * FROM (SELECT bin, chr, pos, ref, alt FROM variant_{} WHERE id={}) AS _var LEFT JOIN dbnfsp_variant ON _var.bin=dbnfsp_variant.bin_hg19 AND _var.chr=dbnfsp_variant.chr_hg19 AND _var.pos=dbnfsp_variant.pos_hg19 AND _var.ref=dbnfsp_variant.ref AND _var.alt=dbnfsp_variant.alt" 
+        variant = db_engine.execute(query.format('hg19', variant_id)).first()
+        chrm = {1:"1", 2:"2", 3:"3", 4:"4", 5:"5", 6:"6", 7:"7", 8:"8", 9:"9", 10:"10", 11:"11", 12:"12", 13:"13", 14:"14", 15:"15", 16:"16", 17:"17", 18:"18", 19:"19", 20:"20", 21:"21", 22:"22", 23:"X", 24:"Y", 25:"M"}[variant.chr]
+        pos  = variant.pos + 1 # return result as 1-based coord
+        ref  = variant.ref
+        alt  = variant.alt
+        gene = variant.genename
+        result = {
+            "id" : variant_id,
+            "reference_id" : reference_id,
+            "reference" : ref_name,
+            "chr" : chrm,
+            "pos" : pos,
+            "ref" : ref,
+            "alt" : alt,
+            "annotations" : {
+
+            },
+            "online_tools_variant" : {
+                "varsome"  : "https://varsome.com/variant/{0}/chr{1}-{2}-{3}".format(ref_name, chrm, pos, ref),
+            },
+            "stats": {
+
+            }
+        }
+        if gene is not None and gene != "":
+            result.update({"online_tools_gene" : {
+                "genetest"    : "https://www.genetests.org/genes/?gene={0}".format(gene),
+                "decipher"    : "https://decipher.sanger.ac.uk/search?q={0}".format(gene),
+                "cosmic"      : "http://cancer.sanger.ac.uk/cosmic/gene/overview?ln={0}".format(gene),
+                "nih_ghr"     : "https://ghr.nlm.nih.gov/gene/{0}".format(gene),
+                "hgnc"        : "http://www.genenames.org/cgi-bin/gene_symbol_report?match={0}".format(gene),
+                "genatlas"    : "http://genatlas.medecine.univ-paris5.fr/fiche.php?symbol={0}".format(gene),
+                "genecards"   : "http://www.genecards.org/cgi-bin/carddisp.pl?gene={0}".format(gene),
+                "gopubmed"    : "http://www.gopubmed.org/search?t=hgnc&q={0}".format(gene),
+                "h_invdb"     : "http://biodb.jp/hfs.cgi?db1=HUGO&type=GENE_SYMBOL&db2=Locusview&id={0}".format(gene),
+                "kegg_patway" : "http://www.kegg.jp/kegg-bin/search_pathway_text?map=map&keyword={0}&mode=1&viewImage=true".format(gene)
+            }})
+        if analysis_id != None:
+            result.update({"analysis" : { 
+                "id" : analysis_id
+            }})
+
+
+        return result
+
+
+
 
 
 
@@ -752,10 +815,11 @@ class FilterEngine:
 
         # Loop to update working table attributes
         query = ""
-        for a in attributes:
+        for a_name in attributes:
             if 'attr_{}'.format(a_name.lower()) not in current_fields:
-                for sid in attributes[a].keys():
-                    query += "UPDATE wt_{} SET attr_{}='{}' WHERE sample_id={}; ".format(analysis_id, a, attributes[a][sid], sid)
+                for sid in attributes[a_name].keys():
+                    query += "UPDATE wt_{} SET attr_{}='{}' WHERE sample_id={}; ".format(analysis_id, a_name, attributes[a_name][sid], sid)
+                    query += "CREATE INDEX wt_{0}_idx_attr_{1} ON wt_{0} USING btree (filter_{1});".format(analysis_id, a_name)
         if query != "":
             db_engine.execute(query)
 
@@ -774,6 +838,7 @@ class FilterEngine:
                     for q in queries[:-1]:
                         query += q
                     query += "UPDATE wt_{} SET filter_{}=True WHERE variant_id IN ({}); ".format(analysis_id, f_id, queries[-1].strip()[:-1] )
+                    query += "CREATE INDEX wt_{0}_idx_filter_{1} ON wt_{0} USING btree (filter_{1});".format(analysis_id, f_id)
                     db_engine.execute(query)
 
 

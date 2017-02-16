@@ -811,25 +811,24 @@
             <!--                        -->
             <div id="contextmenu_genename" class="dropdown clearfix collapse">
                 <ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu" style="display:block;position:static;margin-bottom:5px;">
-                    <li><a tabindex="-1" href="#">VarSome</a></li>
-                    <li><a tabindex="-1" href="#">GeneTests</a></li>
-                    <li><a tabindex="-1" href="#">Decipher</a></li>
-                    <li><a tabindex="-1" href="#">Cosmic</a></li>
-                    <li><a tabindex="-1" href="#">NIH Genetics Home Reference</a></li>
+                    <li><a data-link="online_tools_variant varsome" href="" target="_blanck">VarSome</a></li>
+                    <li><a data-link="online_tools_gene genetest" href="" target="_blanck">GeneTests</a></li>
+                    <li><a data-link="online_tools_gene decipher" href="" target="_blanck">Decipher</a></li>
+                    <li><a data-link="online_tools_gene cosmic" href="" target="_blanck">Cosmic</a></li>
+                    <li><a data-link="online_tools_gene nih_ghr" href="" target="_blanck">NIH Genetics Home Reference</a></li>
                     <li class="divider"></li>
-                    <li><a tabindex="-1" href="#">HGNC</a></li>
-                    <li><a tabindex="-1" href="#">GENATLAS</a></li>
-                    <li><a tabindex="-1" href="#">GeneCards</a></li>
-                    <li><a tabindex="-1" href="#">GOPubmed</a></li>
-                    <li><a tabindex="-1" href="#">H-InvDB</a></li>
-                    <li><a tabindex="-1" href="#">KEGG Pathway</a></li>
+                    <li><a data-link="online_tools_gene hgnc" href="" target="_blanck">HGNC</a></li>
+                    <li><a data-link="online_tools_gene genatlas" href="" target="_blanck">GENATLAS</a></li>
+                    <li><a data-link="online_tools_gene genecards" href="" target="_blanck">GeneCards</a></li>
+                    <li><a data-link="online_tools_gene gopubmed" href="" target="_blanck">GOPubmed</a></li>
+                    <li><a data-link="online_tools_gene h_invdb" href="" target="_blanck">H-InvDB</a></li>
+                    <li><a data-link="online_tools_gene kegg_patway" href="" target="_blanck">KEGG Pathway</a></li>
                     <li class="divider"></li>
-                    <li><a tabindex="-1" href="#">(Un)Select</a></li>
-                    <li><a tabindex="-1" href="#">Hide</a></li>
+                    <li><a data-link="select">(Un)Select</a></li>
+                    <li><a data-link="hide">Hide</a></li>
+                    <li><a data-link="details">View details</a></li>
                 </ul>
             </div>
-
-
 
 
 
@@ -947,6 +946,31 @@
                         // return native menu if pressing control
                         if (e.ctrlKey) return;
                         
+                        variant_id = e.target.parentElement.id.split('_')[1];
+                        $.ajax({ 
+                            url: "{0}/variant/{1}/{2}/{3}".format(rootURL, analysis.analysis.ref, variant_id, analysis.analysis.id), 
+                            type: "GET",
+                            async: true}).fail(function()
+                        {
+                            display_error("Unknow error while getting data about variant : {}".format(variant_id));
+                        }).done(function(json)
+                        {
+                            if (json["success"])
+                            {
+                                json = json['data'];
+                                $('#contextmenu_genename a').each( function (idx, elmt) {
+                                    var data = $(elmt).attr('data-link').split(' ');
+                                    if (data[0] == 'online_tools_variant' || data[0] == 'online_tools_gene')
+                                        $(elmt).attr('href', json[data[0]][data[1]]);
+                                });
+                            }
+                            else
+                            {
+                                alert("variant not found");
+                            }
+                        });
+
+
                         //open menu
                         var $menu = $(settings.menuSelector)
                         .data("invokedOn", $(e.target))

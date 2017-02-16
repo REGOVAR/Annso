@@ -82,7 +82,6 @@ db_session = Session(db_engine)
 # MODEL DEFINITION - Build from the database (see sql scripts used to generate the database)
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
 
-Variant = Base.classes.variant_hg19
 SampleVariant = Base.classes.sample_variant_hg19
 Attribute = Base.classes.attribute
 AnnotationDatabase = Base.classes.annotation_database
@@ -198,6 +197,34 @@ Sample               = Base.classes.sample
 Sample.public_fields = ["id", "name", "comments", "is_mosaic"]
 Sample.from_id       = sample_from_id
 Sample.to_json       = sample_to_json
+
+
+
+
+
+
+
+
+
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
+# Variant
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
+
+def variant_from_id(reference_id, variant_id):
+    """
+        Retrieve Sample with the provided id in the database
+    """
+
+    return db_session.query(Variant).filter_by(id=variant_id).first();
+
+
+
+
+
+Variant              = Base.classes.variant_hg19
+Sample.from_id       = variant_from_id
+
+
 
 
 

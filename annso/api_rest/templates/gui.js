@@ -1454,10 +1454,13 @@ function init_variants_list(json, container_id)
         menuSelector: "#contextmenu_genename",
         menuSelected: function (invokedOn, selectedMenu) 
         {
-            var action = selectedMenu[0].getAttribute("id");
-            var id = invokedOn[0].parentElement.children[6].innerHTML;
-            if (action == "context_menu_info") show_tab("browser_file", id);
-            else if (action == "context_menu_dl") alert("TODO : download the file " + id);
+            // var url = selectedMenu[0].getAttribute("href");
+            // var win = window.open(url, '_blank');
+            // win.focus();
+            // return false;
+            // var id = invokedOn[0].parentElement.children[6].innerHTML;
+            // if (action == "context_menu_info") show_tab("browser_file", id);
+            // else if (action == "context_menu_dl") alert("TODO : download the file " + id);
         }
     });
 

@@ -252,7 +252,17 @@ class AnnotationDBHandler:
 class VariantHandler:
 
     def get_variant(self, request):
-        return rest_success('to be implemented')
+        """
+            Return all data available for the requested variant in the context of the analysis
+        """
+        reference_id = request.match_info.get('ref_id', -1)
+        variant_id = request.match_info.get('variant_id', -1)
+        analysis_id = request.match_info.get('analysis_id', None)
+
+        variant = annso.variant.get(reference_id, variant_id, analysis_id)
+        if variant is None:
+            return rest_error('Variant not found')
+        return rest_success(variant)
 
 
 

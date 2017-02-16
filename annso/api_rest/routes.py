@@ -48,7 +48,8 @@ app.router.add_route('GET',    "/v1/ref/{ref_id}", dbHandler.get_ref_db)        
 app.router.add_route('GET',    "/v1/db/{db_id}", dbHandler.get_database)                                        # Get the database details and the list of all its fields
 
 
-app.router.add_route('GET',    "/v1/variant/{variant_id}", variantHandler.get_variant)                          # Get all available information about the given variant
+app.router.add_route('GET',    "/v1/variant/{ref_id}/{variant_id}", variantHandler.get_variant)                 # Get all available information about the given variant
+app.router.add_route('GET',    "/v1/variant/{ref_id}/{variant_id}/{analysis_id}", variantHandler.get_variant)   # Get all available information about the given variant + data in the context of the analysis
 
 
 app.router.add_route('GET',    "/v1/sample", sampleHandler.get_samples)                                         # Get list of all samples in database
