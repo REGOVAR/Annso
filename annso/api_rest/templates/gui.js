@@ -355,7 +355,7 @@ function AnnsoUIControler ()
     {
         if (!flag)
         {
-            $('#browser_samples').html("<span class=\"maincontent_placeholder\">&#11172; Import and select sample(s) you want to analyse.</span>");
+            $('#browser_samples').html("<span class=\"maincontent_placeholder\"><span style=\"display:block; width: 30px; margin-top:15px; font-weight: bold; float:left; transform: rotate(90deg);\">&#8629;</span> Import and select sample(s) you want to analyse.</span>");
         }
         else
         {

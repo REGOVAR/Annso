@@ -77,6 +77,7 @@ class Core:
 
 
 
+
     def init(self):
         """
             Do some verifications on the server to check that all is good.
@@ -704,9 +705,9 @@ class FilterEngine:
         query  = "DROP TABLE IF EXISTS {0} CASCADE; CREATE TABLE {0} (\
             annotated boolean DEFAULT False, \
             sample_id integer, \
-            variant_id integer, \
+            variant_id bigint, \
             bin integer, \
-            chr integer, \
+            chr bigint, \
             pos integer, \
             ref text, \
             alt text,\

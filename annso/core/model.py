@@ -12,11 +12,12 @@ import tarfile
 import shutil
 
 from sqlalchemy.ext.automap import automap_base
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, sessionmaker, scoped_session
 from sqlalchemy import create_engine
 # from sqlalchemy_aio import ASYNCIO_STRATEGY
 
 from core.framework import *
+
 
 
 
@@ -34,6 +35,10 @@ def connect(user, password, db, host, port):
     con = sqlalchemy.create_engine(url, client_encoding='utf8') #, strategy=ASYNCIO_STRATEGY)
     meta = sqlalchemy.MetaData(bind=con)
     return con, meta
+
+
+def create_session(engine):
+    return scoped_session(sessionmaker(bind=engine))()
 
 
 
@@ -221,8 +226,8 @@ def variant_from_id(reference_id, variant_id):
 
 
 
-Variant              = Base.classes.variant_hg19
-Sample.from_id       = variant_from_id
+Variant         = Base.classes.variant_hg19
+Variant.from_id = variant_from_id
 
 
 

@@ -1,3 +1,7 @@
+<h1 class="fixheader">Phenotype</h1>
+<textarea rows="10" cols="100">
+Describe phenotype here...
+</textarea>
 
 {% for gene in genes %}
 <h1 class="fixheader">{{gene.name}}</h1>
@@ -44,16 +48,16 @@
         <li>TA: <a href="http://www.proteinatlas.org/search/{{gene.name}}" style="max-width: 700px;">{{gene.name}}</a> 
             <div style="max-width: 900px; border: 1px solid #555; padding:20px;">{{ gene.data.ta_graph }}</div></li>
         <li>HBT: <a href="http://hbatlas.org/hbtd/images/wholeBrain/{{gene.name}}.pdf">{{gene.name}}</a></li>
-        <li><img src="http://annso.absolumentg.fr/cache/hbt_image_{{gene.name}}.png" title="HBT" style="max-width: 700px;"/></li>
-        <li>SFARI: <a href="https://gene.sfari.org/autdb/submitsearch?selfld_0=GENES_GENE_SYMBOL&amp;selfldv_0={{gene.name}}&amp;numOfFields=1&amp;userAction=search&amp;tableName=AUT_HG&amp;submit=Submit+Query">{% if gene.data.sfari_gene %}OUI{% else %}NON{% endif %}</a></li>
+        <li><img src="https://annso.absolumentg.fr/cache/reports/dims/hbt_image_{{gene.name}}.png" title="HBT" style="max-width: 700px;"/></li>
+        <li>SFARI: <a href="https://gene.sfari.org/autdb/submitsearch?selfld_0=GENES_GENE_SYMBOL&amp;selfldv_0={{gene.name}}&amp;numOfFields=1&amp;userAction=search&amp;tableName=AUT_HG&amp;submit=Submit+Query">{% if gene.data.sfari_gene %}YES{% else %}NO{% endif %}</a></li>
     </ul>
 
 
 
     Decipher: <a href="https://decipher.sanger.ac.uk/search?q={{gene.name}}#consented-patients/results">{{gene.name}}</a><br/>
-    <img src="http://annso.absolumentg.fr/cache/decipher_image_{{gene.name}}.png" title="Decipher snapshot" style="max-width: 700px;"/><br/>
+    <img src="https://annso.absolumentg.fr/cache/reports/dims/decipher_image_{{gene.name}}.png" title="Decipher snapshot" style="max-width: 700px;"/><br/>
 
     STRING pathway: <a href="http://string-db.org/api/image/network?identifier={{gene.name}}">{{gene.name}}</a><br/>
-    <img src="http://annso.absolumentg.fr/cache/sp_image_{{gene.name}}.png" title="String pathway snapshot" style="max-width: 700px;"/><br/>
+    <img src="https://annso.absolumentg.fr/cache/reports/dims/sp_image_{{gene.name}}.png" title="String pathway snapshot" style="max-width: 700px;"/><br/>
 </div>
 {% endfor %}

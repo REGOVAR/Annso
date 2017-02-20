@@ -119,7 +119,7 @@ ALTER TABLE public."reference" OWNER TO annso;
 CREATE TABLE public.file
 (
     id serial NOT NULL,
-    filename character varying(50) COLLATE pg_catalog."C.UTF-8",
+    filename character varying(255) COLLATE pg_catalog."C.UTF-8",
     comments character varying(255) COLLATE pg_catalog."C.UTF-8",
     type character varying(10) COLLATE pg_catalog."C.UTF-8",
     "path" character varying(255) COLLATE pg_catalog."C.UTF-8",
@@ -505,11 +505,28 @@ UPDATE annotation_field SET uid=MD5(concat(database_uid, name))
 -- --------------------------------------------
 CREATE FUNCTION array_intersect(anyarray, anyarray)
   RETURNS integer ARRAY
-  language sql
-as $FUNCTION$
+  LANGUAGE sql
+AS $FUNCTION$
     SELECT ARRAY(
-        SELECT UNNEST($1)
-        INTERSECT
-        SELECT UNNEST($2)
+      SELECT UNNEST($1)
+      INTERSECT
+      SELECT UNNEST($2)
     );
 $FUNCTION$;
+
+
+
+CREATE OR REPLACE FUNCTION array_multi_remove(integer[], integer[])
+  RETURNS integer ARRAY
+  LANGUAGE plpgsql
+AS $FUNCTION$
+  DECLARE
+    source ALIAS FOR $1;
+    to_remove ALIAS FOR $2;
+  BEGIN
+    FOR i IN array_lower(to_remove, 1)..array_upper(to_remove, 1) LOOP
+      source := array_remove(source, to_remove[i]);
+    END LOOP;
+  RETURN source;
+  END;
+$FUNCTION$

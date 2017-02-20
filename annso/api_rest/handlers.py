@@ -355,7 +355,6 @@ class AnalysisHandler:
         try :
             result = annso.filter.request(int(analysis_id), mode, filter_json, fields, int(limit), int(offset), count)
         except Exception as err :
-            ipdb.set_trace()
             return rest_error("Filtering error : " + str(err))
         return rest_success(result)
 
@@ -468,7 +467,7 @@ class SampleFileWrapper (TusFileWrapper) :
             self.upload_offset = self.file.upload_offset
             self.path = self.file.path
             self.size = self.file.size
-            self.upload_url = "http://" + HOST_P + "/sample/upload/" + str(id)
+            self.upload_url = "https://" + HOST_P + "/sample/upload/" + str(id)
         else:
             return TusManager.build_response(code=500, body="Unknow id : {}".format(id))
 
