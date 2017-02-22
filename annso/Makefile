@@ -7,12 +7,35 @@ test:
 app:
 	python annso_server.py
 
-reset:
+drop:
 	psql -U postgres -c "SELECT pg_terminate_backend(pid) FROM pg_stat_activity WHERE datname = 'annso'"
 	psql -U postgres -c "DROP DATABASE annso"
 	psql -U postgres -c "CREATE DATABASE annso OWNER annso"
 	psql -U annso -d annso -f ./database/create_all.sql
 	psql -U annso -d annso -f /tmp/hg19_db/refGene.sql
 	
+clear:
+	psql -U annso -d annso -c "DELETE FROM sample_file"
+	psql -U annso -d annso -c "DELETE FROM file"
+	psql -U annso -d annso -c "DELETE FROM sample_variant_hg19"
+	psql -U annso -d annso -c "DELETE FROM variant_hg19"
+	psql -U annso -d annso -c "DELETE FROM analysis_sample"
+	psql -U annso -d annso -c "DELETE FROM filter"
+	psql -U annso -d annso -c "DELETE FROM attribute"
+	psql -U annso -d annso -c "DELETE FROM analysis"
+	psql -U annso -d annso -c "DELETE FROM sample"
 
-.PHONY: init test app reset
+	psql -U annso -d annso -c "DROP TABLE IF EXISTS csq_v76_hg19"
+	psql -U annso -d annso -c "DROP TABLE IF EXISTS eff_4_2_hg19"
+	psql -U annso -d annso -c "DELETE FROM annotation_database WHERE uid='be9dc0ad28f104b08178aad3aa1b3e0d'"
+	psql -U annso -d annso -c "DELETE FROM annotation_field WHERE database_uid='be9dc0ad28f104b08178aad3aa1b3e0d'"
+	psql -U annso -d annso -c "DELETE FROM annotation_database WHERE uid='6c4755844bbc192dd4bd92e54868896d'"
+	psql -U annso -d annso -c "DELETE FROM annotation_field WHERE database_uid='6c4755844bbc192dd4bd92e54868896d'"
+
+
+
+list_db:
+	psql -U annso -d annso -c "SELECT table_name, n_tup_ins - n_tup_del as rowcount FROM (SELECT DISTINCT table_name FROM information_schema.columns WHERE table_schema='public' ORDER BY table_name) AS _t LEFT JOIN pg_stat_all_tables ON table_name=relname ORDER BY table_name"
+
+
+.PHONY: init test app clear list_db

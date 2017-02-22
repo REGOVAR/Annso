@@ -151,6 +151,8 @@ class FileManager:
             if file.type in m['info']['input']:
                 log('Start import of the file (id={0}) with the module {1} ({2})'.format(file_id, m['info']['name'], m['info']['description']))
                 m['do'](file.id, file.path, annso)
+                # Reload annotation's databases/fields metadata as some new annot db/fields may have been created during the import
+                annso.annotation_db.load_annotation_metadata()
                 break;
 
         # Notify all about the new status
@@ -193,6 +195,11 @@ class FileManager:
 # fields_map :
 class AnnotationDatabaseManager:
     def __init__(self):
+        self.load_annotation_metadata()
+
+
+
+    def load_annotation_metadata(self):
         self.ref_list  = {}
         self.db_list = {}
         self.db_map = {}
@@ -225,7 +232,6 @@ class AnnotationDatabaseManager:
                 self.db_map[row.duid]["fields"].append(row.fuid)
             else:
                 self.db_map[row.duid] = {"uid"   : row.duid, "name"  : row.dname, "description": row.ddesc, "order" : row.dord, "update" : row.ddate, "fields" : [row.fuid], "version" : row.version, "ref" : row.ref }
-
 
 
     # build the sql query according to the annso filtering parameter and return result as json data

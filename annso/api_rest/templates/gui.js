@@ -1521,7 +1521,7 @@ function annotation_format_pos(pos)
 function annotation_format_percent(value)
 {
     var model = "<td class=\"number\" style=\"position:relative;\"><div style=\"position:absolute; top:0; left:0; bottom:0; width:{0}%; background-color: #a5b0c3;\"></div><div style=\"position:absolute; top:0; left:0; right:0; bottom:0; padding: 8px;{1}\">{0} %</div></td>";
-    var percent = Math.round(value * 100, 2);
+    var percent = value * 100;
     var color = (percent == 0) ? ' color:#aaa;' : "";
     return model.format(percent, color);
 }
