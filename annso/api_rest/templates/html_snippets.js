@@ -13,7 +13,7 @@ var analysis_title_template = "<i class=\"fa fa-folder-o\" style=\"width:20px; t
 
 
 
-var fields_selection_template = "<h3>{0} {1}</h3><p style=\"font-style:italic; color:#999; margin-top:-10px;\">{2}</p><table>{3}</table>";
+var fields_selection_template = "<h3><a data-toggle=\"collapse\" href=\"#collapse_{0}\">{0}</a> {1}</h3><div id=\"collapse_{0}\" class=\"panel-collapse collapse\"><p style=\"font-style:italic; color:#999; margin-top:-10px;\">{2}</p><table>{3}</table></div>";
 var fields_selection_row_template = "<tr><td style=\"width:20px; vertical-align:top;\"><input type=\"checkbox\" id=\"annotation_fields_field_{0}\" onchange=\"javascript:filter_toggle_field(this, '{0}');\"/></td><td style=\"width:250px; vertical-align:top;\">{1}</td><td style=\"font-style:italic; color:#999;\">{2}</td></tr>";
 var fields_selection_db_version_template = "<span style=\"font-size:12px;\">(<select style=\"background:none; border: none;\">>{0}</select>)</span>";
 var fields_selection_db_version_option_template = "<option value=\"{0}\"{2}>{1}</option>";

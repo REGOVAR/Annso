@@ -801,7 +801,7 @@ function AnnsoUIControler ()
         {
             $('#annotation_fields_list tr').each(function(idx, elmt) 
             {
-                if ($(elmt).text().indexOf(search) !== -1 )
+                if ($(elmt).text().toUpperCase().indexOf(search.toUpperCase()) !== -1 )
                     $(elmt).show();
                 else
                     $(elmt).hide();
