@@ -1057,7 +1057,7 @@ function update_filter_set_map()
 
 
 var filter_set_map = {};
-var filter_operator_display_map = {'==' : '=', '!=' : "&#8800;", '>' : "&gt;", '>=' : "&#8805;", '<' : "&lt;", '<=' : "&#8804;", "IN":"&#8712;", "NOTIN":"&#8713;"};
+var filter_operator_display_map = {'==' : '=', '!=' : "&#8800;", '>' : "&gt;", '>=' : "&#8805;", '<' : "&lt;", '<=' : "&#8804;", "IN":"&#8712;", "NOTIN":"&#8713;", '~':'~'};
 var add_filter_ui_parent_elmt;
 function build_filter_ui(json)
 {
@@ -1085,7 +1085,7 @@ function build_filter_ui(json)
     {
         return json[1];
     }
-    else if (['==', '!=', '>', '>=', '<', '<='].includes(json[0]))
+    else if (['==', '!=', '>', '>=', '<', '<=', '~'].includes(json[0]))
     {
         return filter_condition_template.format('check', "{0} {1} {2}".format(build_filter_ui(json[1]), filter_operator_display_map[json[0]], build_filter_ui(json[2])), JSON.stringify(json));
     }
@@ -1105,7 +1105,7 @@ function build_filter_ui_set(json)
     if (json[0] == "sample")
     {
         s = analysis.analysis.samples[json[1]];
-        html = "sample " + (s["nickname"] != "") ? s["nickname"] : s["name"];
+        html = "sample " + (s["nickname"] != "" ? s["nickname"] : s["name"]);
     }
     else if (json[0] == "attribute")
     {

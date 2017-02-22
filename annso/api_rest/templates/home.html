@@ -946,7 +946,7 @@
                         // return native menu if pressing control
                         if (e.ctrlKey) return;
                         
-                        variant_id = e.target.parentElement.id.split('_')[1];
+                        variant_id = $(e.target).parents("tr").attr('id').split('_')[1];
                         $.ajax({ 
                             url: "{0}/variant/{1}/{2}/{3}".format(rootURL, analysis.analysis.ref, variant_id, analysis.analysis.id), 
                             type: "GET",

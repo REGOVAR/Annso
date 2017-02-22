@@ -153,6 +153,7 @@ class FileManager:
                 m['do'](file.id, file.path, annso)
                 # Reload annotation's databases/fields metadata as some new annot db/fields may have been created during the import
                 annso.annotation_db.load_annotation_metadata()
+                annso.filter.load_annotation_metadata()
                 break;
 
         # Notify all about the new status
@@ -667,24 +668,28 @@ class VariantManager:
 # FILTER ENGINE
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
 class FilterEngine:
-    op_map = {'AND' : ' AND ', 'OR': ' OR ', '==' : '=', '!=': '<>', '>':'>', '<':'<', '>=':'>=', '<=':'<=', 
+    op_map = {'AND' : ' AND ', 'OR': ' OR ', '==' : '=', '!=': '<>', '>':'>', '<':'<', '>=':'>=', '<=':'<=', '~' : 'LIKE',
         # As a left join will be done on the chr+pos or chr+pos+ref+alt according to the type of the set operation (by site or by variant)
         # We just need to test if one of the "joined" field is set or not
         'IN'       : '{0}.chr is not null', 
         'NOTIN'    : '{0}.chr is null'}
-    sql_type_map = {'int' : 'integer', 'string' : 'text', 'float' : 'real', 'percent' : 'real', 'enum' : 'integer', 'range' : 'range8', 'bool' : 'boolean',
+    sql_type_map = {'int' : 'integer', 'string' : 'text', 'float' : 'real', 'percent' : 'real', 'enum' : 'integer', 'range' : 'int8range', 'bool' : 'boolean',
                     'list_i' : 'text', 'list_s' : 'text', 'list_f' : 'text', 'list_i' : 'text', 'list_pb' : 'text'}
 
 
 
 
-    def __init__(self, reference=2):
+    def __init__(self):
+        self.load_annotation_metadata()
+
+
+    def load_annotation_metadata(self):
         """
-            Init Annso Filtering engine. (reference=2 mean "hg19", see database import script)
+            Init Annso Filtering engine.
             Init mapping collection for annotations databases and fields
         """
-        refname = db_session.execute("SELECT table_suffix FROM reference WHERE id="+str(reference)).first()["table_suffix"]
-        self.reference = reference
+        refname = 'hg19' # db_session.execute("SELECT table_suffix FROM reference WHERE id="+str(reference)).first()["table_suffix"]
+        self.reference = 2
         self.fields_map = {}
         self.db_map = {}
         self.variant_table = "sample_variant_{0}".format(refname)
@@ -694,7 +699,6 @@ class FilterEngine:
                 self.db_map[row.duid] = {"name" : row.dname, "join": row.jointure, "fields" : {}, "reference_id" : row.reference_id}
             self.db_map[row.duid]["fields"][row.fuid] = {"name" : row.fname, "type" : row.type}
             self.fields_map[row.fuid] = {"name" : row.fname, "type" : row.type, "db_uid" : row.duid, "db_name_ui" : row.dname_ui, "db_name" : row.dname, "join": row.jointure, "wt_default" : row.wt_default}
-
 
 
 
@@ -1027,6 +1031,10 @@ class FilterEngine:
                 check_field_uid(data[1])
                 check_field_uid(data[2])
                 return '{0}{1}{2}'.format(parse_value(t, data[1]), FilterEngine.op_map[operator], parse_value(t, data[2]))
+            elif operator == '~':
+                check_field_uid(data[1])
+                check_field_uid(data[2])
+                return '{0} LIKE {1}'.format(parse_value('string', data[1]), parse_value('string%', data[2]))
             elif operator in ['IN', 'NOTIN']:
                 tmp_table = get_tmp_table(data[1], data[2])
                 temporary_to_import[tmp_table]['where'] = FilterEngine.op_map[operator].format(tmp_table, wt)
@@ -1077,6 +1085,8 @@ class FilterEngine:
                     return str(data[1])
                 elif ftype == 'string':
                     return "'{0}'".format(data[1])
+                elif ftype == 'string%':
+                    return "'%%{0}%%'".format(data[1])
                 elif ftype == 'range' and len(data) == 3:
                     return 'int8range({0}, {1})'.format(data[1], data[2])
             raise AnnsoException("FilterEngine.request.parse_value - Unknow type : {0} ({1})".format(ftype, data))

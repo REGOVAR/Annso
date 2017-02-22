@@ -35,7 +35,13 @@ clear:
 
 
 list_db:
-	psql -U annso -d annso -c "SELECT table_name, n_tup_ins - n_tup_del as rowcount FROM (SELECT DISTINCT table_name FROM information_schema.columns WHERE table_schema='public' ORDER BY table_name) AS _t LEFT JOIN pg_stat_all_tables ON table_name=relname ORDER BY table_name"
+	psql -U annso -d annso -c "SELECT relname as Table, pg_size_pretty(pg_total_relation_size(relid)) As Size, pg_size_pretty(pg_total_relation_size(relid) - pg_relation_size(relid)) as ExternalSize, rowcount as RowCount \
+    FROM pg_catalog.pg_statio_user_tables  \
+    LEFT JOIN ( \
+        SELECT table_name, n_tup_ins - n_tup_del as rowcount  \
+        FROM (SELECT DISTINCT table_name FROM information_schema.columns WHERE table_schema='public' ORDER BY table_name) AS _t  \
+        LEFT JOIN pg_stat_all_tables ON table_name=relname ORDER BY table_name) AS _sub ON table_name=relname \
+    ORDER BY pg_total_relation_size(relid) DESC"
 
 
 .PHONY: init test app clear list_db

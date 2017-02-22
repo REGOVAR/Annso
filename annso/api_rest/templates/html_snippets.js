@@ -106,6 +106,7 @@ var filter_form_operators_type_float = "<select name=\"select\" id=\"modal_filte
 
 var filter_form_operators_type_string = "<select name=\"select\" id=\"modal_filter_field_operator\">\
                                     <option value=\"==\">=</option> \
+                                    <option value=\"~\">~</option>\
                                     <option value=\"!=\">&#8800;</option></select>\
                                 <input type=\"text\" id=\"modal_filter_field_value\" placeholder=\"Field value\" value=\"{0}\"/>"
 
