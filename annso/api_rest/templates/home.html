@@ -932,7 +932,6 @@
 
         $("#variant_scrolling").scroll(function() 
         {
-            console.debug("{0} > {1} - {2} (={3})".format($("#variant_scrolling").scrollTop(), $("#variants_list").height(), $("#variant_scrolling").height(), $("#variants_list").height()- $("#variant_scrolling").height()));
 
             if(!query_next_entry_in_progress && $("#variant_scrolling").scrollTop() > $("#variants_list").height() - $("#variant_scrolling").height()) 
             {
@@ -968,6 +967,20 @@
                         $('#demo_footer').html("{2} / {0} variant{1}".format(annotation_format_number(count, false), (count > 1 ? 's' : ''), annotation_format_number(analysis.analysis.current_count)));
                         query_next_entry_in_progress = false;
                         $('#variant_scrolling').css('cursor', 'default');
+
+                        $("#variants_list_table tr").contextMenu({
+                            menuSelector: "#contextmenu_genename",
+                            menuSelected: function (invokedOn, selectedMenu) 
+                            {
+                                // var url = selectedMenu[0].getAttribute("href");
+                                // var win = window.open(url, '_blank');
+                                // win.focus();
+                                // return false;
+                                // var id = invokedOn[0].parentElement.children[6].innerHTML;
+                                // if (action == "context_menu_info") show_tab("browser_file", id);
+                                // else if (action == "context_menu_dl") alert("TODO : download the file " + id);
+                            }
+                        });
                     }
                     else
                     {

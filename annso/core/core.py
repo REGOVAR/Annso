@@ -610,12 +610,12 @@ class VariantManager:
             return all data available about a variant
         """
         ref_name = annso.annotation_db.ref_list[int(reference_id)]
-        query = "SELECT * FROM (SELECT bin, chr, pos, ref, alt FROM variant_{} WHERE id={}) AS _var LEFT JOIN dbnfsp_variant ON _var.bin=dbnfsp_variant.bin_hg19 AND _var.chr=dbnfsp_variant.chr_hg19 AND _var.pos=dbnfsp_variant.pos_hg19 AND _var.ref=dbnfsp_variant.ref AND _var.alt=dbnfsp_variant.alt" 
+        query = "SELECT _var.bin as vbin, _var.chr as vchr, _var.pos as vpos, _var.ref as vref, _var.alt as valt, dbnfsp_variant.* FROM (SELECT bin, chr, pos, ref, alt FROM variant_{} WHERE id={}) AS _var LEFT JOIN dbnfsp_variant ON _var.bin=dbnfsp_variant.bin_hg19 AND _var.chr=dbnfsp_variant.chr_hg19 AND _var.pos=dbnfsp_variant.pos_hg19 AND _var.ref=dbnfsp_variant.ref AND _var.alt=dbnfsp_variant.alt" 
         variant = db_engine.execute(query.format('hg19', variant_id)).first()
-        chrm = {1:"1", 2:"2", 3:"3", 4:"4", 5:"5", 6:"6", 7:"7", 8:"8", 9:"9", 10:"10", 11:"11", 12:"12", 13:"13", 14:"14", 15:"15", 16:"16", 17:"17", 18:"18", 19:"19", 20:"20", 21:"21", 22:"22", 23:"X", 24:"Y", 25:"M"}[variant.chr]
-        pos  = variant.pos + 1 # return result as 1-based coord
-        ref  = variant.ref
-        alt  = variant.alt
+        chrm = {1:"1", 2:"2", 3:"3", 4:"4", 5:"5", 6:"6", 7:"7", 8:"8", 9:"9", 10:"10", 11:"11", 12:"12", 13:"13", 14:"14", 15:"15", 16:"16", 17:"17", 18:"18", 19:"19", 20:"20", 21:"21", 22:"22", 23:"X", 24:"Y", 25:"M"}[variant.vchr]
+        pos  = variant.vpos + 1 # return result as 1-based coord
+        ref  = variant.vref
+        alt  = variant.valt
         gene = variant.genename
         result = {
             "id" : variant_id,
