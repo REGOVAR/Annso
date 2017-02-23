@@ -928,7 +928,7 @@ function AnnsoUIControler ()
                 else
                 {
                     $('#current_filter_count').html(annotation_format_number(count, false));
-                    $('#demo_footer').html("{0} variant{1}".format(annotation_format_number(count, false), (count > 1) ? 's' : ''));
+                    $('#demo_footer').html("{2} / {0} variant{1}".format(annotation_format_number(count, false), (count > 1) ? 's' : ''), count);
                 }
                 
             }
@@ -1388,6 +1388,7 @@ function load_variants_array()
         else
         {
             count = init_variants_list(json, '#variants_list');
+            current_count = count;
             if (count == 100)
             {
                 // As the server return the max range variants, maybe the total is higher. so, do another request to get total count
@@ -1396,7 +1397,8 @@ function load_variants_array()
             else
             {
                 $('#current_filter_count').html(annotation_format_number(count, false));
-                $('#demo_footer').html("{0} variant{1}".format(annotation_format_number(count, false), (count > 1) ? 's' : ''));
+                $('#demo_footer').html("{2} / {0} variant{1}".format(annotation_format_number(count, false), (count > 1) ? 's' : ''), count);
+                analysis.analysis.current_total = count;
             }
             
         }
@@ -1420,11 +1422,13 @@ function loading_variants_count()
         {
             $('#current_filter_count').html(annotation_format_number(json["data"], false));
             $('#demo_footer').html("{0} variant{1}".format(annotation_format_number(json["data"], false), (json["data"] > 1) ? 's' : ''));
+            analysis.analysis.current_total = count;
         }
         else
         {
             $('#current_filter_count').html("-");
             $('#demo_footer').html("-");
+            analysis.analysis.current_total = 0;
             display_error(json);
         }
         
@@ -1458,37 +1462,12 @@ function init_variants_list(json, container_id)
     $.each(json["data"], function( idx, v ) 
     {
         count += 1;
-        selected = (analysis.analysis.selection.indexOf(v["id"].toString()) == -1) ? "" : " checked";
-        html += variants_table_row_start.format(v["id"], selected);
-        for (var i=0; i<analysis.analysis.fields.length; i++)
-        {
-            fid   = analysis.analysis.fields[i];
-            ftype = annotation_fields[fid]["type"];
-
-            if (fid in annotation_fields_formaters)
-            {
-                // use special format method to display this field
-                html += annotation_fields_formaters[fid](v[analysis.analysis.fields[i]]);
-            }
-            else
-            {
-                // format according to the type
-                if (ftype == "int" || ftype == "float")
-                    html += annotation_format_number(v[fid]);
-                else if (ftype == 'percent')
-                {
-                    html += annotation_format_percent(v[fid]);
-                }
-                else 
-                    html += variants_table_row_cell.format(v[fid]);
-            }
-        }
-        html += variants_table_row_end;
+        html += insert_variant_row(v);
     });
     $(container_id).html(html + "</tbody></table>");
 
     // Add context menu
-    $(container_id + " tr").contextMenu({
+/*    $(container_id + " tr").contextMenu({
         menuSelector: "#contextmenu_genename",
         menuSelected: function (invokedOn, selectedMenu) 
         {
@@ -1500,10 +1479,46 @@ function init_variants_list(json, container_id)
             // if (action == "context_menu_info") show_tab("browser_file", id);
             // else if (action == "context_menu_dl") alert("TODO : download the file " + id);
         }
-    });
+    });*/
 
     return count;
 }
+
+function insert_variant_row(json)
+{
+    html = "";
+    selected = (analysis.analysis.selection.indexOf(json["id"].toString()) == -1) ? "" : " checked";
+    html += variants_table_row_start.format(json["id"], selected);
+    for (var i=0; i<analysis.analysis.fields.length; i++)
+    {
+        fid   = analysis.analysis.fields[i];
+        ftype = annotation_fields[fid]["type"];
+
+        if (fid in annotation_fields_formaters)
+        {
+            // use special format method to display this field
+            html += annotation_fields_formaters[fid](json[analysis.analysis.fields[i]]);
+        }
+        else
+        {
+            // format according to the type
+            if (ftype == "int" || ftype == "float")
+                html += annotation_format_number(json[fid]);
+            else if (ftype == 'percent')
+            {
+                html += annotation_format_percent(json[fid]);
+            }
+            else 
+                html += variants_table_row_cell.format(json[fid]);
+        }
+    }
+    html += variants_table_row_end;
+    return html;
+}
+
+
+
+
 
 function annotation_format_number(value, td=true)
 {
@@ -1573,7 +1588,15 @@ function annotation_format_percent(value)
 
 function update_variants_list(json)
 {
-
+    count = 0;
+    html = "";
+    $.each(json["data"], function( idx, v ) 
+    {
+        count += 1;
+        html += insert_variant_row(v);
+    });
+    $('#variants_list tr:last').after(html);
+    this.current_count += count;
 }
 
 

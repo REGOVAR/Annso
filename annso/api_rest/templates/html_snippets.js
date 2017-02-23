@@ -79,7 +79,7 @@ var variants_table_header_start = "<table id=\"variants_list_table\" class=\"tab
 var variants_table_header_cell  = "<th onclick=\"javascript:ui.order_by('{0}');\" style=\"cursor:pointer;\">{1} <span id=\"orderby_{0}\">{2}</span></th>";
 var variants_table_header_end   = "</tr></thead><tbody>";
 
-var variants_table_row_start = "<tr id=\"variant_{0}\" style=\"cursor: pointer;\"><td><input type=\"checkbox\" value=\"{0}\" onchange=\"javascript:ui.check_variant(this);\"{1}/></td>";
+var variants_table_row_start = "<tr id=\"variant_{0}\"><td><input type=\"checkbox\" value=\"{0}\" onchange=\"javascript:ui.check_variant(this);\"{1}/></td>";
 var variants_table_row_cell  = "<td>{0}</td>";
 var variants_table_row_end   = "</tr>";
 

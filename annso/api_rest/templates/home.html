@@ -437,7 +437,7 @@
                                 <!--              -->
                                 <!-- VARIANT LIST -->
                                 <!--              -->
-                                <div class="col-md-9" style="padding-left:0; padding-right:0; overflow-y:auto; position:absolute; right:0; bottom:0; top:0;">
+                                <div id="variant_scrolling" class="col-md-9" style="padding-left:0; padding-right:0; overflow-y:auto; position:absolute; right:0; bottom:0; top:0;">
                                     <div id="variants_list"></div>
                                     <div id="selection_list"></div>
                                 </div>
@@ -895,7 +895,7 @@
         var annotation_fields_autocomplete_info = [];
         var ctrl_is_pressed = false;
 
-
+        var query_next_entry_in_progress = false;
 
 
         
@@ -930,7 +930,53 @@
 
 
 
-        
+        $("#variant_scrolling").scroll(function() 
+        {
+            console.debug("{0} > {1} - {2} (={3})".format($("#variant_scrolling").scrollTop(), $("#variants_list").height(), $("#variant_scrolling").height(), $("#variants_list").height()- $("#variant_scrolling").height()));
+
+            if(!query_next_entry_in_progress && $("#variant_scrolling").scrollTop() > $("#variants_list").height() - $("#variant_scrolling").height()) 
+            {
+                // if no need to load new entries, do nothing
+                if (analysis.analysis.current_count >= analysis.analysis.current_total) return;
+
+                // retrieve list of variant
+                query_next_entry_in_progress = true;
+                $('#variant_scrolling').css('cursor', 'wait');
+
+                $.ajax({ 
+                    url: "{0}/analysis/{1}/filtering".format(rootURL, analysis.analysis.id), 
+                    type: "POST",
+                    data: "{\"mode\" : \"table\", \"filter\" : " + JSON.stringify(analysis.analysis.filter) + ", \"fields\" : " + JSON.stringify(analysis.analysis.fields) + ", \"order\" : " + JSON.stringify(analysis.analysis.order) + ", \"offset\" : " + current_count +  "}",
+                    async: true}).fail(function()
+                {
+                    display_error("Unknow error in 'load_variants_array' request");
+                    query_next_entry_in_progress = false;
+                    $('#variant_scrolling').css('cursor', 'default');
+                }).done(function(json)
+                {
+                    if (!json["success"])
+                    {
+                        display_error(json);
+                        query_next_entry_in_progress = false;
+                        $('#variant_scrolling').css('cursor', 'default');
+                        return;
+                    }
+
+                    if (  $("#variants_list_table").length )
+                    {
+                        update_variants_list(json);
+                        $('#demo_footer').html("{2} / {0} variant{1}".format(annotation_format_number(count, false), (count > 1 ? 's' : ''), annotation_format_number(analysis.analysis.current_count)));
+                        query_next_entry_in_progress = false;
+                        $('#variant_scrolling').css('cursor', 'default');
+                    }
+                    else
+                    {
+                        debugger; // why we arrive here ... 
+                        
+                    }
+                });
+            }
+        });
 
 
 

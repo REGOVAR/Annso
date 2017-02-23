@@ -504,7 +504,7 @@ UPDATE annotation_field SET uid=MD5(concat(database_uid, name))
 -- FUNCTIONS
 -- --------------------------------------------
 -- Return array with element that occure in both input arrays
-CREATE FUNCTION array_intersect(anyarray, anyarray)
+CREATE OR REPLACE FUNCTION array_intersect(anyarray, anyarray)
   RETURNS integer ARRAY
   LANGUAGE sql
 AS $FUNCTION$
@@ -534,10 +534,20 @@ $FUNCTION$
 
 
 -- return index position (1-based) of an element into an array
-CREATE FUNCTION array_search(needle ANYELEMENT, haystack ANYARRAY)
+CREATE OR REPLACE FUNCTION array_search(needle ANYELEMENT, haystack ANYARRAY)
 RETURNS INT AS $$
     SELECT i
       FROM generate_subscripts($2, 1) AS i
      WHERE $2[i] = $1
   ORDER BY i
 $$ LANGUAGE sql STABLE;
+
+
+
+-- keep element in the first array if equivalent bool in the second array is true
+CREATE OR REPLACE FUNCTION array_mask(anyarray, boolean[])
+RETURNS anyarray AS $$ 
+SELECT ARRAY(SELECT $1[i] 
+  FROM generate_subscripts($1,1) g(i)
+  WHERE $2[i])
+$$ LANGUAGE sql;

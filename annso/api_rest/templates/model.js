@@ -44,7 +44,9 @@ function Analysis(json)
     this.fields = settings["fields"];
     this.filter = settings["filter"];
     this.selection = settings["selection"];
-    this.order = settings["order"]
+    this.order = settings["order"];
+    this.current_count = 0;
+    this.current_total = 0;
 
     if (this.selection == undefined)
     {
