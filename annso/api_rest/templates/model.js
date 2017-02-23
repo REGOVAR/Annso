@@ -39,7 +39,7 @@ function Analysis(json)
 
     // settings
     settings = json["settings"]
-    if (!('order' in settings)) { ettings["order"] = []; }
+    if (!('order' in settings)) { settings["order"] = []; }
     this.filter_mode = "table";
     this.fields = settings["fields"];
     this.filter = settings["filter"];

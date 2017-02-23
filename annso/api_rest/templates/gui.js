@@ -97,7 +97,7 @@ function AnnsoControler () {
 
     // ------------------------------------------------------------------
     // Save current analysis settings to the server
-    // Settings = samples, attributes, fields, filter, selection
+    // Settings = samples, attributes, fields, filter, selection, order
     this.save_analysis = function ()
     {
         var samples = [];
