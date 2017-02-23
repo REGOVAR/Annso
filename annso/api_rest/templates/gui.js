@@ -143,7 +143,8 @@ function AnnsoControler () {
                 "samples" : samples,
                 "attributes" : analysis.analysis.attributes,
                 "fields" : analysis.analysis.fields,
-                "filter" : analysis.analysis.filter
+                "filter" : analysis.analysis.filter,
+                "order"  : analysis.analysis.order
             }),
             async: false}).fail(function() { display_error("TODO : network error"); })
         .done(function(json)
@@ -900,7 +901,7 @@ function AnnsoUIControler ()
         $.ajax({ 
         url: "{0}/analysis/{1}/filtering".format(rootURL, analysis.analysis.id), 
         type: "POST",
-        data: "{\"mode\" : \"table\", \"filter\" : " + JSON.stringify(analysis.analysis.filter) + ", \"fields\" : " + JSON.stringify(analysis.analysis.fields) + "}",
+        data: "{\"mode\" : \"table\", \"filter\" : " + JSON.stringify(analysis.analysis.filter) + ", \"fields\" : " + JSON.stringify(analysis.analysis.fields) + ", \"order\" : " + JSON.stringify(analysis.analysis.order) + "}",
         async: true}).fail(function()
         {
             display_error("Unknow error in 'load_variants_array' request");
@@ -933,6 +934,39 @@ function AnnsoUIControler ()
             }
         });
         
+    }
+
+
+
+    this.order_by = function (id)
+    {
+        if (analysis.analysis.order == undefined || analysis.analysis.order == null)
+        {
+            analysis.analysis.order = [];
+        }
+
+
+        if (id in analysis.analysis.order)
+        {
+            analysis.analysis.order.pop(id);
+            $('#orderby_'+id).html("");
+            return;
+        }
+
+        if (ctrl_is_pressed)
+        {
+            analysis.analysis.order.push(id);
+            $('#orderby_'+id).html("<i class=\"fa fa-sort-amount-desc\" aria-hidden=\"true\"></i>");
+        }
+        else
+        {
+            $.each(analysis.analysis.order, function (idx, key)
+            {
+                $('#orderby_'+key).html("");
+            });
+            analysis.analysis.order=[id];
+            $('#orderby_'+id).html("<i class=\"fa fa-sort-amount-asc\" aria-hidden=\"true\"></i>");
+        }
     }
 
 }
@@ -1057,7 +1091,7 @@ function update_filter_set_map()
 
 
 var filter_set_map = {};
-var filter_operator_display_map = {'==' : '=', '!=' : "&#8800;", '>' : "&gt;", '>=' : "&#8805;", '<' : "&lt;", '<=' : "&#8804;", "IN":"&#8712;", "NOTIN":"&#8713;", '~':'~'};
+var filter_operator_display_map = {'==' : '=', '!=' : "&#8800;", '>' : "&gt;", '>=' : "&#8805;", '<' : "&lt;", '<=' : "&#8804;", "IN":"&#8712;", "NOTIN":"&#8713;", '~':'~', '!~' : '&#8769;'};
 var add_filter_ui_parent_elmt;
 function build_filter_ui(json)
 {
@@ -1085,7 +1119,7 @@ function build_filter_ui(json)
     {
         return json[1];
     }
-    else if (['==', '!=', '>', '>=', '<', '<=', '~'].includes(json[0]))
+    else if (['==', '!=', '>', '>=', '<', '<=', '~', '!~'].includes(json[0]))
     {
         return filter_condition_template.format('check', "{0} {1} {2}".format(build_filter_ui(json[1]), filter_operator_display_map[json[0]], build_filter_ui(json[2])), JSON.stringify(json));
     }
@@ -1331,11 +1365,11 @@ function load_variants_array()
     $('#variants_list').html('<i class="fa fa-refresh fa-spin fa-3x fa-fw" style="display:block;margin:auto;margin-top:200px;"></i><span class="sr-only">Loading data from database</span>');
 
 
-    // retrieve list of sample
+    // retrieve list of variant
     $.ajax({ 
         url: "{0}/analysis/{1}/filtering".format(rootURL, analysis.analysis.id), 
         type: "POST",
-        data: "{\"mode\" : \"table\", \"filter\" : " + JSON.stringify(analysis.analysis.filter) + ", \"fields\" : " + JSON.stringify(analysis.analysis.fields) + "}",
+        data: "{\"mode\" : \"table\", \"filter\" : " + JSON.stringify(analysis.analysis.filter) + ", \"fields\" : " + JSON.stringify(analysis.analysis.fields) + ", \"order\" : " + JSON.stringify(analysis.analysis.order) +  "}",
         async: true}).fail(function()
     {
         display_error("Unknow error in 'load_variants_array' request");
@@ -1409,7 +1443,11 @@ function init_variants_list(json, container_id)
     {
         var id = analysis.analysis.fields[i];
         if (annotation_fields[id] != undefined)
-            html += variants_table_header_cell.format(annotation_fields[id]["name"]);
+        {
+            orderby = analysis.analysis.order.indexOf(id) >=0 ? "<i class=\"fa fa-sort-amount-asc\" aria-hidden=\"true\"></i>" : "";
+            orderby = analysis.analysis.order.indexOf('-'+id) >=0 ? "<i class=\"fa fa-sort-amount-desc\" aria-hidden=\"true\"></i>" : orderby;
+            html += variants_table_header_cell.format(id, annotation_fields[id]["name"], orderby);
+        }
         else
             console.debug("nothing for " + id);
     }

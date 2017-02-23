@@ -43,5 +43,11 @@ list_db:
         LEFT JOIN pg_stat_all_tables ON table_name=relname ORDER BY table_name) AS _sub ON table_name=relname \
     ORDER BY pg_total_relation_size(relid) DESC"
 
+list_field:
+	psql -U annso -d annso -c "select d.name, f.uid, f.name, f.name_ui from annotation_field f INNER JOIN annotation_database d ON f.database_uid=d.uid ORDER BY d.name, f.name"
 
-.PHONY: init test app clear list_db
+free_db:
+	psql -U postgres -c "SELECT pg_terminate_backend(pid) FROM pg_stat_activity WHERE datname = 'annso'"
+
+
+.PHONY: init test app clear list_db list_field free_db

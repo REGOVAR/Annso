@@ -503,6 +503,7 @@ UPDATE annotation_field SET uid=MD5(concat(database_uid, name))
 -- --------------------------------------------
 -- FUNCTIONS
 -- --------------------------------------------
+-- Return array with element that occure in both input arrays
 CREATE FUNCTION array_intersect(anyarray, anyarray)
   RETURNS integer ARRAY
   LANGUAGE sql
@@ -515,7 +516,7 @@ AS $FUNCTION$
 $FUNCTION$;
 
 
-
+-- Remove all occurence elements from an array into another one 
 CREATE OR REPLACE FUNCTION array_multi_remove(integer[], integer[])
   RETURNS integer ARRAY
   LANGUAGE plpgsql
@@ -530,3 +531,13 @@ AS $FUNCTION$
   RETURN source;
   END;
 $FUNCTION$
+
+
+-- return index position (1-based) of an element into an array
+CREATE FUNCTION array_search(needle ANYELEMENT, haystack ANYARRAY)
+RETURNS INT AS $$
+    SELECT i
+      FROM generate_subscripts($2, 1) AS i
+     WHERE $2[i] = $1
+  ORDER BY i
+$$ LANGUAGE sql STABLE;

@@ -668,7 +668,7 @@ class VariantManager:
 # FILTER ENGINE
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
 class FilterEngine:
-    op_map = {'AND' : ' AND ', 'OR': ' OR ', '==' : '=', '!=': '<>', '>':'>', '<':'<', '>=':'>=', '<=':'<=', '~' : 'LIKE',
+    op_map = {'AND' : ' AND ', 'OR': ' OR ', '==' : '=', '!=': '<>', '>':'>', '<':'<', '>=':'>=', '<=':'<=', '~' : ' LIKE ', '!~' : ' NOT LIKE ',
         # As a left join will be done on the chr+pos or chr+pos+ref+alt according to the type of the set operation (by site or by variant)
         # We just need to test if one of the "joined" field is set or not
         'IN'       : '{0}.chr is not null', 
@@ -842,7 +842,7 @@ class FilterEngine:
         for f_id in filter_ids:
             if 'filter_{}'.format(f_id) not in current_fields:
                 f_filter = json.loads(db_engine.execute("SELECT filter FROM filter WHERE id={}".format(f_id)).first().filter)
-                q = self.build_query(analysis_id, analysis.reference_id, 'table', f_filter, [], None)
+                q = self.build_query(analysis_id, analysis.reference_id, 'table', f_filter, [], None, None)
                 queries = q[0]
                 if len(queries) > 0:
                     query = ""
@@ -875,7 +875,7 @@ class FilterEngine:
 
 
 
-    def request(self, analysis_id, mode, filter_json, fields=None, limit=100, offset=0, count=False):
+    def request(self, analysis_id, mode, filter_json, fields=None, order=None, limit=100, offset=0, count=False):
         # Check parameters : if no field, select by default the first field avalaible to avoir error
         if fields is None: fields = [next(iter(self.fields_map.keys()))]
         if type(analysis_id) != int or analysis_id <=0 : analysis_id = None
@@ -887,7 +887,7 @@ class FilterEngine:
             raise AnnsoException("Not able to retrieve analysis with provided id : {}".format(analysis_id)) 
 
         # Parse data to generate sql query and retrieve list of needed annotations databases/fields
-        query, field_uids, dbs_uids, sample_ids, filter_ids, attributes = self.build_query(analysis_id, analysis.reference_id, mode, filter_json, fields, limit, offset, count)
+        query, field_uids, dbs_uids, sample_ids, filter_ids, attributes = self.build_query(analysis_id, analysis.reference_id, mode, filter_json, fields, order, limit, offset, count)
 
         # Prepare database working table
         if analysis.status is None or analysis.status == '':
@@ -908,6 +908,7 @@ class FilterEngine:
                 settings = json.loads(db_engine.execute("SELECT settings FROM analysis WHERE id={}".format(analysis_id)).first().settings)
                 settings["filter"] = filter_json
                 settings["fields"] = fields
+                settings["order"]  = [] if order is None else order
                 db_engine.execute("UPDATE analysis SET {0}update_date=CURRENT_TIMESTAMP WHERE id={1}".format("settings='{0}', ".format(json.dumps(settings)), analysis_id))
             except : 
                 # TODO : log error
@@ -934,7 +935,7 @@ class FilterEngine:
 
 
 
-    def build_query(self, analysis_id, reference_id, mode, filter, fields, limit=100, offset=0, count=False):
+    def build_query(self, analysis_id, reference_id, mode, filter, fields, order=None, limit=100, offset=0, count=False):
         """
             This method build the sql query according to the provided parameters, and also build several list  with ids of
             fields, databases, sample, etc... all information that could be used by the analysis to work.
@@ -967,12 +968,12 @@ class FilterEngine:
         # Retrieve saved filter's ids of the analysis - and parse their filter to get list of dbs/fields used by filters
         for row in db_session.execute("select id, filter from filter where analysis_id={0} ORDER BY id ASC".format(analysis_id)): # ORDER BY is important as a filter can "called" an oldest filter to be build.
             filter_ids.append(row.id)
-            q, f, d = self.parse_filter(analysis_id, mode, sample_ids, row.filter, fields, None)
+            q, f, d = self.parse_filter(analysis_id, mode, sample_ids, row.filter, fields, None, None)
             field_uids = array_merge(field_uids, f)
             db_uids = array_merge(db_uids, d)
 
         # Parse the current filter
-        query, f, d = self.parse_filter(analysis_id, mode, sample_ids, filter, fields, limit, offset, count)
+        query, f, d = self.parse_filter(analysis_id, mode, sample_ids, filter, fields, order, limit, offset, count)
         field_uids = array_merge(field_uids, f)
         db_uids    = array_merge(db_uids, d)
         
@@ -983,7 +984,7 @@ class FilterEngine:
 
 
 
-    def parse_filter(self, analysis_id, mode, sample_ids, filters, fields=[], limit=100, offset=0, count=False):
+    def parse_filter(self, analysis_id, mode, sample_ids, filters, fields=[], order=None, limit=100, offset=0, count=False):
         # Get working table
         wt = 'wt_{}'.format(analysis_id)
         query = ""
@@ -1031,10 +1032,10 @@ class FilterEngine:
                 check_field_uid(data[1])
                 check_field_uid(data[2])
                 return '{0}{1}{2}'.format(parse_value(t, data[1]), FilterEngine.op_map[operator], parse_value(t, data[2]))
-            elif operator == '~':
+            elif operator in ['~', '!~']:
                 check_field_uid(data[1])
                 check_field_uid(data[2])
-                return '{0} LIKE {1}'.format(parse_value('string', data[1]), parse_value('string%', data[2]))
+                return '{0}{1}{2}'.format(parse_value('string', data[1]), FilterEngine.op_map[operator], parse_value('string%', data[2]))
             elif operator in ['IN', 'NOTIN']:
                 tmp_table = get_tmp_table(data[1], data[2])
                 temporary_to_import[tmp_table]['where'] = FilterEngine.op_map[operator].format(tmp_table, wt)
@@ -1050,7 +1051,7 @@ class FilterEngine:
                     mode : site or variant
                     data : json data about the temp table to create
             """
-            ttable_quer_map = "CREATE TEMP TABLE IF NOT EXISTS {0} AS {1}; "
+            ttable_quer_map = "CREATE TABLE IF NOT EXISTS {0} AS {1}; "
             if data[0] == 'sample' :
                 tmp_table_name    = "tmp_sample_{0}_{1}".format(data[1], mode)
                 if mode == 'site':
@@ -1070,7 +1071,7 @@ class FilterEngine:
                     tmp_table_query = ttable_quer_map.format(tmp_table_name, "SELECT DISTINCT {0}.bin, {0}.chr, {0}.pos FROM {0} WHERE {0}.attr_{1}='{2}'".format(wt, key, value))
                 else : # if mode = 'variant' :
                     tmp_table_query = ttable_quer_map.format(tmp_table_name, "SELECT DISTINCT {0}.bin, {0}.chr, {0}.pos, {0}.ref, {0}.alt FROM {0} WHERE {0}.attr_{1}='{2}'".format(wt, key, value))
-            temporary_to_import[tmp_table_name] = {'query' : tmp_table_query}
+            temporary_to_import[tmp_table_name] = {'query' : tmp_table_query + "CREATE INDEX IF NOT EXISTS {0}_idx_var ON {0} USING btree (bin, chr, pos);".format(tmp_table_name) }
             return tmp_table_name
 
         def parse_value(ftype, data):
@@ -1107,13 +1108,30 @@ class FilterEngine:
         q_from += " ".join([t['from'] for t in temporary_to_import.values()])
         
 
+        # Build ORDER BY
+        q_order = ""
+        if order is not None and len(order) > 0:
+            orders = []
+
+            for f_uid in order:
+                asc = 'ASC'
+                if f_uid[0] == '-' :
+                    f_uid = f_uid[1:]
+                    asc = 'DESC'
+                if self.fields_map[f_uid]['db_name_ui'] == 'Variant':
+                    orders.append('{} {}'.format(self.fields_map[f_uid]["name"], asc))
+                else:
+                    orders.append('_{} {}'.format(f_uid, asc))
+            q_order = 'ORDER BY {}'.format(', '.join(orders))
+
+
         # build final query
         query_tpm = [t['query'] for t in temporary_to_import.values()]
         if count:
             query_req = "SELECT DISTINCT {0} FROM {1} WHERE {2}".format(q_select, q_from, q_where)
             query =  query_tpm + ['SELECT COUNT(*) FROM ({0}) AS sub;'.format(query_req)]
         else: 
-            query_req = "SELECT DISTINCT {0} FROM {1} WHERE {2} {3} {4};".format(q_select, q_from, q_where, 'LIMIT {}'.format(limit) if limit is not None else '', 'OFFSET {}'.format(offset) if offset is not None else '')
+            query_req = "SELECT DISTINCT {0} FROM {1} WHERE {2} {3} {4} {5};".format(q_select, q_from, q_where, q_order, 'LIMIT {}'.format(limit) if limit is not None else '', 'OFFSET {}'.format(offset) if offset is not None else '')
             query =  query_tpm + [query_req]
 
 

@@ -76,7 +76,7 @@ var filter_save_filter_row   = "<li><a href=\"javascript:ui.reset_filter({0});\"
 
 var variants_table_header_start = "<table id=\"variants_list_table\" class=\"table table-striped table-bordered\" cellspacing=\"0\" width=\"100%\" style=\"margin:0\">\
     <thead><tr><th style=\"width:20px\"><input id=\"checkbox_all_variants\" type=\"checkbox\" onchange=\"javascript:ui.check_all_variant();\"/></th>";
-var variants_table_header_cell  = "<th>{0}</th>";
+var variants_table_header_cell  = "<th onclick=\"javascript:ui.order_by('{0}');\" style=\"cursor:pointer;\">{1} <span id=\"orderby_{0}\">{2}</span></th>";
 var variants_table_header_end   = "</tr></thead><tbody>";
 
 var variants_table_row_start = "<tr id=\"variant_{0}\" style=\"cursor: pointer;\"><td><input type=\"checkbox\" value=\"{0}\" onchange=\"javascript:ui.check_variant(this);\"{1}/></td>";
@@ -107,7 +107,8 @@ var filter_form_operators_type_float = "<select name=\"select\" id=\"modal_filte
 var filter_form_operators_type_string = "<select name=\"select\" id=\"modal_filter_field_operator\">\
                                     <option value=\"==\">=</option> \
                                     <option value=\"~\">~</option>\
-                                    <option value=\"!=\">&#8800;</option></select>\
+                                    <option value=\"!=\">&#8800;</option> \
+                                    <option value=\"!~\">&#8769;</option></select>\
                                 <input type=\"text\" id=\"modal_filter_field_value\" placeholder=\"Field value\" value=\"{0}\"/>"
 
 var filter_form_operators_type_percent = "<select name=\"select\" id=\"modal_filter_field_operator\">\

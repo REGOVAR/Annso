@@ -345,6 +345,7 @@ class AnalysisHandler:
         limit = data["limit"] if "limit" in data else 100
         offset = data["offset"] if "offset" in data else 0
         mode = data["mode"] if "mode" in data else "table"
+        order = data["order"] if "order" in data else None
 
         # 2- Check parameters
         if "mode" in data: mode = data["mode"]
@@ -353,7 +354,7 @@ class AnalysisHandler:
         
         # 3- Execute filtering request
         try :
-            result = annso.filter.request(int(analysis_id), mode, filter_json, fields, int(limit), int(offset), count)
+            result = annso.filter.request(int(analysis_id), mode, filter_json, fields, order, int(limit), int(offset), count)
         except Exception as err :
             return rest_error("Filtering error : " + str(err))
         return rest_success(result)

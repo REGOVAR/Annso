@@ -86,6 +86,8 @@ CREATE TABLE public.refgene_exon_hg19
   cdsrange int8range,
   i_exonstart character varying(255),
   i_exonend character varying(255),
+  i_exonstarts character varying(10)[],
+  exonpos integer,
   exoncount bigint,
   exonstart bigint,
   exonend bigint,
@@ -134,24 +136,29 @@ FROM import_refgene_hg19
 WHERE char_length(chrom) <= 5;
 
 
-INSERT INTO public.refgene_exon_hg19(bin, name, chr, strand, txstart, txend, txrange, cdsstart, cdsend, cdsrange, exoncount, i_exonstart, i_exonend, score, name2, cdsstartstat, cdsendstat)
+INSERT INTO public.refgene_exon_hg19(bin, name, chr, strand, txstart, txend, txrange, cdsstart, cdsend, cdsrange, exoncount, i_exonstart, i_exonend, i_exonstarts, score, name2, cdsstartstat, cdsendstat)
 SELECT bin, name,
   CASE WHEN chrom='chrX' THEN 23 WHEN chrom='chrY' THEN 24 WHEN chrom='chrM' THEN 25 ELSE CAST(substring(chrom from 4) AS INTEGER) END,
-  strand, txstart, txend, int8range(txstart, txend), cdsstart, cdsend, int8range(cdsstart, cdsend), exoncount, unnest(string_to_array(trim(trailing ',' from exonstarts), ',')), unnest(string_to_array(trim(trailing ',' from exonends), ',')), score, name2, cdsstartstat, cdsendstat
+  strand, txstart, txend, int8range(txstart, txend), cdsstart, cdsend, int8range(cdsstart, cdsend), exoncount, 
+  unnest(string_to_array(trim(trailing ',' from exonstarts), ',')), 
+  unnest(string_to_array(trim(trailing ',' from exonends), ',')), 
+  string_to_array(trim(trailing ',' from exonstarts), ','), score, name2, cdsstartstat, cdsendstat
 FROM import_refgene_hg19
 WHERE char_length(chrom) <= 5;
+
 
 
 
 UPDATE public.refgene_exon_hg19 SET 
   exonstart=CAST(coalesce(i_exonstart, '0') AS integer),
   exonend  =CAST(coalesce(i_exonend,   '0') AS integer),
-  exonrange=int8range(CAST(coalesce(i_exonstart, '0') AS integer), CAST(coalesce(i_exonend, '0') AS integer)) ;
-
+  exonrange=int8range(CAST(coalesce(i_exonstart, '0') AS integer), CAST(coalesce(i_exonend, '0') AS integer)),
+  exonpos  =array_search(CAST(i_exonstart AS character varying(10)), i_exonstarts) ;
 
 
 ALTER TABLE public.refgene_exon_hg19 DROP COLUMN i_exonstart;
 ALTER TABLE public.refgene_exon_hg19 DROP COLUMN i_exonend;
+ALTER TABLE public.refgene_exon_hg19 DROP COLUMN i_exonstarts;
 
 
 

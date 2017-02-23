@@ -302,7 +302,7 @@
                                 <!--                    -->
                                 <!-- QUICK FILTERS MENU -->
                                 <!--                    -->
-                                <div id="filters_panel_menu_quick" class="col-md-2 browser-panel collapse">
+                                <div id="filters_panel_menu_quick" class="col-md-3 browser-panel collapse">
                                     <a class="btn section" style="display:block; text-align:left;" role="button" data-toggle="collapse" href="#filters_panel_menu_quick_f" aria-expanded="false" aria-controls="filters_panel_menu_quick_f">
                                         <i class="fa fa-cubes" style="width:20px; text-align:center;" aria-hidden="true"></i> Saved filters 
                                         <span style="float:right;"> <i class="fa fa-chevron-right" aria-hidden="true" style="width:20px; text-align:center;"></i></span>
@@ -411,7 +411,7 @@
                                 <!--              -->
                                 <!-- FILTERS MENU -->
                                 <!--              -->
-                                <div id="filters_panel_menu_filter" class="col-md-2 browser-panel">
+                                <div id="filters_panel_menu_filter" class="col-md-3 browser-panel">
                                     <a class="btn section" style="display:block; text-align:left;" role="button" data-toggle="collapse" href="#filters_panel_menu_filter_f" aria-expanded="true" aria-controls="filters_panel_menu_filter_f">
                                         <i class="fa fa-cubes" style="width:20px; text-align:center;" aria-hidden="true"></i> Saved filters 
                                         <span style="float:right;"> <i class="fa fa-chevron-right" aria-hidden="true" style="width:20px; text-align:center;"></i></span>
@@ -437,7 +437,7 @@
                                 <!--              -->
                                 <!-- VARIANT LIST -->
                                 <!--              -->
-                                <div class="col-md-10" style="padding-left:0; padding-right:0; overflow-y:auto; position:absolute; right:0; bottom:0; top:0;">
+                                <div class="col-md-9" style="padding-left:0; padding-right:0; overflow-y:auto; position:absolute; right:0; bottom:0; top:0;">
                                     <div id="variants_list"></div>
                                     <div id="selection_list"></div>
                                 </div>
@@ -893,12 +893,21 @@
         var annotation_fields = [];
         var annotation_fields_autocomplete = [];
         var annotation_fields_autocomplete_info = [];
-
+        var ctrl_is_pressed = false;
 
 
 
 
         
+        $(document).keydown(function(event)
+        {
+            if(event.which=="17") ctrl_is_pressed = true;
+        });
+
+        $(document).keyup(function(event)
+        {
+            if(event.which=="17") ctrl_is_pressed = false;
+        });
 
 
 
