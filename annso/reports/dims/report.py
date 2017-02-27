@@ -510,7 +510,7 @@ def report_data(analysis_id, data, cache_path, output_path, annso_core=None):
         subprocess.run(['pandoc', '-s', '-o', destination, source])
 
     def get_hbt_image(gene_name):
-        image_url  = 'http://hbatlas.org/hbtd/images/wholeBrain/{}.pdf'.format(gene_name)
+        image_url  = 'https://hbatlas.org/hbtd/images/wholeBrain/{}.pdf'.format(gene_name)
         image_filename = os.path.join(cache_path, 'hbt_image_{}.png'.format(gene_name))
         missing_filename = os.path.join(cache_path, 'hbt_image_{}.missing'.format(gene_name))
         if os.path.exists(image_filename) :
@@ -538,7 +538,7 @@ def report_data(analysis_id, data, cache_path, output_path, annso_core=None):
         return None
 
     def get_sp_image(gene_name):
-        image_url  = 'http://string-db.org/api/image/network?identifier={}_HUMAN'.format(gene_name)
+        image_url  = 'https://string-db.org/api/image/network?identifier={}_HUMAN'.format(gene_name)
         image_filename = os.path.join(cache_path, 'sp_image_{}.png'.format(gene_name))
         missing_filename = os.path.join(cache_path, 'sp_image_{}.missing'.format(gene_name))
         if os.path.exists(image_filename):
@@ -605,9 +605,10 @@ def report_data(analysis_id, data, cache_path, output_path, annso_core=None):
         if r.status_code == requests.codes.ok:
             soup = BeautifulSoup(r.text, 'html.parser')
 
-            html = """<script language="javascript" src="http://www.proteinatlas.org/utils/jquery.min.js?version=15.0.0" type="text/javascript"></script>
-                      <script language="javascript" src="http://www.proteinatlas.org/common.js?version=15.0.0" type="text/javascript"></script>
-                      <script language="javascript" src="http://www.proteinatlas.org/utils/d3.min.js?version=15.0.0" type="text/javascript"></script>"""
+            html = ""
+            # """<script language="javascript" src="https://www.proteinatlas.org/utils/jquery.min.js?version=15.0.0" type="text/javascript"></script>
+            #           <script language="javascript" src="https://www.proteinatlas.org/common.js?version=15.0.0" type="text/javascript"></script>
+            #           <script language="javascript" src="https://www.proteinatlas.org/utils/d3.min.js?version=15.0.0" type="text/javascript"></script>"""
             p = soup.find(text='RNA EXPRESSION OVERVIEW')
             while p.name != 'p':
                 p = p.parent

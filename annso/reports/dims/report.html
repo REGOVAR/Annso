@@ -1,3 +1,34 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Annso</title>
+
+
+    <!-- Base -->
+    <script type="text/javascript" src="https://code.jquery.com/jquery-3.1.0.min.js"></script>
+    <script type="text/javascript" src="https://code.jquery.com/jquery-migrate-3.0.0.js"></script>
+    <!-- Latest compiled and minified CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">
+    <script type="text/javascript" src="/assets/jquery.tablesorter.min.js"></script>
+    <!-- Latest compiled and minified JavaScript -->
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+
+    <!-- Annso specific -->
+    <script type="text/javascript" src="https://annso.absolumentg.fr/v1/cache/reports/dims/common.js"></script>
+    <link rel="stylesheet" href="/assets/annso.css"/>
+    <link rel="stylesheet" href="/assets/font-awesome-4.6.3/css/font-awesome.min.css"/>
+
+
+
+
+
+</head>
+<body style="margin:20px;">
+
+
 <h1 class="fixheader">Phenotype</h1>
 <textarea rows="10" cols="100">
 Describe phenotype here...
@@ -11,7 +42,7 @@ Describe phenotype here...
     <ul>
         <li>Name : {{gene.data.name}}</li>
         <li>Also known as : {{', '.join(gene.data.symbols)}}</li>
-        <li>OMIM: <a href="http://www.omim.org/entry/{{gene.data.mim_number}}">{{gene.data.mim_number}}</a></li>
+        <li>OMIM: <a href="http://www.omim.org/entry/{{gene.data.mim_number}}" target="_blanck">{{gene.data.mim_number}}</a></li>
     </ul>
     {% else %}
     <p>No information found on OMIM.</p>
@@ -30,34 +61,37 @@ Describe phenotype here...
         <li>SFARI autism genes list: {{gene.data.sfari_gene and '`yes <https://gene.sfari.org/autdb/submitsearch?selfld_0=GENES_GENE_SYMBOL&selfldv_0={}&numOfFields=1&userAction=search&tableName=AUT_HG&submit=Submit+Query>`_'.format(gene.data.sfari_gene_as or gene.name) or 'no'}}{{gene.data.sfari_gene_as and ' (as {})'.format(gene.data.sfari_gene_as) or ''}}</li>
         <li>1000 genomes (all, max): {{' / '.join(gene.get_variant_annotations('dbNSFP_1000Gp1_AF', 'dbNSFP_1000Gp1_pred')) or 'Ø'}}</li>
         <li>ESP (AA, EA): {{' / '.join(gene.get_variant_annotations('dbNSFP_ESP6500_AA_AF', 'dbNSFP_ESP6500_EA_AF')) or 'Ø'}}</li>
-        <li>dbSNP: {{' / '.join(gene.get_formated_variant_ids('`{} <http://www.ncbi.nlm.nih.gov/SNP/snp_ref.cgi?searchType=adhoc_search&type=rs&rs={}>`_'))}}</li>
+        <li>dbSNP: {{' / '.join(gene.get_formated_variant_ids('`{} <https://www.ncbi.nlm.nih.gov/SNP/snp_ref.cgi?searchType=adhoc_search&type=rs&rs={}>`_'))}}</li>
         <li>ClinVar: {{' / '.join(gene.get_clinical_significances())}} {{gene.name}}</li>
         <li>ExAC (all, max): {{' / '.join(gene.get_variant_annotations('dbNSFP_ExAC_AF', 'dbNSFP_ExAC_max')) or 'Ø'}} </li>
     </ul>
 
     <h2>In silico prediction:</h2>
     <ul>
-        <li><a href="http://genic-intolerance.org/Search?query={{gene.name}}">RVIS</a> : {{gene.data.rvis_score['%ALL_1%']}}</li>
+        <li><a href="http://genic-intolerance.org/Search?query={{gene.name}}" target="_blanck">RVIS</a> : {{gene.data.rvis_score['%ALL_1%']}}</li>
         <li>Present in the ID genes list: {{gene.data.id_gene and 'yes' or 'no'}}</li>
 
         <li>Morbid Map: TODO FIXME modbid map</li>
     </ul>
     <h2>Cerebral expression:</h2>
     <ul>
-        <li>GTEX: <a href="http://www.gtexportal.org/home/gene/{{gene.name}}">{{gene.name}}</a></li>
-        <li>TA: <a href="http://www.proteinatlas.org/search/{{gene.name}}" style="max-width: 700px;">{{gene.name}}</a> 
+        <li>GTEX: <a href="http://www.gtexportal.org/home/gene/{{gene.name}}" target="_blanck">{{gene.name}}</a></li>
+        <li>TA: <a href="http://www.proteinatlas.org/search/{{gene.name}}" style="max-width: 700px;" target="_blanck">{{gene.name}}</a> 
             <div style="max-width: 900px; border: 1px solid #555; padding:20px;">{{ gene.data.ta_graph }}</div></li>
-        <li>HBT: <a href="http://hbatlas.org/hbtd/images/wholeBrain/{{gene.name}}.pdf">{{gene.name}}</a></li>
-        <li><img src="https://annso.absolumentg.fr/cache/reports/dims/hbt_image_{{gene.name}}.png" title="HBT" style="max-width: 700px;"/></li>
-        <li>SFARI: <a href="https://gene.sfari.org/autdb/submitsearch?selfld_0=GENES_GENE_SYMBOL&amp;selfldv_0={{gene.name}}&amp;numOfFields=1&amp;userAction=search&amp;tableName=AUT_HG&amp;submit=Submit+Query">{% if gene.data.sfari_gene %}YES{% else %}NO{% endif %}</a></li>
+        <li>HBT: <a href="http://hbatlas.org/hbtd/images/wholeBrain/{{gene.name}}.pdf" target="_blanck">{{gene.name}}</a></li>
+        <li><img src="https://annso.absolumentg.fr/v1/cache/reports/dims/hbt_image_{{gene.name}}.png" title="HBT" style="max-width: 700px;"/></li>
+        <li>SFARI: <a target="_blanck" href="https://gene.sfari.org/autdb/submitsearch?selfld_0=GENES_GENE_SYMBOL&amp;selfldv_0={{gene.name}}&amp;numOfFields=1&amp;userAction=search&amp;tableName=AUT_HG&amp;submit=Submit+Query">{% if gene.data.sfari_gene %}YES{% else %}NO{% endif %}</a></li>
     </ul>
 
 
 
-    Decipher: <a href="https://decipher.sanger.ac.uk/search?q={{gene.name}}#consented-patients/results">{{gene.name}}</a><br/>
-    <img src="https://annso.absolumentg.fr/cache/reports/dims/decipher_image_{{gene.name}}.png" title="Decipher snapshot" style="max-width: 700px;"/><br/>
+    Decipher: <a href="http://decipher.sanger.ac.uk/search?q={{gene.name}}#consented-patients/results"  target="_blanck">{{gene.name}}</a><br/>
+    <img src="https://annso.absolumentg.fr/v1/cache/reports/dims/decipher_image_{{gene.name}}.png" title="Decipher snapshot" style="max-width: 700px;"/><br/>
 
-    STRING pathway: <a href="http://string-db.org/api/image/network?identifier={{gene.name}}">{{gene.name}}</a><br/>
-    <img src="https://annso.absolumentg.fr/cache/reports/dims/sp_image_{{gene.name}}.png" title="String pathway snapshot" style="max-width: 700px;"/><br/>
+    STRING pathway: <a href="https://string-db.org/api/image/network?identifier={{gene.name}}" target="_blanck">{{gene.name}}</a><br/>
+    <img src="https://annso.absolumentg.fr/v1/cache/reports/dims/sp_image_{{gene.name}}.png" title="String pathway snapshot" style="max-width: 700px;"/><br/>
 </div>
 {% endfor %}
+
+
+</body>

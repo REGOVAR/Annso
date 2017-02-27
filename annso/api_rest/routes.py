@@ -12,8 +12,10 @@ from api_rest.handlers import *
 
 
 
+
 app = web.Application()
 aiohttp_jinja2.setup(app, loader=jinja2.FileSystemLoader(TEMPLATE_DIR))	
+
 
 
 # Handlers instances
@@ -91,4 +93,4 @@ app.router.add_route('DELETE', "/v1/sample/upload/{file_id}", sampleHandler.tus_
 # DEV/DEBUG - Routes that should be manages directly by NginX
 app.router.add_static('/assets', TEMPLATE_DIR)
 
-app.router.add_static('/cache', CACHE_DIR)
+app.router.add_static('/v1/cache', CACHE_DIR)

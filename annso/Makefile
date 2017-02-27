@@ -2,7 +2,10 @@ init:
 	pip install -r requirements.txt
 
 test:
-	python tests.py
+	# ignore E302,E303 (to allow multiple blank line in the code)
+	# ignore E501 too long line as (we have large screen now... and long sql queries...  <_< )
+	flake8 . --statistics --exclude=__*  --ignore=E302,E303,E501 --exit-zero
+	# python tests.py
 
 app:
 	python annso_server.py

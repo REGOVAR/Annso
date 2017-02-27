@@ -88,14 +88,14 @@ def process_generic_get(query_string, allowed_fields):
                 if f in allowed_fields:
                     fields.append(f)
         if len(fields) == 0:
-            return rest_error("No valid fields provided : " + get_params.get('fields'))
+            return rest_error("No valid fields provided: " + get_params.get('fields'))
 
         # 3- Build json query for mongoengine
         query = {}
         if r_filter is not None:
-            query = {"$or" : []}
+            query = {"$or": []}
             for k in fields:
-                query["$or"].append({k : {'$regex': r_filter}})
+                query["$or"].append({k: {'$regex': r_filter}})
 
         # 4- Order
         order = ['-create_date', "name"]
@@ -120,7 +120,7 @@ def process_generic_get(query_string, allowed_fields):
             offset = int(r_range[0])
             limit = int(r_range[1])
         except:
-            return rest_error("No valid range provided : " + get_params.get('range') )
+            return rest_error("No valid range provided: " + get_params.get('range') )
 
         # 6- Return processed data
         return fields, query, order, offset, limit
@@ -131,7 +131,7 @@ def process_generic_get(query_string, allowed_fields):
 def notify_all(data):
     msg = json.dumps(data)
     if 'msg' not in data.keys() or data['msg'] != 'hello':
-        log ("API_rest Notify All : {0}".format(msg))
+        log ("API_rest Notify All: {0}".format(msg))
     for ws in WebsocketHandler.socket_list:
         ws[0].send_str(msg)
 
@@ -153,14 +153,14 @@ class WebsiteHandler:
     @aiohttp_jinja2.template('home.html')
     def home(self, request):
         data = {
-            "hostname" : HOST_P,
-            "templates" : [], # return by default last 10 templates
-            "analysis" : annso.analysis.get(),  # return by default last 10 analyses
-            "annotations_db_ref"     : annso.annotation_db.ref_list,
-            "annotations_fields" : json.dumps(annso.annotation_db.get_fields()),
-            "export_modules" : [annso.export_modules[m]['info'] for m in annso.export_modules], 
-            "import_modules" : [annso.import_modules[m]['info'] for m in annso.import_modules], 
-            "report_modules" : [annso.report_modules[m]['info'] for m in annso.report_modules], 
+            "hostname": HOST_P,
+            "templates": [], # return by default last 10 templates
+            "analysis": annso.analysis.get(),  # return by default last 10 analyses
+            "annotations_db_ref"    : annso.annotation_db.ref_list,
+            "annotations_fields": json.dumps(annso.annotation_db.get_fields()),
+            "export_modules": [annso.export_modules[m]['info'] for m in annso.export_modules], 
+            "import_modules": [annso.import_modules[m]['info'] for m in annso.import_modules], 
+            "report_modules": [annso.report_modules[m]['info'] for m in annso.report_modules], 
         }
 
         return data
@@ -169,12 +169,12 @@ class WebsiteHandler:
 
     def get_config(self, request):
         return rest_success({
-            "host" : HOST_P,
-            "pagination_default_range" : RANGE_DEFAULT,
-            "pagination_max_range" : RANGE_MAX,
-            "export_modules" : annso.export_modules, 
-            "import_modules" : annso.import_modules,
-            "report_modules" : annso.report_modules
+            "host": HOST_P,
+            "pagination_default_range": RANGE_DEFAULT,
+            "pagination_max_range": RANGE_MAX,
+            "export_modules": annso.export_modules, 
+            "import_modules": annso.import_modules,
+            "report_modules": annso.report_modules
             })
 
 
@@ -210,11 +210,11 @@ class AnnotationDBHandler:
         if ref_id is None or ref_id not in annso.annotation_db.ref_list.keys():
             ref_id = DEFAULT_REFERENCIAL_ID 
 
-        result = { "ref_id" : ref_id, "ref_name" : annso.annotation_db.ref_list[ref_id], "db" : []}
+        result = { "ref_id": ref_id, "ref_name": annso.annotation_db.ref_list[ref_id], "db": []}
 
-        for db_name in annso.annotation_db.db_list[ref_id]["order"] :
+        for db_name in annso.annotation_db.db_list[ref_id]["order"]:
             db_data = annso.annotation_db.db_list[ref_id]['db'][db_name]
-            db_data.update({"selected" : next(iter(db_data['versions'].keys()))})
+            db_data.update({"selected": next(iter(db_data['versions'].keys()))})
             db_data['fields'] = []
             for fuid in annso.annotation_db.db_map[db_data['versions'][db_data['selected']]]['fields']:
                 db_data['fields'].append(annso.annotation_db.fields_map[fuid])
@@ -286,7 +286,7 @@ class AnalysisHandler:
 
     def get_analysis(self, request):
         """
-            Return all data about the analysis with the provided id (analysis metadata : name, settings, template data, samples used, filters, ... )
+            Return all data about the analysis with the provided id (analysis metadata: name, settings, template data, samples used, filters, ... )
         """
         analysis_id = request.match_info.get('analysis_id', -1)
         analysis = annso.analysis.load(analysis_id)
@@ -316,11 +316,11 @@ class AnalysisHandler:
         # 1- Retrieve data from request
         analysis_id = request.match_info.get('analysis_id', -1)
 
-        try :
+        try:
             settings = Analysis.from_id(analysis_id).setting
-        except Exception as err :
+        except Exception as err:
             return rest_error("Unable to get analsis settings with provided information. " + str(err))
-        if settings is None : settings = {}
+        if settings is None: settings = {}
         return rest_success(settings)
 
 
@@ -330,7 +330,7 @@ class AnalysisHandler:
         data = await request.json()
         try:
             annso.analysis.update(analysis_id, data)
-        except Exception as err :
+        except Exception as err:
             return rest_error("Error occured when trying to save settings for the analysis with id=" + str(analysis_id) + ". " + str(err))
         return rest_success() 
 
@@ -349,14 +349,14 @@ class AnalysisHandler:
 
         # 2- Check parameters
         if "mode" in data: mode = data["mode"]
-        if limit<0 or limit > RANGE_MAX : limit = 100
-        if offset<0 : offset = 0
+        if limit<0 or limit > RANGE_MAX: limit = 100
+        if offset<0: offset = 0
         
         # 3- Execute filtering request
-        try :
+        try:
             result = annso.filter.request(int(analysis_id), mode, filter_json, fields, order, int(limit), int(offset), count)
-        except Exception as err :
-            return rest_error("Filtering error : " + str(err))
+        except Exception as err:
+            return rest_error("Filtering error: " + str(err))
         return rest_success(result)
 
 
@@ -395,10 +395,10 @@ class AnalysisHandler:
         data = await request.json()
         analysis_id = request.match_info.get('analysis_id', -1)
 
-        try :
+        try:
             result = annso.analysis.get_selection(analysis_id, data)
-        except Exception as err :
-            return rest_error("AnalysisHandler.get_selection error : " + str(err))
+        except Exception as err:
+            return rest_error("AnalysisHandler.get_selection error: " + str(err))
         return rest_success(result)
 
 
@@ -412,9 +412,9 @@ class AnalysisHandler:
         # update model
         try:
             annso.analysis.load_ped(file_path)
-        except Exception as err :
+        except Exception as err:
             os.remove(file_path)
-            return rest_error("Error occured ! Wrong Ped file : " + str(err))
+            return rest_error("Error occured ! Wrong Ped file: " + str(err))
         os.remove(file_path)
         return rest_success(result)
         
@@ -428,14 +428,14 @@ class AnalysisHandler:
         analysis_id = request.match_info.get('analysis_id', -1)
         report_id = request.match_info.get('report_id', -1)
 
-        try :
+        try:
             cache_path = annso.analysis.report(analysis_id, report_id, data)
-        except Exception as err :
-            return rest_error("AnalysisHandler.get_report error : " + str(err))
+        except Exception as err:
+            return rest_error("AnalysisHandler.get_report error: " + str(err))
 
         # create url to access to the report
-        url = '{0}/cache{1}'.format(HOST_P, cache_path[len(CACHE_DIR):])
-        return rest_success({'url' : url})
+        url = 'http://{0}/cache{1}'.format(HOST_P, cache_path[len(CACHE_DIR):])
+        return rest_success({'url': url})
 
 
 
@@ -444,11 +444,11 @@ class AnalysisHandler:
         analysis_id = request.match_info.get('analysis_id', -1)
         export_id = request.match_info.get('export_id', -1)
 
-        try :
+        try:
             result = annso.analysis.export(analysis_id, export_id, data)
-        except Exception as err :
-            return rest_error("AnalysisHandler.get_export error : " + str(err))
-        return rest_success({"url" : "http://your_export."+str(export_id)})
+        except Exception as err:
+            return rest_error("AnalysisHandler.get_export error: " + str(err))
+        return rest_success({"url": "http://your_export."+str(export_id)})
 
 
 
@@ -459,7 +459,7 @@ class AnalysisHandler:
 
 # Customization of the TUS protocol for the download of sample files
 # Sample TUS wrapper
-class SampleFileWrapper (TusFileWrapper) :
+class SampleFileWrapper (TusFileWrapper):
     def __init__(self, id):
         self.file = File.from_id(id)
         if self.file is not None:
@@ -470,7 +470,7 @@ class SampleFileWrapper (TusFileWrapper) :
             self.size = self.file.size
             self.upload_url = "https://" + HOST_P + "/sample/upload/" + str(id)
         else:
-            return TusManager.build_response(code=500, body="Unknow id : {}".format(id))
+            return TusManager.build_response(code=500, body="Unknow id: {}".format(id))
 
 
     def save(self):
@@ -480,7 +480,7 @@ class SampleFileWrapper (TusFileWrapper) :
             f.upload_offset=self.upload_offset
             db_session.commit()
         except Exception as error:
-            return TusManager.build_response(code=500, body="Unexpected error occured : {}".format(error))
+            return TusManager.build_response(code=500, body="Unexpected error occured: {}".format(error))
 
 
     def complete(self, checksum=None, checksum_type="md5"):
@@ -488,7 +488,7 @@ class SampleFileWrapper (TusFileWrapper) :
             log ('Upload of the file (id={0}) is complete.'.format(self.id))
             annso.file.upload_finish(self.id, checksum, checksum_type)
         except Exception as error:
-            return TusManager.build_response(code=500, body="Unexpected error occured : {}".format(error))
+            return TusManager.build_response(code=500, body="Unexpected error occured: {}".format(error))
 
 
     @staticmethod
@@ -512,10 +512,10 @@ class SampleHandler:
         fields, query, order, offset, limit = process_generic_get(request.query_string, Sample.public_fields)
         # Get range meta data
         range_data = {
-            "range_offset" : offset,
-            "range_limit"  : limit,
-            "range_total"  : annso.sample.total(),
-            "range_max"    : RANGE_MAX,
+            "range_offset": offset,
+            "range_limit" : limit,
+            "range_total" : annso.sample.total(),
+            "range_max"   : RANGE_MAX,
         }
         # Return result of the query 
         return rest_success(annso.sample.get(fields, query, order, offset, limit), range_data)
@@ -536,7 +536,7 @@ class SampleHandler:
         if db_name is None:
             return rest_error("No database name provided")
 
-        return rest_success({"database" : db_name})
+        return rest_success({"database": db_name})
 
 
     # Resumable download implement the TUS.IO protocol.
@@ -584,7 +584,7 @@ class WebsocketHandler:
         await ws.prepare(request)
 
         WebsocketHandler.socket_list.append((ws, ws_id))
-        msg = {'msg' :'hello', 'data' : [[str(_ws[1]) for _ws in WebsocketHandler.socket_list]]}
+        msg = {'msg':'hello', 'data': [[str(_ws[1]) for _ws in WebsocketHandler.socket_list]]}
         notify_all(msg)
 
         try:

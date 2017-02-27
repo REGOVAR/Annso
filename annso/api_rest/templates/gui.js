@@ -278,6 +278,14 @@ function AnnsoControler () {
             async: false}).fail(function() { display_error("TODO : network error"); })
         .done(function(report)
         {
+            if (report['success'])
+            {
+                window.open(report['data']['url'],'_blank');
+            }
+            else
+            {
+                error(json);
+            }
             // Retrieve data
             $('#selection_list').html(report);
         });
@@ -470,6 +478,7 @@ function AnnsoUIControler ()
 
         var file = $("#modal_import_file_tus_localinput").prop('files')[0];
         var chunkSize = parseInt($('#modal_new_file_tus_chunksize').val(), 10);
+        $('#modal_new_file_start_btn').hide();
         console.log("selected file", file);
 
 
@@ -500,7 +509,8 @@ function AnnsoUIControler ()
                 $('#modal_new_file_details').removeClass("hidden");
                 $("#modal_import_file_tus_localinput").val("");
                 buildProgressBar(100, "modal_new_file_progress");
-                this.tus_uploader = null;
+                ui.tus_uploader = null;
+                $('#modal_new_file_start_btn').show();
             }
         }
 
@@ -1388,7 +1398,7 @@ function load_variants_array()
         else
         {
             count = init_variants_list(json, '#variants_list');
-            current_count = count;
+            analysis.analysis.current_count = count;
             if (count == 100)
             {
                 // As the server return the max range variants, maybe the total is higher. so, do another request to get total count
@@ -1467,7 +1477,7 @@ function init_variants_list(json, container_id)
     $(container_id).html(html + "</tbody></table>");
 
     // Add context menu
-/*    $(container_id + " tr").contextMenu({
+    $(container_id + " tr").contextMenu({
         menuSelector: "#contextmenu_genename",
         menuSelected: function (invokedOn, selectedMenu) 
         {
@@ -1479,7 +1489,7 @@ function init_variants_list(json, container_id)
             // if (action == "context_menu_info") show_tab("browser_file", id);
             // else if (action == "context_menu_dl") alert("TODO : download the file " + id);
         }
-    });*/
+    });
 
     return count;
 }
@@ -1596,7 +1606,7 @@ function update_variants_list(json)
         html += insert_variant_row(v);
     });
     $('#variants_list tr:last').after(html);
-    this.current_count += count;
+    analysis.analysis.current_count += count;
 }
 
 

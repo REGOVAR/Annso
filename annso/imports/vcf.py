@@ -207,6 +207,7 @@ def import_data(file_id, filepath, annso_core=None, reference_id = 2):
         """
             Prepare database for import of custom annotation, and set the mapping between VCF info fields and DB schema
         """
+
         reference  = db_engine.execute("SELECT table_suffix FROM reference WHERE id={}".format(reference_id)).first()[0]
         table_name = normalise_annotation_name('{}_{}_{}'.format(vcf_annotation_metadata['flag'], vcf_annotation_metadata['version'], reference))
         
@@ -233,7 +234,14 @@ def import_data(file_id, filepath, annso_core=None, reference_id = 2):
             for idx, col in enumerate(diff):
                 name=normalise_annotation_name(col)
                 query += "ALTER TABLE {0} ADD COLUMN {1} text; INSERT INTO public.annotation_field (database_uid, ord, name, name_ui, type) VALUES ('{2}', {3}, '{1}', '{4}', 'string');".format(table_name, name, db_uid, offset + idx, col)
-                table_cols[name] = { 'name' : cname, 'type' : 'string', 'name_ui' : col }
+                table_cols[name] = { 'name' : name, 'type' : 'string', 'name_ui' : col }
+
+            # execute query
+            session = Session(db_engine)
+            session.execute(query)
+            session.commit()
+            session.commit()
+            session.close()
         # Update vcf_annotation_metadata with database mapping
         vcf_annotation_metadata.update({ 'table' : table_name })
         vcf_annotation_metadata['db_map'] = {}
@@ -472,7 +480,7 @@ def import_data(file_id, filepath, annso_core=None, reference_id = 2):
     job_in_progress = 0
     pool = mp.Pool(processes=max_job_in_progress)
 
-
+    ipdb.set_trace()
     vcf_metadata = prepare_vcf_parsing(filepath)
     db_ref_suffix="_hg19" # TODO/FIXME : retrieve data from annso core
 
@@ -567,22 +575,32 @@ def import_data(file_id, filepath, annso_core=None, reference_id = 2):
                             if pos is not None and alt==allele:
                                 # print("ok")
                                 sql_query3 += sql_pattern3.format(metadata['table'], ','.join(q_fields), ','.join(q_values), bin, chrm, pos, ref, alt)
+                                count += 1
                             pos, ref, alt = normalize(r.pos, r.ref, s.alleles[1])
                             # print(pos, ref, alt, allele)
                             if pos is not None and alt==allele:
                                 # print("ok")
                                 sql_query3 += sql_pattern3.format(metadata['table'], ','.join(q_fields), ','.join(q_values), bin, chrm, pos, ref, alt)
+                                count += 1
 
 
 
                     # manage split big request to avoid sql out of memory transaction
-                    if count >= 100000:
+                    if count >= 25000:
                         count = 0
-                        transaction1 = sql_query1
-                        transaction2 = sql_query2
-                        transaction3 = sql_query3
-                        pool.apply_async(exec_sql_query, (transaction1, transaction2, transaction3))
-                        
+                        log("VCF import : Execute query")
+                        # transaction1 = sql_query1
+                        # transaction2 = sql_query2
+                        # transaction3 = sql_query3
+                        # pool.apply_async(exec_sql_query, (transaction1, transaction2, transaction3))
+                        session = Session(db_engine)
+                        session.execute(sql_query1)
+                        session.execute(sql_query2)
+                        session.execute(sql_query3)
+                        session.commit()
+                        session.commit() # Need a second commit to force session to commit :/ ... strange behavior when we execute(raw_sql) instead of using sqlalchemy's objects as query
+                        session.close()
+
 
                         sql_query1 = ""
                         sql_query2 = ""
