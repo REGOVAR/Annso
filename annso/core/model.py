@@ -6,10 +6,11 @@ import uuid
 import sqlalchemy
 import aiopg
 
-import sqlalchemy as sa
+
 from sqlalchemy.ext.automap import automap_base
-# from sqlalchemy import create_engine
-# from sqlalchemy_aio import ASYNCIO_STRATEGY
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker
+
 
 import config as C
 
@@ -20,38 +21,13 @@ import ipdb
 # =====================================================================================================================
 
 
-# def connect(user, password, db, host, port):
-#     '''Returns a connection and a metadata object'''
-#     url = 'postgresql://{}:{}@{}:{}/{}'
-#     url = url.format(user, password, host, port, db)
-#     con = sqlalchemy.create_engine(url, client_encoding='utf8')  # , strategy=ASYNCIO_STRATEGY)
-#     meta = sqlalchemy.MetaData(bind=con)
-#     return con, meta
-
-
-
-async def init_pg(user, password, db, host, port, maxpool):
-    db_pool = await aiopg.create_pool(
-        database=db,
-        user=user,
-        password=password,
-        host=host,
-        port=port,
-        minsize=0,
-        maxsize=maxpool)
-    return db_pool
-
-
-
-
-async def db_execute(sql):
-    pool = await aiopg.create_pool(dsn)
-
-    async with app['db'].cursor() as cur:
-        yield from cur.execute('SELECT 1')
-        ret = yield from cur.fetchone()
-        assert ret == (1,), ret
-
+def init_pg(user, password, db, host, port):
+    '''Returns a connection and a metadata object'''
+    url = 'postgresql://{}:{}@{}:{}/{}'.format(user, password, host, port, db)
+    url = 'postgresql://annso:annso@localhost/annso'
+    con = sqlalchemy.create_engine(url, client_encoding='utf8')  # , strategy=ASYNCIO_STRATEGY)
+    # meta = sqlalchemy.MetaData(bind=con)
+    return con
 
 
 
@@ -61,9 +37,11 @@ async def db_execute(sql):
 
 # Connect and map the engine to the database
 Base = automap_base()
-db_engine = init_pg(C.DATABASE_USER, C.DATABASE_PWD, DATABASE_NAME, C.DATABASE_HOST,  C.DATABASE_PORT, C.DATABASE_POOL_SIZE)
+db_engine = init_pg(C.DATABASE_USER, C.DATABASE_PWD, C.DATABASE_NAME, C.DATABASE_HOST, C.DATABASE_PORT)
 Base.prepare(db_engine, reflect=True)
 Base.metadata.create_all(db_engine)
+Session = sessionmaker(bind=db_engine)
+db_session = Session()
 
 
 # =====================================================================================================================
