@@ -92,11 +92,8 @@
 
                             <div style="padding:10px; margin-left:75px; border-left: 1px solid #ddd;">
                                 <div class="btn-group ">
-                                    <a class="btn btn-default" href="#modal_import_sample_file" title="Import sample/variant data from local file" data-toggle="modal">
-                                        <i class="fa fa-download" style="width:20px; text-align:center;" aria-hidden="true"></i> From VCF
-                                    </a>
-                                    <a class="btn btn-default" href="#modal_import_sample_db" onclick="javascript:ui.load_sample_database();" title="Import sample/variant data from database" data-toggle="modal">
-                                        <i class="fa fa-database" style="width:20px; text-align:center;" aria-hidden="true"></i> From Database
+                                    <a class="btn btn-default" href="#modal_import_sample_db" onclick="javascript:ui.load_sample_database();" title="Add a sample to your analysis" data-toggle="modal">
+                                        <i class="fa fa-plus" style="width:20px; text-align:center;" aria-hidden="true"></i> Add sample
                                     </a>
                                 </div>
                                 &nbsp;
@@ -546,6 +543,35 @@
 
 
 
+            <!--                                   -->
+            <!-- MODAL POPUP - DB Sample selection -->
+            <!--                                   -->
+            <div id="modal_import_sample_db" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+                <div class="modal-dialog" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                            <h4 class="modal-title"><i class="fa fa-folder-open-o" aria-hidden="true"></i> Import sample/variant from annso database</h4>
+                        </div>
+                        <div id="modal_import_sample_db_content" class="modal-body" style="height:450px; padding:0;">
+                            <i class="fa fa-refresh fa-spin fa-3x fa-fw" style="margin:200px 250px;"></i><span class="sr-only">Loading data from database</span>
+                            
+
+                        </div>
+                        <div class="modal-footer">
+                            <a class="btn btn-default" style="float:left;" href="#modal_import_sample_file" title="Import sample/variant data from local file" data-toggle="modal">
+                                <i class="fa fa-download" style="width:20px; text-align:center;" aria-hidden="true"></i> Import new sample from VCF
+                            </a>
+                            <button id="modal_new_file_cancel_btn" type="button" class="btn btn-default" data-dismiss="modal">Done</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
+
+
+
             <!--                           -->
             <!-- MODAL POPUP - File Upload -->
             <!--                           -->
@@ -585,29 +611,6 @@
                 </div>
             </div>
 
-
-
-            <!--                                   -->
-            <!-- MODAL POPUP - DB Sample selection -->
-            <!--                                   -->
-            <div id="modal_import_sample_db" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
-                <div class="modal-dialog" role="document">
-                    <div class="modal-content">
-                        <div class="modal-header">
-                            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                            <h4 class="modal-title"><i class="fa fa-folder-open-o" aria-hidden="true"></i> Import sample/variant from annso database</h4>
-                        </div>
-                        <div id="modal_import_sample_db_content" class="modal-body" style="height:450px; padding:0;">
-                            <i class="fa fa-refresh fa-spin fa-3x fa-fw" style="margin:200px 250px;"></i><span class="sr-only">Loading data from database</span>
-                            
-
-                        </div>
-                        <div class="modal-footer">
-                            <button id="modal_new_file_cancel_btn" type="button" class="btn btn-default" data-dismiss="modal">Done</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
 
 
 

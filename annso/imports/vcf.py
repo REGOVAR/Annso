@@ -52,6 +52,8 @@ def import_data(file_id, filepath, annso_core=None, reference_id = 2):
     def debug_clear_header(filename):
         """
             A workaround to fix a bug with GVCF header with pysam
+            EDIT : in fact the problem to be that pysam do not support some kind of compression, so this command 
+            is still used to rezip the vcf in a supported format.
         """
         bashCommand = "grep -v '^##GVCFBlock' {} | gzip --best > /var/regovar/downloads/tmp_workaround".format(filename)
         if filename.endswith("gz"):
@@ -106,13 +108,19 @@ def import_data(file_id, filepath, annso_core=None, reference_id = 2):
             d = headers['INFO']['CSQ']['description'].split('Format:')
             vep = {
                 'vep' : {
-                    'version'     : headers['VEP'][0].split(' ')[0],
-                    'flag'        : 'CSQ',
-                    'columns'     : d[1].strip().split('|'),
+                    'version' : headers['VEP'][0].split(' ')[0],
+                    'flag' : 'CSQ',
+                    'name' : 'VEP',
+                    'db_type' : 'transcript',
+                    'db_pk' : 'Feature',
                     'description' : d[0].strip(),
-                    'name'        : 'VEP'
+                    'columns' : d[1].strip().split('|'),
                 }
             }
+            if 'Feature' in vep['vep']['columns']:
+                vep['vep']['columns'].remove('Feature')
+            else:
+                vep = {'vep' : False }
 
         # Check for SnpEff
         snpeff = {'snpeff' : False }
@@ -124,13 +132,20 @@ def import_data(file_id, filepath, annso_core=None, reference_id = 2):
                 d = headers['INFO']['EFF']['description'].split('\'')
                 snpeff = {
                     'snpeff' : {
-                        'version'     : headers['SnpEffVersion'][0].strip().strip('"').split(' ')[0],
-                        'flag'        : 'EFF',
-                        'columns'     : [c.strip() for c in d[1].strip().split('|')],
+                        'version' : headers['SnpEffVersion'][0].strip().strip('"').split(' ')[0],
+                        'flag' : 'EFF',
+                        'name' : 'SnpEff',
+                        'db_type' : 'transcript',
+                        'db_pk' : 'Transcript_ID',
+                        'columns' : [c.strip() for c in d[1].strip().split('|')],
                         'description' : d[0].strip(),
-                        'name'        : 'SnpEff'
                     }
                 }
+                if 'Transcript_ID' in snpeff['snpeff']['columns']:
+                    snpeff['snpeff']['columns'].remove('Transcript_ID')
+                else:
+                    snpeff = {'snpeff' : False }
+
 
         # Retrieve extension
         file_type = os.path.split(filename)[1].split('.')[-1]
@@ -174,18 +189,22 @@ def import_data(file_id, filepath, annso_core=None, reference_id = 2):
             Create an annotation database according to information retrieved from the VCF file with the prepare_vcf_parsing method
         """
         # Create annotation table
+        ipdb.set_trace()
         session = Session(db_engine)
-        pattern = "CREATE TABLE {0} (variant_id bigint, bin integer, chr integer, pos bigint, ref text, alt text, {1});" # DEBUG/FIXME : DROP only here for debug. !! don't do this in prodution
+        pk = 'transcript_id character varying(50), ' if vcf_annotation_metadata['db_type'] == 'transcript' else ''
+        pattern = "CREATE TABLE {0} (variant_id bigint, bin integer, chr integer, pos bigint, ref text, alt text, " + pk + "{1});"
         query   = ""
         db_map = {}
         fields = []
         for col in vcf_annotation_metadata['columns']:
             col_name = normalise_annotation_name(col)
             fields.append("{} text".format(col_name))
-            db_map[col_name] = { 'name' : col_name, 'type' : 'string', 'name_ui' : col } # By default, create a table with only text field... TODO : need to find a way to properly cast annotation's columns
+            db_map[col_name] = { 'name' : col_name, 'type' : 'string', 'name_ui' : col }  # By default, create a table with only text field. Type can be changed by user via a dedicated UI
         query += pattern.format(table_name, ', '.join(fields))
         query += "CREATE INDEX {0}_idx_vid ON {0} USING btree (variant_id);".format(table_name)
         query += "CREATE INDEX {0}_idx_var ON {0} USING btree (bin, chr, pos);".format(table_name)
+        if vcf_annotation_metadata['db_type'] == 'transcript':
+            query += "CREATE INDEX {0}_idx_tid ON {0} USING btree (transcript_id);".format(table_name)
 
         # Register annotation
         db_hasname = session.execute("SELECT MD5('{}')".format(table_name)).first()[0]
@@ -223,7 +242,7 @@ def import_data(file_id, filepath, annso_core=None, reference_id = 2):
             # Table already exists : retrieve columns already defined
             for col in db_engine.execute("SELECT name, name_ui, type FROM annotation_field WHERE database_uid='{}'".format(db_uid)):
                 table_cols[col.name] = { 'name' : col.name, 'type' : col.type, 'name_ui' : col.name_ui }
-        # TODO : Get diff between columns in vcf and columns in DB, and update DB schema (add missing column) if needed
+        # Get diff between columns in vcf and columns in DB, and update DB schema
         diff = []
         for col in vcf_annotation_metadata['columns']:
             if normalise_annotation_name(col) not in table_cols.keys():
@@ -524,7 +543,7 @@ def import_data(file_id, filepath, annso_core=None, reference_id = 2):
         
         sql_pattern1 = "INSERT INTO {0} (chr, pos, ref, alt, is_transition, bin, sample_list) VALUES ({1}, {2}, '{3}', '{4}', {5}, {6}, array[{7}]) ON CONFLICT (chr, pos, ref, alt) DO UPDATE SET sample_list=array_multi_remove({0}.sample_list, array[{7}])  WHERE {0}.chr={1} AND {0}.pos={2} AND {0}.ref='{3}' AND {0}.alt='{4}';"
         sql_pattern2 = "INSERT INTO sample_variant" + db_ref_suffix + " (sample_id, variant_id, bin, chr, pos, ref, alt, genotype, depth) SELECT {0}, id, {1}, '{2}', {3}, '{4}', '{5}', '{6}', {7} FROM variant" + db_ref_suffix + " WHERE bin={1} AND chr={2} AND pos={3} AND ref='{4}' AND alt='{5}' ON CONFLICT DO NOTHING;"
-        sql_pattern3 = "INSERT INTO {0} (bin,chr,pos,ref,alt,{1}) VALUES ({3},{4},{5},'{6}','{7}',{2}) ON CONFLICT DO NOTHING;" # TODO : on conflict, shall update fields with value in the VCF ton complete database annotation with (maybe) new fields
+        sql_pattern3 = "INSERT INTO {0} (bin,chr,pos,ref,alt, transcript_id, {1}) VALUES ({3},{4},{5},'{6}','{7}', {8}, {2}) ON CONFLICT (bin,chr,pos,ref,alt, transcript_id) DO  NOTHING;" # TODO : on conflict, shall update fields with value in the VCF to complete database annotation with (maybe) new fields
         sql_tail = " ON CONFLICT DO NOTHING;"
         sql_query1 = ""
         sql_query2 = ""
@@ -561,26 +580,30 @@ def import_data(file_id, filepath, annso_core=None, reference_id = 2):
                             data = info.split('|')
                             q_fields = []
                             q_values = []
+                            transcript_id = 'NULL'
                             allele   = ""
                             for col_pos, col_name in enumerate(metadata['columns']):
                                 q_fields.append(metadata['db_map'][col_name]['name'])
                                 val = escape_value_for_sql(data[col_pos])
                                 if col_name == 'Allele':
                                     allele = val.strip().strip("-")
-                                q_values.append('\'{}\''.format(val) if val != '' and val is not None else 'NULL')
+                                if col_name == metadata['db_pk']:
+                                    transcript_id = val if val != '' and val is not None else 'NULL'
+                                else:
+                                    q_values.append('\'{}\''.format(val) if val != '' and val is not None else 'NULL')
 
 
                             pos, ref, alt = normalize(r.pos, r.ref, s.alleles[0])
                             # print(pos, ref, alt, allele)
                             if pos is not None and alt==allele:
                                 # print("ok")
-                                sql_query3 += sql_pattern3.format(metadata['table'], ','.join(q_fields), ','.join(q_values), bin, chrm, pos, ref, alt)
+                                sql_query3 += sql_pattern3.format(metadata['table'], ','.join(q_fields), ','.join(q_values), bin, chrm, pos, ref, alt, transcript_id)
                                 count += 1
                             pos, ref, alt = normalize(r.pos, r.ref, s.alleles[1])
                             # print(pos, ref, alt, allele)
                             if pos is not None and alt==allele:
                                 # print("ok")
-                                sql_query3 += sql_pattern3.format(metadata['table'], ','.join(q_fields), ','.join(q_values), bin, chrm, pos, ref, alt)
+                                sql_query3 += sql_pattern3.format(metadata['table'], ','.join(q_fields), ','.join(q_values), bin, chrm, pos, ref, alt, transcript_id)
                                 count += 1
 
 

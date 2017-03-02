@@ -11,7 +11,7 @@
 
 
 CREATE TYPE field_type AS ENUM ('int', 'string', 'float', 'percent', 'enum', 'range', 'bool', 'list_i', 'list_s', 'list_f', 'list_p', 'list_b');
-CREATE TYPE annotation_db_type AS ENUM ('variant', 'site');
+CREATE TYPE annotation_db_type AS ENUM ('site', 'variant', 'transcript');
 
 
 
@@ -20,7 +20,7 @@ CREATE TYPE annotation_db_type AS ENUM ('variant', 'site');
 CREATE TABLE public.template
 (
     id serial NOT NULL,
-    name character varying(50) COLLATE pg_catalog."C.UTF-8",
+    name character varying(100) COLLATE pg_catalog."C.UTF-8",
     author character varying(255) COLLATE pg_catalog."C.UTF-8",
     description text COLLATE pg_catalog."C.UTF-8",
     version character varying(20) COLLATE pg_catalog."C.UTF-8",
@@ -62,8 +62,8 @@ CREATE TABLE public.report
 (
     id serial NOT NULL,
     analysis_id integer,
-    name character varying(50) COLLATE pg_catalog."C.UTF-8",
-    path character varying(250) COLLATE pg_catalog."C.UTF-8",
+    name character varying(255) COLLATE pg_catalog."C.UTF-8",
+    path character varying(255) COLLATE pg_catalog."C.UTF-8",
     type character varying(50) COLLATE pg_catalog."C.UTF-8",
     module_id character varying(50) COLLATE pg_catalog."C.UTF-8",
     creation_date timestamp without time zone,
@@ -78,7 +78,7 @@ CREATE TABLE public.filter
 (
     id serial NOT NULL,
     analysis_id integer,
-    name character varying(50) COLLATE pg_catalog."C.UTF-8",
+    name character varying(255) COLLATE pg_catalog."C.UTF-8",
     description text COLLATE pg_catalog."C.UTF-8",
     filter text COLLATE pg_catalog."C.UTF-8",
     total_variants integer,
@@ -120,7 +120,7 @@ CREATE TABLE public.file
 (
     id serial NOT NULL,
     filename character varying(255) COLLATE pg_catalog."C.UTF-8",
-    comments character varying(255) COLLATE pg_catalog."C.UTF-8",
+    comments text,
     type character varying(10) COLLATE pg_catalog."C.UTF-8",
     "path" character varying(255) COLLATE pg_catalog."C.UTF-8",
     size integer,
@@ -267,6 +267,7 @@ CREATE TABLE public.annotation_database
     url character varying(255) COLLATE pg_catalog."C.UTF-8" ,
     update_date timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
     jointure character varying(255) COLLATE pg_catalog."C.UTF-8",
+    db_pk character varying(255) COLLATE pg_catalog."C.UTF-8",
     CONSTRAINT annotation_database_pkey PRIMARY KEY (reference_id, name, version),
     CONSTRAINT annotation_database_reference_id_fkey FOREIGN KEY (reference_id)
         REFERENCES public."reference" (id) MATCH SIMPLE
