@@ -688,23 +688,27 @@ def report_data(analysis_id, data, cache_path, output_path, annso_core=None):
 
 
     # For each variant, find gene
+    log('Start DIMS report generation for gene id : {}'.format(','.join(data['variants'])))
     samples  = data['samples']
     sql =  "SELECT DISTINCT v.chr, v.pos, v.ref, v.alt, rg.name2 FROM variant_hg19 v "
     sql += "INNER JOIN refgene_hg19 rg ON v.chr = rg.chr AND rg.txrange @> int8(v.pos) "
-    sql += "WHERE v.id IN (" + ','.join(data['variants']) + ") ORDER BY rg.name2"
+    sql += "WHERE v.id IN (" + ','.join(data['variants']) + ") and rg.name2<>'' ORDER BY rg.name2"
 
     genes     = []
     variants  = []
     gene_name = ""
+    gs = []
     for r in db_engine.execute(sql):
         if gene_name != r.name2:
             if gene_name != "":
+                gs.append(gene_name)
                 genes.append(Gene(gene_name, variants))
             gene_name = r.name2
             variants  = []
         variants.append( Variant(chr_from_db(r.chr), r.pos, r.ref, r.alt, [], [], gene_name))
     genes.append(Gene(gene_name, variants))
 
+    log('Following gene''names have been found : {}'.format(','.join(gs)))
 
     # Generate report
     def render_jinja_html(template_loc, file_name,**context):

@@ -503,6 +503,7 @@ function AnnsoUIControler ()
                 var percentage = (bytesUploaded / bytesTotal * 100).toFixed(2);
                 console.log(bytesUploaded, bytesTotal, percentage + "%");
                 buildProgressBar(percentage, "modal_new_file_progress");
+                $('#modal_new_file_start_btn').hide();
             },
             onSuccess: function() 
             {
@@ -510,7 +511,6 @@ function AnnsoUIControler ()
                 $("#modal_import_file_tus_localinput").val("");
                 buildProgressBar(100, "modal_new_file_progress");
                 ui.tus_uploader = null;
-                $('#modal_new_file_start_btn').show();
             }
         }
 

@@ -175,7 +175,7 @@ def new_file_from_tus(filename, file_size):
     file = File()
     file.filename = filename
     file.type = get_extension(filename)
-    file.path = os.path.join(TEMP_DIR, str(uuid.uuid4()))
+    file.path = os.path.join(C.TEMP_DIR, str(uuid.uuid4()))
     file.size = int(file_size)
     file.upload_offset = 0
     file.import_date = datetime.datetime.now()
