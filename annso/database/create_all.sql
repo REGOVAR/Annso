@@ -478,7 +478,7 @@ INSERT INTO public.annotation_field(database_uid, ord, wt_default, name, name_ui
   ('7363e34fee56d2cb43583f9bd19d3980', 30, True, 'depth',     'DP',     'float',  'Depth.', NULL);
 
 
-UPDATE annotation_field SET uid=MD5(concat(database_uid, name))
+UPDATE annotation_field SET uid=MD5(concat(database_uid, name));
 
 
 
@@ -530,7 +530,7 @@ AS $FUNCTION$
     END LOOP;
   RETURN source;
   END;
-$FUNCTION$
+$FUNCTION$;
 
 
 -- return index position (1-based) of an element into an array
