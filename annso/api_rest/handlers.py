@@ -476,9 +476,9 @@ class SampleFileWrapper (TusFileWrapper):
     def save(self):
         try:
             f = File.from_id(self.id)
-            db_session.add(f)
+            Model.session.add(f)
             f.upload_offset=self.upload_offset
-            db_session.commit()
+            Model.session.commit()
         except Exception as error:
             return TusManager.build_response(code=500, body="Unexpected error occured: {}".format(error))
 

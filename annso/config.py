@@ -8,9 +8,9 @@ DEBUG = True
 
 # HOST (internal)
 HOST = "0.0.0.0"
-PORT = "8100"
+PORT = 8100
 VERSION = "v1"
-HOSTNAME = HOST + ":" + PORT + "/" + VERSION
+HOSTNAME = "{}:{}/{}".format(HOST, PORT, VERSION)
 
 
 # HOST (public)
@@ -21,9 +21,9 @@ RANGE_MAX = 1000
 
 # DB
 DATABASE_HOST = "localhost"
-DATABASE_PORT = "5432"
+DATABASE_PORT = 5432
 DATABASE_USER = "annso"
-DATABASE_PWD = "ansso"
+DATABASE_PWD = "annso"
 DATABASE_NAME = "annso"
 DATABASE_POOL_SIZE = 7
 

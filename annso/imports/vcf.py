@@ -25,9 +25,8 @@ def import_data(file_id, filepath, annso_core=None, reference_id = 2):
     from pysam import VariantFile
 
 
-    from core.framework import get_or_create, log, war, err
-    from sqlalchemy.orm import Session
-    from core.model import Sample, db_engine, db_session, create_session
+    from core.framework import log, war, err
+    import core.model as Model
 
 
 
@@ -190,7 +189,6 @@ def import_data(file_id, filepath, annso_core=None, reference_id = 2):
         """
         # Create annotation table
         ipdb.set_trace()
-        session = Session(db_engine)
         pk = 'transcript_id character varying(50), ' if vcf_annotation_metadata['db_type'] == 'transcript' else ''
         pattern = "CREATE TABLE {0} (variant_id bigint, bin integer, chr integer, pos bigint, ref text, alt text, " + pk + "{1});"
         query   = ""
@@ -214,11 +212,8 @@ def import_data(file_id, filepath, annso_core=None, reference_id = 2):
         for idx, f in enumerate(vcf_annotation_metadata['columns']):
             query += "('{0}', {1}, '{2}', '{3}', 'string'),".format(db_hasname, idx, db_map[normalise_annotation_name(f)]['name'], f)
         
-        session.execute(query[:-1])
-        session.execute("UPDATE annotation_field SET uid=MD5(concat(database_uid, name)) WHERE uid IS NULL;")
-        session.commit()
-        session.commit()
-        session.close()
+        Model.execute(query[:-1])
+        Model.execute("UPDATE annotation_field SET uid=MD5(concat(database_uid, name)) WHERE uid IS NULL;")
         return db_map
 
 
@@ -227,12 +222,12 @@ def import_data(file_id, filepath, annso_core=None, reference_id = 2):
             Prepare database for import of custom annotation, and set the mapping between VCF info fields and DB schema
         """
 
-        reference  = db_engine.execute("SELECT table_suffix FROM reference WHERE id={}".format(reference_id)).first()[0]
+        reference  = Model.execute("SELECT table_suffix FROM reference WHERE id={}".format(reference_id)).first()[0]
         table_name = normalise_annotation_name('{}_{}_{}'.format(vcf_annotation_metadata['flag'], vcf_annotation_metadata['version'], reference))
         
         # Get database schema (if available)
         table_cols = {}
-        db_uid     = db_engine.execute("SELECT uid FROM annotation_database WHERE name='{}'".format(table_name)).first()
+        db_uid     = Model.execute("SELECT uid FROM annotation_database WHERE name='{}'".format(table_name)).first()
 
         if db_uid is None:
             # No table in db for these annotation : create new table
@@ -240,7 +235,7 @@ def import_data(file_id, filepath, annso_core=None, reference_id = 2):
         else:
             db_uid = db_uid[0]
             # Table already exists : retrieve columns already defined
-            for col in db_engine.execute("SELECT name, name_ui, type FROM annotation_field WHERE database_uid='{}'".format(db_uid)):
+            for col in Model.execute("SELECT name, name_ui, type FROM annotation_field WHERE database_uid='{}'".format(db_uid)):
                 table_cols[col.name] = { 'name' : col.name, 'type' : col.type, 'name_ui' : col.name_ui }
         # Get diff between columns in vcf and columns in DB, and update DB schema
         diff = []
@@ -256,11 +251,7 @@ def import_data(file_id, filepath, annso_core=None, reference_id = 2):
                 table_cols[name] = { 'name' : name, 'type' : 'string', 'name_ui' : col }
 
             # execute query
-            session = Session(db_engine)
-            session.execute(query)
-            session.commit()
-            session.commit()
-            session.close()
+            Model.execute(query)
         # Update vcf_annotation_metadata with database mapping
         vcf_annotation_metadata.update({ 'table' : table_name })
         vcf_annotation_metadata['db_map'] = {}
@@ -472,10 +463,10 @@ def import_data(file_id, filepath, annso_core=None, reference_id = 2):
 
 
     def exec_sql_query(q1, q2, q3):
-        global job_in_progress, db_engine, log
+        global job_in_progress, Model, log
         job_in_progress += 1
 
-        session = Session(db_engine)
+        session = Session(Model)
         try:
             session.execute(sql_query1)
             session.execute(sql_query2)
@@ -493,6 +484,10 @@ def import_data(file_id, filepath, annso_core=None, reference_id = 2):
         job_in_progress -= 1
 
 
+    def transaction_end(job_id, result):
+        job_in_progress -= 1
+        if result is Exception or result is None:
+            annso_core.notify_all({'msg':'import_vcf_end', 'data' : {'file_id' : file_id, 'msg' : 'Error occured : ' + str(err)}})
 
     start_0 = datetime.datetime.now()
     max_job_in_progress = 6
@@ -516,8 +511,7 @@ def import_data(file_id, filepath, annso_core=None, reference_id = 2):
         vcf_reader = VariantFile(filepath)
 
         # get samples in the VCF 
-        samples = {i : get_or_create(db_session, Sample, name=i)[0] for i in list((vcf_reader.header.samples))}
-        db_session.commit()
+        samples = {i : get_or_create(Model.session(), Sample, name=i)[0] for i in list((vcf_reader.header.samples))}
 
         if len(samples.keys()) == 0 : 
             war("VCF files without sample cannot be imported in the database.")
@@ -530,7 +524,7 @@ def import_data(file_id, filepath, annso_core=None, reference_id = 2):
 
 
         # Associate sample to the file
-        db_engine.execute("INSERT INTO sample_file (sample_id, file_id) VALUES {0} ON CONFLICT DO NOTHING;".format( ','.join(["({0}, {1})".format(samples[sid].id, file_id) for sid in samples])))
+        Model.execute("INSERT INTO sample_file (sample_id, file_id) VALUES {0} ON CONFLICT DO NOTHING;".format( ','.join(["({0}, {1})".format(samples[sid].id, file_id) for sid in samples])))
 
 
 
@@ -609,20 +603,16 @@ def import_data(file_id, filepath, annso_core=None, reference_id = 2):
 
 
                     # manage split big request to avoid sql out of memory transaction
-                    if count >= 25000:
+                    if count >= 10000:
                         count = 0
                         log("VCF import : Execute query")
                         # transaction1 = sql_query1
                         # transaction2 = sql_query2
                         # transaction3 = sql_query3
-                        # pool.apply_async(exec_sql_query, (transaction1, transaction2, transaction3))
-                        session = Session(db_engine)
-                        session.execute(sql_query1)
-                        session.execute(sql_query2)
-                        session.execute(sql_query3)
-                        session.commit()
-                        session.commit() # Need a second commit to force session to commit :/ ... strange behavior when we execute(raw_sql) instead of using sqlalchemy's objects as query
-                        session.close()
+                        # Model.execute_async(transaction1 + transaction2 + transaction3, transaction_end)
+                        Model.execute(sql_query1)
+                        Model.execute(sql_query2)
+                        Model.execute(sql_query3)
 
 
                         sql_query1 = ""
@@ -630,7 +620,7 @@ def import_data(file_id, filepath, annso_core=None, reference_id = 2):
                         sql_query3 = ""
 
         # Loop done, execute last pending query 
-        session = Session(db_engine)
+        session = Session(Model)
         try:
             session.execute(sql_query1)
             session.execute(sql_query2)

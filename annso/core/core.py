@@ -11,7 +11,7 @@ import hashlib
 import ped_parser
 
 import config as C
-import core.model as M
+import core.model as Model
 from core.framework import log, err, array_merge, AnnsoException, Timer, CHR_DB_MAP
 
 
@@ -94,7 +94,7 @@ class FileManager:
             (the file is not yet available, but we can manipulate its annso metadata)
         """
         # TODO: test file extension if ["vcf", "gvcf", "vcf.gz", "gvcf.gz"]: sample file, otherwise ...
-        sample_file = M.File.new_from_tus(filename, file_size)
+        sample_file = Model.File.new_from_tus(filename, file_size)
         return sample_file
 
 
@@ -105,7 +105,7 @@ class FileManager:
             Update finaly the status of the file to UPLOADED or CHECKED -> file ready to be used
         """
         # Retrieve file
-        file = M.File.from_id(file_id)
+        file = Model.File.from_id(file_id)
         if file is None:
             raise AnnsoException("Unable to retrieve the file with the provided id: " + file_id)
         # Move file
@@ -126,8 +126,8 @@ class FileManager:
         file.status = file_status
         file.path = new_path
 
-        M.db_session.add(file)
-        M.db_session.commit()
+        Model.session().add(file)
+        Model.session().commit()
 
         # Importing to the database according to the type (if an import module can manage it)
         for m in annso.import_modules.values():
@@ -145,7 +145,7 @@ class FileManager:
 
 
     def delete(self, file_id):
-        M.db_engine.execute("DELETE FROM variant")
+        Model.execute("DELETE FROM variant")
 
 
 # =====================================================================================================================
@@ -188,7 +188,7 @@ class AnnotationDatabaseManager:
         query = "SELECT d.uid, d.reference_id, d.version, d.name_ui, d.description, d.url, r.name \
                  FROM annotation_database d INNER JOIN reference r ON r.id=d.reference_id \
                  ORDER BY r.name ASC, d.ord ASC, version DESC"
-        for row in M.db_session.execute(query):
+        for row in Model.execute(query):
             self.ref_list.update({row.reference_id: row.name})
             if row.reference_id in self.db_list.keys():
                 if row.name_ui in self.db_list[row.reference_id].keys():
@@ -203,7 +203,7 @@ class AnnotationDatabaseManager:
                  FROM annotation_field a \
                  INNER JOIN annotation_database d ON a.database_uid=d.uid \
                  ORDER BY d.uid, a.ord"
-        for row in M.db_session.execute(query):
+        for row in Model.execute(query):
             meta = None if row.meta is None else json.loads(row.meta)
             self.fields_map[row.fuid] = {"uid": row.fuid, "name": row.name, "description": row.desc, "type": row.type, "meta": meta, "order": row.ford, "dbuid": row.duid}
             if row.duid in self.db_map.keys():
@@ -237,7 +237,7 @@ class AnalysisManager:
             Generic method to get analysis metadata according to provided filtering options.
         """
         if fields is None:
-            fields = M.Analysis.public_fields
+            fields = Model.Analysis.public_fields
         if query is None:
             query = {}
         if order is None:
@@ -246,7 +246,7 @@ class AnalysisManager:
             offset = 0
         if limit is None:
             limit = offset + C.RANGE_MAX
-        return M.db_session.query(M.Analysis).filter_by(**query).offset(offset).limit(limit).all()
+        return Model.session().query(Model.Analysis).filter_by(**query).offset(offset).limit(limit).all()
 
 
     def create(self, name, ref_id, template_id=None):
@@ -254,7 +254,7 @@ class AnalysisManager:
             Create a new analysis in the database.
         """
         instance = None
-        M.db_session.begin(nested=True)
+        Model.session().begin(nested=True)
         try:
             if ref_id not in annso.annotation_db.ref_list.keys():
                 ref_id = C.DEFAULT_REFERENCIAL_ID
@@ -262,13 +262,13 @@ class AnalysisManager:
             db_uid = annso.annotation_db.db_list[ref_id]['db']['Variant']['versions']['']
             for f in annso.annotation_db.db_map[db_uid]["fields"][1:]:
                 settings["fields"].append(f)
-            instance = M.Analysis(name=name, creation_date=datetime.datetime.now(), update_date=datetime.datetime.now(), reference_id=ref_id, settings=json.dumps(settings))
-            M.db_session.add(instance)
-            M.db_session.commit()  # commit the save point into the session (opened by the .begin() before the try:)
-            M.db_session.commit()  # commit into the database.
+            instance = Model.Analysis(name=name, creation_date=datetime.datetime.now(), update_date=datetime.datetime.now(), reference_id=ref_id, settings=json.dumps(settings))
+            Model.session().add(instance)
+            Model.session().commit()  # commit the save point into the session (opened by the .begin() before the try:)
+            Model.session().commit()  # commit into the database.
             return instance.to_json(), True
-        except M.IntegrityError as e:
-            M.db_session.rollback()
+        except Model.IntegrityError as e:
+            Model.session().rollback()
         return None, False
 
 
@@ -276,7 +276,7 @@ class AnalysisManager:
         """
             Load all data about the analysis with the provided id and return result as JSON object.
         """
-        analysis = M.db_session.execute("SELECT a.id, a.name, a.update_date, a.creation_date, a.settings, t.name AS t_name, t.id AS t_id FROM analysis a LEFT JOIN template t ON a.template_id = t.id WHERE a.id = {0}".format(analysis_id)).first()
+        analysis = Model.execute("SELECT a.id, a.name, a.update_date, a.creation_date, a.settings, t.name AS t_name, t.id AS t_id FROM analysis a LEFT JOIN template t ON a.template_id = t.id WHERE a.id = {0}".format(analysis_id)).first()
         result = {
             "id": analysis.id,
             "name": analysis.name,
@@ -295,7 +295,7 @@ class AnalysisManager:
 
         # Get predefined filters set for this analysis
         query = "SELECT * FROM filter WHERE analysis_id = {0} ORDER BY name ASC;"
-        for f in M.db_engine.execute(query.format(analysis_id)):
+        for f in Model.execute(query.format(analysis_id)):
             result["filters"][f.id] = {"name": f.name, "description": f.description, "filter": json.loads(f.filter)}
 
         # Get attributes used for this analysis
@@ -305,7 +305,7 @@ class AnalysisManager:
             ORDER BY a.name ASC, a.sample_id ASC"
 
         current_attribute = None
-        for r in M.db_engine.execute(query.format(analysis_id)):
+        for r in Model.execute(query.format(analysis_id)):
             if current_attribute is None or current_attribute != r.name:
                 current_attribute = r.name
                 result["attributes"].append({"name": r.name, "samples_value": {r.sample_id: r.value}})
@@ -319,7 +319,7 @@ class AnalysisManager:
             LEFT JOIN sample_file sf ON s.id = sf.sample_id \
             LEFT JOIN file f ON f.id = sf.file_id \
             WHERE asp.analysis_id = {0}"
-        for r in M.db_engine.execute(query.format(analysis_id)):
+        for r in Model.execute(query.format(analysis_id)):
             result["samples"].append({
                 "id": r.id,
                 "name": r.name,
@@ -350,7 +350,7 @@ class AnalysisManager:
             # retrieved current settings from database
             settings = {}
             try:
-                settings = json.loads(M.db_engine.execute("SELECT settings FROM analysis WHERE id={}".format(analysis_id)).first().settings)
+                settings = json.loads(Model.execute("SELECT settings FROM analysis WHERE id={}".format(analysis_id)).first().settings)
             except:
                 # TODO: log error
                 settings = {}
@@ -366,12 +366,12 @@ class AnalysisManager:
         # saved filters
         if "filters" in data.keys():
             # delete old filters
-            M.db_engine.execute("DELETE FROM filter WHERE analysis_id={}".format(analysis_id))
+            Model.execute("DELETE FROM filter WHERE analysis_id={}".format(analysis_id))
             # create new associations
             query = "INSERT INTO filter (analysis_id, name, filter) VALUES "
             subquery = "({0}, '{1}', '{2}'')"
             query = query + ', '.join([subquery.format(analysis_id, f['name'], f['filter']) for f in data["filters"]])
-            M.db_engine.execute(query)
+            Model.execute(query)
 
         # samples + nickname
         if "samples" in data.keys():
@@ -381,8 +381,8 @@ class AnalysisManager:
             # check if query seems good then apply change
             if query != "":
                 # delete old analysis sample associations
-                M.db_engine.execute("DELETE FROM analysis_sample WHERE analysis_id={}".format(analysis_id))
-                M.db_engine.execute("INSERT INTO analysis_sample (analysis_id, sample_id, nickname) VALUES " + query)
+                Model.execute("DELETE FROM analysis_sample WHERE analysis_id={}".format(analysis_id))
+                Model.execute("INSERT INTO analysis_sample (analysis_id, sample_id, nickname) VALUES " + query)
             else:
                 # TODO: log error
                 pass
@@ -395,8 +395,8 @@ class AnalysisManager:
             query = ', '.join([pattern.format(analysis_id, sid, att['name'], att['samples_value'][sid]) for att in data['attributes'] for sid in att['samples_value']])
             # check if query seems good then apply change
             if query != "":
-                M.db_engine.execute("DELETE FROM attribute WHERE analysis_id={}".format(analysis_id))
-                M.db_engine.execute("INSERT INTO attribute (analysis_id, sample_id, name, value) VALUES " + query)
+                Model.execute("DELETE FROM attribute WHERE analysis_id={}".format(analysis_id))
+                Model.execute("INSERT INTO attribute (analysis_id, sample_id, name, value) VALUES " + query)
             else:
                 # TODO: log error
                 pass
@@ -406,7 +406,7 @@ class AnalysisManager:
             main_query += "name='{0}', ".format(data["name"])
 
         # update analysis
-        M.db_engine.execute("UPDATE analysis SET {0}update_date=CURRENT_TIMESTAMP WHERE id={1}".format(main_query, analysis_id))
+        Model.execute("UPDATE analysis SET {0}update_date=CURRENT_TIMESTAMP WHERE id={1}".format(main_query, analysis_id))
 
 
 
@@ -420,13 +420,13 @@ class AnalysisManager:
             return False
         # retrieve analysis samples
         samples = {}
-        for row in M.db_engine.execute("SELECT a_s.sample_id, a_s.nickname, s.name FROM analysis_sample a_s INNER JOIN sample s ON a_s.sample_id=s.id WHERE analysis_id={0}".format(analysis_id)):
+        for row in Model.execute("SELECT a_s.sample_id, a_s.nickname, s.name FROM analysis_sample a_s INNER JOIN sample s ON a_s.sample_id=s.id WHERE analysis_id={0}".format(analysis_id)):
             samples[row.name] = row.sample_id
             if row.nickname is not '' and row.nickname is not None:
                 samples[row.nickname] = row.sample_id
         # drop all old "ped" attributes to avoid conflict
         ped_attributes = ['FamilyId', 'SampleId', 'FatherId', 'MotherId', 'Sex', 'Phenotype']
-        M.db_engine.execute("DELETE FROM attribute WHERE analysis_id={0} AND name IN ('{1}')".format(analysis_id, ''','''.join(ped_attributes)))
+        Model.execute("DELETE FROM attribute WHERE analysis_id={0} AND name IN ('{1}')".format(analysis_id, ''','''.join(ped_attributes)))
         # Insert new attribute's values according to the ped data
         sql = "INSERT INTO attribute (analysis_id, sample_id, name, value) VALUES "
         for sample in parser.individuals:
@@ -436,7 +436,7 @@ class AnalysisManager:
                 sql += "({}, {}, '{}', '{}'),".format(analysis_id, samples[sample.individual_id], 'MotherId', sample.mother)
                 sql += "({}, {}, '{}', '{}'),".format(analysis_id, samples[sample.individual_id], 'Sex', sample.sex)
                 sql += "({}, {}, '{}', '{}'),".format(analysis_id, samples[sample.individual_id], 'Phenotype', sample.phenotype)
-        M.db_engine.execute(sql[:-1])
+        Model.execute(sql[:-1])
 
 
     def save_filter(self, analysis_id, name, filter_json):
@@ -444,25 +444,25 @@ class AnalysisManager:
             Save (add) a new filter for the analysis with the provided id.
         """
         instance = None
-        M.db_session.begin(nested=True)
+        Model.session().begin(nested=True)
         try:
-            instance = M.Filter(analysis_id=analysis_id, name=name, filter=json.dumps(filter_json))
-            M.db_session.add(instance)
-            M.db_session.commit()  # commit the save point into the session (opened by the .begin() before the try:)
-            M.db_session.commit()  # commit into the database.
+            instance = Model.Filter(analysis_id=analysis_id, name=name, filter=json.dumps(filter_json))
+            Model.session().add(instance)
+            Model.session().commit()  # commit the save point into the session (opened by the .begin() before the try:)
+            Model.session().commit()  # commit into the database.
             return instance.to_json(), True
-        except M.IntegrityError as e:
-            M.db_session.rollback()
+        except Model.IntegrityError as e:
+            Model.session().rollback()
         return None, False
 
 
     def update_filter(self, filter_id, name, filter_json):
         query = "UPDATE filter SET name='{1}', filter='{2}' WHERE id={0}".format(filter_id, name, json.dumps(filter_json))
-        M.db_engine.execute(query)
+        Model.execute(query)
 
 
     def delete_filter(self, filter_id):
-        M.db_engine.execute("DELETE FROM filter WHERE id={}".format(filter_id))
+        Model.execute("DELETE FROM filter WHERE id={}".format(filter_id))
 
 
 
@@ -502,7 +502,7 @@ class AnalysisManager:
     #     sql += "FROM variant_hg19 v "
     #     sql += "INNER JOIN refgene_hg19 rg ON v.chr = rg.chrom AND rg.txrange @> int8(v.pos) "
     #     sql += "WHERE v.id IN (" + ','.join(variants_ids) + ") GROUP BY v.id"
-    #     for r in M.db_engine.execute():
+    #     for r in Model.execute():
     #         result.append((r[1], r[0], r[3], r[4], r[5], r[6]))
     #     return Gene("GJB2", [])
 
@@ -522,7 +522,7 @@ class SampleManager:
 
 
     def total(self):
-        return M.db_session.execute("SELECT count(*) FROM sample").first()[0]
+        return Model.execute("SELECT count(*) FROM sample").first()[0]
 
 
     def get(self, fields=None, query=None, order=None, offset=None, limit=None, sublvl=0):
@@ -530,7 +530,7 @@ class SampleManager:
             Generic method to get files metadata according to provided filtering options
         """
         if fields is None:
-            fields = M.Sample.public_fields
+            fields = Model.Sample.public_fields
         if query is None:
             query = {}
         if order is None:
@@ -541,7 +541,7 @@ class SampleManager:
             limit = offset + C.RANGE_MAX
 
         result = []
-        for s in M.db_session.execute("SELECT sp.id, sp.name, sp.comments  FROM sample sp"):
+        for s in Model.execute("SELECT sp.id, sp.name, sp.comments  FROM sample sp"):
             result.append({"id": s[0], "name": s[1], "comments": s[2], "analyses": []})
         return result
 
@@ -562,7 +562,7 @@ class VariantManager:
         """
         ref_name = annso.annotation_db.ref_list[int(reference_id)]
         query = "SELECT _var.bin as vbin, _var.chr as vchr, _var.pos as vpos, _var.ref as vref, _var.alt as valt, dbnfsp_variant.* FROM (SELECT bin, chr, pos, ref, alt FROM variant_{} WHERE id={}) AS _var LEFT JOIN dbnfsp_variant ON _var.bin=dbnfsp_variant.bin_hg19 AND _var.chr=dbnfsp_variant.chr_hg19 AND _var.pos=dbnfsp_variant.pos_hg19 AND _var.ref=dbnfsp_variant.ref AND _var.alt=dbnfsp_variant.alt"
-        variant = M.db_engine.execute(query.format('hg19', variant_id)).first()
+        variant = Model.execute(query.format('hg19', variant_id)).first()
         chrm = CHR_DB_MAP[variant.vchr]
         pos = variant.vpos + 1  # return result as 1-based coord
         ref = variant.vref
@@ -619,13 +619,13 @@ class FilterEngine:
             Init Annso Filtering engine.
             Init mapping collection for annotations databases and fields
         """
-        refname = 'hg19'  # M.db_session.execute("SELECT table_suffix FROM reference WHERE id="+str(reference)).first()["table_suffix"]
+        refname = 'hg19'  # Model.execute("SELECT table_suffix FROM reference WHERE id="+str(reference)).first()["table_suffix"]
         self.reference = 2
         self.fields_map = {}
         self.db_map = {}
         self.variant_table = "sample_variant_{0}".format(refname)
         query = "SELECT d.uid AS duid, d.name AS dname, d.name_ui AS dname_ui, d.jointure, d.reference_id, a.uid AS fuid, a.name AS fname, a.type, a.wt_default FROM annotation_field a LEFT JOIN annotation_database d ON a.database_uid=d.uid"
-        for row in M.db_session.execute(query):
+        for row in Model.execute(query):
             if row.duid not in self.db_map:
                 self.db_map[row.duid] = {"name": row.dname, "join": row.jointure, "fields": {}, "reference_id": row.reference_id}
             self.db_map[row.duid]["fields"][row.fuid] = {"name": row.fname, "type": row.type}
@@ -656,7 +656,7 @@ class FilterEngine:
             sample_tcount integer, \
             sample_alist integer[], \
             sample_acount integer);"
-        M.db_engine.execute(query.format(w_table))
+        Model.execute(query.format(w_table))
         # Insert variant without annotation first
         query = "INSERT INTO {0} (sample_id, variant_id, bin, chr, pos, ref, alt, genotype, depth, is_transition, sample_tlist, sample_tcount, sample_alist, sample_acount) \
             SELECT sample_variant_{1}.sample_id, sample_variant_{1}.variant_id, sample_variant_{1}.bin, sample_variant_{1}.chr, sample_variant_{1}.pos, sample_variant_{1}.ref, sample_variant_{1}.alt, \
@@ -665,7 +665,7 @@ class FilterEngine:
             array_intersect(variant_{1}.sample_list, array[{2}]), array_length(array_intersect(variant_{1}.sample_list, array[{2}]),1) \
             FROM sample_variant_{1} INNER JOIN variant_{1} ON sample_variant_{1}.variant_id=variant_{1}.id\
             WHERE sample_variant_{1}.sample_id IN ({2});"
-        M.db_engine.execute(query.format(w_table, 'hg19', ','.join([str(i) for i in sample_ids])))
+        Model.execute(query.format(w_table, 'hg19', ','.join([str(i) for i in sample_ids])))
         # Create indexes
         query = "CREATE INDEX {0}_idx_ann ON {0} USING btree (annotated);".format(w_table)
         query = "CREATE INDEX {0}_idx_vid ON {0} USING btree (variant_id);".format(w_table)
@@ -673,10 +673,10 @@ class FilterEngine:
         query += "CREATE INDEX {0}_idx_var ON {0} USING btree (bin, chr, pos);".format(w_table)
         query += "CREATE INDEX {0}_idx_gt ON {0}  USING btree (genotype);".format(w_table)
         query += "CREATE INDEX {0}_idx_dp ON {0}  USING btree (depth);".format(w_table)
-        M.db_engine.execute(query)
+        Model.execute(query)
         # Update count stat of the analysis
         query = "UPDATE analysis SET total_variants=(SELECT COUNT(*) FROM {}), status='ANNOTATING' WHERE id={}".format(w_table, analysis_id)
-        M.db_engine.execute(query)
+        Model.execute(query)
         # Update working table by computing annotation
         self.update_working_table(analysis_id, sample_ids, field_uids, dbs_uids, filter_ids, attributes)
 
@@ -685,7 +685,7 @@ class FilterEngine:
             Update annotation of the working table of an analysis. The working table shall already exists
         """
         # Get list of fields to add in the wt
-        analysis = M.Analysis.from_id(analysis_id)
+        analysis = Model.Analysis.from_id(analysis_id)
         total = analysis.total_variants
         diff_fields = []
         diff_dbs = []
@@ -693,7 +693,7 @@ class FilterEngine:
         annso.notify_all(progress)
         try:
             query = "SELECT column_name FROM information_schema.columns WHERE table_name='wt_{}'".format(analysis_id)
-            current_fields = [row.column_name if row.column_name[0] != '_' else row.column_name[1:] for row in M.db_engine.execute(query)]
+            current_fields = [row.column_name if row.column_name[0] != '_' else row.column_name[1:] for row in Model.execute(query)]
             for f_uid in field_uids:
                 if f_uid not in current_fields and self.fields_map[f_uid]['db_name_ui'] != 'Variant':
                     diff_fields.append('_{}'.format(f_uid))
@@ -717,9 +717,9 @@ class FilterEngine:
                 query += pattern.format(analysis_id, 'filter_', f_id, 'boolean')
         if query != "":
             # Add new annotation columns to the working table
-            M.db_engine.execute(query)
+            Model.execute(query)
             # Mark all variant as not annotated (to be able to do a resumable update)
-            M.db_engine.execute("UPDATE wt_{} SET annotated=False".format(analysis_id))
+            Model.execute("UPDATE wt_{} SET annotated=False".format(analysis_id))
         progress.update({"step": 3})
         annso.notify_all(progress)
 
@@ -733,7 +733,7 @@ class FilterEngine:
         if qset_ann != "":
             for page in range(0, total, C.RANGE_DEFAULT * 10):
                 query = "UPDATE wt_{0} SET annotated=True, {1} FROM (SELECT _var.variant_id, {2} FROM ({3}) AS _var {4}) AS _ann WHERE wt_{0}.variant_id=_ann.variant_id".format(analysis_id, qset_ann, qslt_ann, qslt_var, qjoin)
-                M.db_engine.execute(query)
+                Model.execute(query)
                 progress.update({"progress_current": page})
                 annso.notify_all(progress)
         progress.update({"step": 4, "progress_current": total})
@@ -747,14 +747,14 @@ class FilterEngine:
                     query += "UPDATE wt_{} SET attr_{}='{}' WHERE sample_id={}; ".format(analysis_id, a_name, attributes[a_name][sid], sid)
                     query += "CREATE INDEX wt_{0}_idx_attr_{1} ON wt_{0} USING btree (filter_{1});".format(analysis_id, a_name)
         if query != "":
-            M.db_engine.execute(query)
+            Model.execute(query)
 
         # Loop to update working table filter
         progress.update({"step": 5})
         annso.notify_all(progress)
         for f_id in filter_ids:
             if 'filter_{}'.format(f_id) not in current_fields:
-                f_filter = json.loads(M.db_engine.execute("SELECT filter FROM filter WHERE id={}".format(f_id)).first().filter)
+                f_filter = json.loads(Model.execute("SELECT filter FROM filter WHERE id={}".format(f_id)).first().filter)
                 q = self.build_query(analysis_id, analysis.reference_id, 'table', f_filter, [], None, None)
                 queries = q[0]
                 if len(queries) > 0:
@@ -763,14 +763,14 @@ class FilterEngine:
                         query += q
                     query += "UPDATE wt_{} SET filter_{}=True WHERE variant_id IN ({}); ".format(analysis_id, f_id, queries[-1].strip()[:-1])
                     query += "CREATE INDEX wt_{0}_idx_filter_{1} ON wt_{0} USING btree (filter_{1});".format(analysis_id, f_id)
-                    M.db_engine.execute(query)
+                    Model.execute(query)
 
         progress.update({"step": 6})
         annso.notify_all(progress)
 
         # Update count stat of the analysis
         query = "UPDATE analysis SET status='READY' WHERE id={}".format(analysis_id)
-        M.db_engine.execute(query)
+        Model.execute(query)
 
         # 1- Finir Update Working table simple (ajout d'annotation existante)
         # 2- Avec upload async dans un thread a pars (notif realtime avec progress bar UI)
@@ -793,7 +793,7 @@ class FilterEngine:
             mode = "table"
 
         # Get analysis data and check status if ok to do filtering
-        analysis = M.Analysis.from_id(analysis_id)
+        analysis = Model.Analysis.from_id(analysis_id)
         if analysis is None:
             raise AnnsoException("Not able to retrieve analysis with provided id: {}".format(analysis_id))
 
@@ -809,18 +809,18 @@ class FilterEngine:
         # Execute query
         sql_result = None
         with Timer() as t:
-            sql_result = M.db_engine.execute(' '.join(query))
+            sql_result = Model.execute(' '.join(query))
         log("---\nFields:\n{0}\nFilter:\n{1}\nQuery:\n{2}\nRequest query: {3}".format(fields, filter_json, '\n'.join(query), t))
 
         # Save filter in analysis settings
         if not count and analysis_id > 0:
             settings = {}
             try:
-                settings = json.loads(M.db_engine.execute("SELECT settings FROM analysis WHERE id={}".format(analysis_id)).first().settings)
+                settings = json.loads(Model.execute("SELECT settings FROM analysis WHERE id={}".format(analysis_id)).first().settings)
                 settings["filter"] = filter_json
                 settings["fields"] = fields
                 settings["order"] = [] if order is None else order
-                M.db_engine.execute("UPDATE analysis SET {0}update_date=CURRENT_TIMESTAMP WHERE id={1}".format("settings='{0}', ".format(json.dumps(settings)), analysis_id))
+                Model.execute("UPDATE analysis SET {0}update_date=CURRENT_TIMESTAMP WHERE id={1}".format("settings='{0}', ".format(json.dumps(settings)), analysis_id))
             except:
                 # TODO: log error
                 err("Not able to save current filter")
@@ -857,24 +857,24 @@ class FilterEngine:
         attributes = {}  # list of attributes (and their values by sample) defined for this analysis
 
         # Retrieve sample ids of the analysis
-        for row in M.db_session.execute("select sample_id from analysis_sample where analysis_id={0}".format(analysis_id)):
+        for row in Model.execute("select sample_id from analysis_sample where analysis_id={0}".format(analysis_id)):
             sample_ids.append(str(row.sample_id))
 
         # Retrieve attributes of the analysis
-        for row in M.db_session.execute("select sample_id, value, name from attribute where analysis_id={0}".format(analysis_id)):
+        for row in Model.execute("select sample_id, value, name from attribute where analysis_id={0}".format(analysis_id)):
             if row.name not in attributes.keys():
                 attributes[row.name] = {row.sample_id: row.value}
             else:
                 attributes[row.name].update({row.sample_id: row.value})
 
         # Init fields uid and db uids with the defaults annotations fields according to the reference (hg19 by example)
-        for row in M.db_session.execute("SELECT d.uid AS duid, f.uid FROM annotation_database d INNER JOIN annotation_field f ON d.uid=f.database_uid WHERE d.reference_id={} AND d.type='variant' AND f.wt_default=True".format(reference_id)):
+        for row in Model.execute("SELECT d.uid AS duid, f.uid FROM annotation_database d INNER JOIN annotation_field f ON d.uid=f.database_uid WHERE d.reference_id={} AND d.type='variant' AND f.wt_default=True".format(reference_id)):
             if row.duid not in db_uids:
                 db_uids.append(row.duid)
             field_uids.append(row.uid)
 
         # Retrieve saved filter's ids of the analysis - and parse their filter to get list of dbs/fields used by filters
-        for row in M.db_session.execute("select id, filter from filter where analysis_id={0} ORDER BY id ASC".format(analysis_id)):  # ORDER BY is important as a filter can "called" an oldest filter to be build.
+        for row in Model.execute("select id, filter from filter where analysis_id={0} ORDER BY id ASC".format(analysis_id)):  # ORDER BY is important as a filter can "called" an oldest filter to be build.
             filter_ids.append(row.id)
             q, f, d = self.parse_filter(analysis_id, mode, sample_ids, row.filter, fields, None, None)
             field_uids = array_merge(field_uids, f)
