@@ -561,7 +561,7 @@
                             <form class="form">
                                 <div class="input-group">
 
-                                    <input type="hidden" id="modal_new_file_tus_endpoint" name="modal_new_file_tus_endpoint" value="https://{{ hostname }}/sample/upload"/>
+                                    <input type="hidden" id="modal_new_file_tus_endpoint" name="modal_new_file_tus_endpoint" value="{{ hostname }}/sample/upload"/>
                                     <input type="hidden" id="modal_new_file_tus_chunksize" name="modal_new_file_tus_chunksize" value="256000"/>
 
                                     <span class="input-group-addon"><i class="fa fa-file" aria-hidden="true"></i></span>
@@ -863,7 +863,7 @@
     <script src="/assets/model.js"></script>
     <script src="/assets/gui.js"></script>
     <script>
-        var rootURL = "https://{{ hostname }}";
+        var rootURL = "{{ hostname }}";
 
         var ws = null;
         var $message = $('#message');
@@ -1175,7 +1175,7 @@
 
         function ws_setup()
         {
-            this.ws = new WebSocket('wss://{{ hostname }}/ws');
+            this.ws = new WebSocket((location.protocol === 'https:') ? 'wss://' : 'ws://' + location.host + '{{ hostname }}/ws');
             this.ws.onerror = ws_onerror;
             this.ws.onopen = ws_onopen;
             this.ws.onmessage = ws_onmessage;

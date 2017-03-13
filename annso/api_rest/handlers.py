@@ -434,7 +434,7 @@ class AnalysisHandler:
             return rest_error("AnalysisHandler.get_report error: " + str(err))
 
         # create url to access to the report
-        url = 'http://{0}/cache{1}'.format(HOST_P, cache_path[len(CACHE_DIR):])
+        url = '{0}/cache{1}'.format(HOST_P, cache_path[len(CACHE_DIR):])
         return rest_success({'url': url})
 
 
@@ -468,7 +468,7 @@ class SampleFileWrapper (TusFileWrapper):
             self.upload_offset = self.file.upload_offset
             self.path = self.file.path
             self.size = self.file.size
-            self.upload_url = "https://" + HOST_P + "/sample/upload/" + str(id)
+            self.upload_url = HOST_P + "/sample/upload/" + str(id)
         else:
             return TusManager.build_response(code=500, body="Unknow id: {}".format(id))
 
