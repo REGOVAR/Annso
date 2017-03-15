@@ -863,7 +863,7 @@
     <script src="/assets/model.js"></script>
     <script src="/assets/gui.js"></script>
     <script>
-        var rootURL = "{{ hostname }}";
+        var rootURL = location.protocol + "//{{ hostname }}";
 
         var ws = null;
         var $message = $('#message');
@@ -1141,7 +1141,6 @@
                     break;
 
                 case 'import_vcf_end':
-                    debugger;
                     // clean and close import popup
                     $('#modal_new_file_progress').html("");
                     $('#modal_new_file_import').html("");
@@ -1175,7 +1174,7 @@
 
         function ws_setup()
         {
-            this.ws = new WebSocket((location.protocol === 'https:') ? 'wss://' : 'ws://' + location.host + '{{ hostname }}/ws');
+            this.ws = new WebSocket((location.protocol == 'https:' ? 'wss://' : 'ws://') + '{{ hostname }}/ws');
             this.ws.onerror = ws_onerror;
             this.ws.onopen = ws_onopen;
             this.ws.onmessage = ws_onmessage;

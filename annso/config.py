@@ -7,14 +7,14 @@ DEBUG = True
 
 
 # HOST (internal)
-HOST = "0.0.0.0"
+HOST = "127.0.0.1"
 PORT = "8100"
 VERSION = "v1"
-HOSTNAME = HOST + ":" + PORT + "/" + VERSION
+HOSTNAME = HOST + ":" + PORT + "/" + VERSION  # This is the internal host on which aioHTTP will run the service.
 
 
 # HOST (public)
-HOST_P = "/" + VERSION
+HOST_P = HOSTNAME  # THIS url must be change if the annso server is reach via a public namespace that user
 RANGE_DEFAULT = 100
 RANGE_MAX = 1000
 

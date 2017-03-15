@@ -27,7 +27,7 @@ def import_data(file_id, filepath, annso_core=None, reference_id = 2):
 
     from core.framework import get_or_create, log, war, err
     from sqlalchemy.orm import Session
-    from core.model import Sample, db_engine, db_session, create_session
+    from core.model import Sample, db_engine, db_session
 
 
 
@@ -480,14 +480,14 @@ def import_data(file_id, filepath, annso_core=None, reference_id = 2):
     job_in_progress = 0
     pool = mp.Pool(processes=max_job_in_progress)
 
-    ipdb.set_trace()
     vcf_metadata = prepare_vcf_parsing(filepath)
     db_ref_suffix="_hg19" # TODO/FIXME : retrieve data from annso core
 
     # Prepare database for import of custom annotation, and set the mapping between VCF info fields and DB schema
     for annotation in vcf_metadata['annotations'].keys():
-        data = prepare_annotation_db(reference_id, vcf_metadata['annotations'][annotation])
-        vcf_metadata['annotations'][annotation].update(data)
+        if vcf_metadata['annotations'][annotation]:
+            data = prepare_annotation_db(reference_id, vcf_metadata['annotations'][annotation])
+            vcf_metadata['annotations'][annotation].update(data)
 
 
     if filepath.endswith(".vcf") or filepath.endswith(".vcf.gz"):
@@ -557,31 +557,32 @@ def import_data(file_id, filepath, annso_core=None, reference_id = 2):
 
                     # Import custom annotation for the variant
                     for ann_name, metadata in vcf_metadata['annotations'].items():
-                        for info in r.info[metadata['flag']]:
-                            data = info.split('|')
-                            q_fields = []
-                            q_values = []
-                            allele   = ""
-                            for col_pos, col_name in enumerate(metadata['columns']):
-                                q_fields.append(metadata['db_map'][col_name]['name'])
-                                val = escape_value_for_sql(data[col_pos])
-                                if col_name == 'Allele':
-                                    allele = val.strip().strip("-")
-                                q_values.append('\'{}\''.format(val) if val != '' and val is not None else 'NULL')
+                        if metadata:
+                            for info in r.info[metadata['flag']]:
+                                data = info.split('|')
+                                q_fields = []
+                                q_values = []
+                                allele   = ""
+                                for col_pos, col_name in enumerate(metadata['columns']):
+                                    q_fields.append(metadata['db_map'][col_name]['name'])
+                                    val = escape_value_for_sql(data[col_pos])
+                                    if col_name == 'Allele':
+                                        allele = val.strip().strip("-")
+                                    q_values.append('\'{}\''.format(val) if val != '' and val is not None else 'NULL')
 
 
-                            pos, ref, alt = normalize(r.pos, r.ref, s.alleles[0])
-                            # print(pos, ref, alt, allele)
-                            if pos is not None and alt==allele:
-                                # print("ok")
-                                sql_query3 += sql_pattern3.format(metadata['table'], ','.join(q_fields), ','.join(q_values), bin, chrm, pos, ref, alt)
-                                count += 1
-                            pos, ref, alt = normalize(r.pos, r.ref, s.alleles[1])
-                            # print(pos, ref, alt, allele)
-                            if pos is not None and alt==allele:
-                                # print("ok")
-                                sql_query3 += sql_pattern3.format(metadata['table'], ','.join(q_fields), ','.join(q_values), bin, chrm, pos, ref, alt)
-                                count += 1
+                                pos, ref, alt = normalize(r.pos, r.ref, s.alleles[0])
+                                # print(pos, ref, alt, allele)
+                                if pos is not None and alt==allele:
+                                    # print("ok")
+                                    sql_query3 += sql_pattern3.format(metadata['table'], ','.join(q_fields), ','.join(q_values), bin, chrm, pos, ref, alt)
+                                    count += 1
+                                pos, ref, alt = normalize(r.pos, r.ref, s.alleles[1])
+                                # print(pos, ref, alt, allele)
+                                if pos is not None and alt==allele:
+                                    # print("ok")
+                                    sql_query3 += sql_pattern3.format(metadata['table'], ','.join(q_fields), ','.join(q_values), bin, chrm, pos, ref, alt)
+                                    count += 1
 
 
 
@@ -596,7 +597,8 @@ def import_data(file_id, filepath, annso_core=None, reference_id = 2):
                         session = Session(db_engine)
                         session.execute(sql_query1)
                         session.execute(sql_query2)
-                        session.execute(sql_query3)
+                        if sql_query3 != '':
+                            session.execute(sql_query3)
                         session.commit()
                         session.commit() # Need a second commit to force session to commit :/ ... strange behavior when we execute(raw_sql) instead of using sqlalchemy's objects as query
                         session.close()
@@ -611,7 +613,8 @@ def import_data(file_id, filepath, annso_core=None, reference_id = 2):
         try:
             session.execute(sql_query1)
             session.execute(sql_query2)
-            session.execute(sql_query3)
+            if sql_query3 != '':
+                session.execute(sql_query3)
             session.commit()
             session.commit() # Need a second commit to force session to commit :/ ... strange behavior when we execute(raw_sql) instead of using sqlalchemy's objects as query
             session.close()
