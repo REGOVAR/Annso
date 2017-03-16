@@ -124,7 +124,7 @@ class TusManager:
         fw.save()
         # file transfer complete
         if fw.size == fw.upload_offset: 
-            fw.complete()
+            await fw.complete()
         headers = { 'Upload-Offset' : str(fw.upload_offset), 'Tus-Temp-Filename' : str(fw.id) }
         return TusManager.build_response(code=200, headers=headers)
 

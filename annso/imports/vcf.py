@@ -12,7 +12,7 @@ metadata = {
 
 
 
-def import_data(file_id, filepath, annso_core=None, reference_id = 2):
+async def import_data(file_id, filepath, annso_core=None, reference_id = 2):
     import ipdb
 
     import os
@@ -462,37 +462,17 @@ def import_data(file_id, filepath, annso_core=None, reference_id = 2):
     # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
 
-    def exec_sql_query(q1, q2, q3):
-        global job_in_progress, Model, log
-        job_in_progress += 1
-
-        session = Session(Model)
-        try:
-            session.execute(sql_query1)
-            session.execute(sql_query2)
-            session.execute(sql_query3)
-            session.commit()
-            session.commit() # Need a second commit to force session to commit :/ ... strange behavior when we execute(raw_sql) instead of using sqlalchemy's objects as query
-            session.close()
-        except Exception as err:
-            ipdb.set_trace()
-            log(err)
-            if annso_core is not None:
-                annso_core.notify_all({'msg':'import_vcf_end', 'data' : {'file_id' : file_id, 'msg' : 'Error occured : ' + str(err)}})
-            session.close()
-            return
-        job_in_progress -= 1
 
 
     def transaction_end(job_id, result):
-        job_in_progress -= 1
+        job_in_progress.remove(job_id)
         if result is Exception or result is None:
             annso_core.notify_all({'msg':'import_vcf_end', 'data' : {'file_id' : file_id, 'msg' : 'Error occured : ' + str(err)}})
 
+
+
     start_0 = datetime.datetime.now()
-    max_job_in_progress = 6
-    job_in_progress = 0
-    pool = mp.Pool(processes=max_job_in_progress)
+    job_in_progress = []
 
     ipdb.set_trace()
     vcf_metadata = prepare_vcf_parsing(filepath)
@@ -605,36 +585,30 @@ def import_data(file_id, filepath, annso_core=None, reference_id = 2):
                     # manage split big request to avoid sql out of memory transaction
                     if count >= 10000:
                         count = 0
-                        log("VCF import : Execute query")
                         # transaction1 = sql_query1
                         # transaction2 = sql_query2
                         # transaction3 = sql_query3
                         # Model.execute_async(transaction1 + transaction2 + transaction3, transaction_end)
-                        Model.execute(sql_query1)
-                        Model.execute(sql_query2)
-                        Model.execute(sql_query3)
-
+                        transaction = sql_query1 + sql_query2 + sql_query3
+                        job_id = Model.execute_bw(transaction, transaction_end)
+                        job_in_progress.append(job_id)
+                        log("VCF import : Execute async query, new job_id : {}. Jobs running [{}]".format(job_id, ','.join([job_in_progress])))
 
                         sql_query1 = ""
                         sql_query2 = ""
                         sql_query3 = ""
 
         # Loop done, execute last pending query 
-        session = Session(Model)
-        try:
-            session.execute(sql_query1)
-            session.execute(sql_query2)
-            session.execute(sql_query3)
-            session.commit()
-            session.commit() # Need a second commit to force session to commit :/ ... strange behavior when we execute(raw_sql) instead of using sqlalchemy's objects as query
-            session.close()
-        except Exception as err:
-            ipdb.set_trace()
-            log(err)
-            if annso_core is not None:
-                annso_core.notify_all({'msg':'import_vcf_end', 'data' : {'file_id' : file_id, 'msg' : 'Error occured : ' + str(err)}})
-            session.close()
-            return
+        transaction = sql_query1 + sql_query2 + sql_query3
+        job_id = Model.execute_bw(transaction, transaction_end)
+        job_in_progress.append(job_id)
+
+
+        # waiting end of all running job
+        ipdb.set_trace()
+        while len(job_in_progress) > 0:
+            await asyncio.sleep(1.0)
+        ipdb.set_trace()
 
     end = datetime.datetime.now()
     if annso_core is not None:

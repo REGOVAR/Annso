@@ -4,6 +4,7 @@ import os
 import datetime
 import uuid
 import sqlalchemy
+import asyncio
 import multiprocessing as mp
 
 
@@ -42,14 +43,12 @@ Base.metadata.create_all(__db_engine)
 Session = sessionmaker(bind=__db_engine)
 __db_session = Session()
 __db_pool = mp.Pool()
-
-
 __async_job_id = 0
 __async_jobs = {}
 
 
 
-def _execute_async(async_job_id, query):
+def private_execute_async(async_job_id, query):
     """
         Internal method used to execute query asynchronously
     """
@@ -69,13 +68,15 @@ def _execute_async(async_job_id, query):
     return (async_job_id, result)
 
 
-def _execute_callback(result):
+def private_execute_callback(result):
     """
         Internal callback method for asynch query execution. 
 
     """
     job_id = result[0]
     result = result[1]
+    # Storing result in dictionary
+    __async_jobs[job_id]['result'] = result
 
     # Call callback if defined
     if __async_jobs[job_id]['callback']:
@@ -83,6 +84,9 @@ def _execute_callback(result):
 
     # Delete job 
     del __async_jobs[async_job_id]
+
+
+
 
 
 
@@ -123,8 +127,10 @@ def get_or_create(session, model, defaults=None, **kwargs):
 
 
 def session():
+    """
+        Return the current pgsql session (SQLAlchemy)
+    """
     return __db_session
-
 
 
 def execute(query):
@@ -142,28 +148,48 @@ def execute(query):
     return result
 
 
-def execute_async(query, callback=None):
+def execute_bw(query, callback=None):
     """
-        Asynchrone execution of the query. An optional callback method that take 2 arguments (job_id, query_result) can be set.
+        execute in background worker:
+        Asynchrone execution of the query in an other thread. An optional callback method that take 2 arguments (job_id, query_result) can be set.
         This method return a job_id for this request that allow you to cancel it if needed
     """
+    global __async_job_id, __async_jobs, __db_pool
     __async_job_id += 1
-    t = pool.apply_async(_execute_async, args = (__async_job_id, query,), callback=_execute_callback)
+    t = __db_pool.apply_async(private_execute_async, args = (__async_job_id, query,), callback=private_execute_callback)
     __async_jobs[__async_job_id] = {"task" : t, "callback": callback, "query" : query, "start": datetime.datetime.now}
     return __async_job_id
+        
 
 
+async def execute_aio(query):
+    """
+        execute as coroutine
+        Asynchrone execution of the query as coroutine
+    """
 
+    # Execute the query in another thread via coroutine
+    loop = asyncio.get_event_loop()
+    futur = loop.run_in_executor(None, private_execute_async, None, query)
+
+
+    # Aio wait the end of the async task to return result
+    result = await futur
+    return result[1]
 
 
 def cancel(async_job_id):
+    """
+        Cancel an asynch job running in the threads pool
+    """
     if async_job_id in __async_jobs.keys():
         __async_jobs.keys[async_job_id]["task"].terminate()
         __async_jobs.keys[async_job_id]["task"].join()
         log("Model async query (id:{}) canceled".format(async_job_id))
     else:
         log("Model unable to cancel async query (id:{}) because it doesn't exists".format(async_job_id))
-        
+
+
 
 
 
@@ -174,6 +200,7 @@ SampleVariant = Base.classes.sample_variant_hg19
 Attribute = Base.classes.attribute
 AnnotationDatabase = Base.classes.annotation_database
 AnnotationField = Base.classes.annotation_field
+
 
 
 # =====================================================================================================================

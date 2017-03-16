@@ -483,10 +483,10 @@ class SampleFileWrapper (TusFileWrapper):
             return TusManager.build_response(code=500, body="Unexpected error occured: {}".format(error))
 
 
-    def complete(self, checksum=None, checksum_type="md5"):
+    async def complete(self, checksum=None, checksum_type="md5"):
         try:
             log ('Upload of the file (id={0}) is complete.'.format(self.id))
-            annso.file.upload_finish(self.id, checksum, checksum_type)
+            await annso.file.upload_finish(self.id, checksum, checksum_type)
         except Exception as error:
             return TusManager.build_response(code=500, body="Unexpected error occured: {}".format(error))
 

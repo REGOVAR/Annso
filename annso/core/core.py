@@ -8,16 +8,18 @@ import datetime
 import uuid
 import psycopg2
 import hashlib
+import asyncio
 import ped_parser
 
 import config as C
 import core.model as Model
-from core.framework import log, err, array_merge, AnnsoException, Timer, CHR_DB_MAP
+from core.framework import log, err, array_merge, AnnsoException, Timer, CHR_DB_MAP, run_until_complete
 
 
 # =====================================================================================================================
 # CORE OBJECT
 # =====================================================================================================================
+
 
 
 class Core:
@@ -98,7 +100,7 @@ class FileManager:
         return sample_file
 
 
-    def upload_finish(self, file_id, checksum=None, checksum_type="md5"):
+    async def upload_finish(self, file_id, checksum=None, checksum_type="md5"):
         """
             When upload of a file is finish, we move it from the download temporary folder to the
             files folder. A checksum validation can also be done if provided.
@@ -112,9 +114,11 @@ class FileManager:
         old_path = file.path
         new_path = os.path.join(C.FILES_DIR, "{0}.{1}".format(uuid.uuid4(), file.type))
         os.rename(old_path, new_path)
+        log('Moving saving temporary file (id={})from {} to {}'.format(file_id, old_path, new_path))
         # If checksum provided, check that file is correct
         file_status = "UPLOADED"
         if checksum:
+            log('Checksum verification (id={})'.format(file_id))
             # TODO
             # if checksum_type == "md5" and md5(fullpath) != checksum:
             #     raise error
@@ -130,10 +134,11 @@ class FileManager:
         Model.session().commit()
 
         # Importing to the database according to the type (if an import module can manage it)
+        log('Looking for available module to import file data into database.')
         for m in annso.import_modules.values():
             if file.type in m['info']['input']:
                 log('Start import of the file (id={0}) with the module {1} ({2})'.format(file_id, m['info']['name'], m['info']['description']))
-                m['do'](file.id, file.path, annso)
+                await m['do'](file.id, file.path, annso)
                 # Reload annotation's databases/fields metadata as some new annot db/fields may have been created during the import
                 annso.annotation_db.load_annotation_metadata()
                 annso.filter.load_annotation_metadata()
@@ -144,8 +149,8 @@ class FileManager:
         # TODO: check if run was waiting the end of the upload to start
 
 
-    def delete(self, file_id):
-        Model.execute("DELETE FROM variant")
+    async def delete(self, file_id):
+        await Model.aio_execute("DELETE FROM variant")
 
 
 # =====================================================================================================================
@@ -176,10 +181,10 @@ class FileManager:
 
 class AnnotationDatabaseManager:
     def __init__(self):
-        self.load_annotation_metadata()
+        run_until_complete(self.load_annotation_metadata())
 
 
-    def load_annotation_metadata(self):
+    async def load_annotation_metadata(self):
         self.ref_list = {}
         self.db_list = {}
         self.db_map = {}
@@ -188,7 +193,8 @@ class AnnotationDatabaseManager:
         query = "SELECT d.uid, d.reference_id, d.version, d.name_ui, d.description, d.url, r.name \
                  FROM annotation_database d INNER JOIN reference r ON r.id=d.reference_id \
                  ORDER BY r.name ASC, d.ord ASC, version DESC"
-        for row in Model.execute(query):
+        result = await Model.execute_aio(query)
+        for row in result:
             self.ref_list.update({row.reference_id: row.name})
             if row.reference_id in self.db_list.keys():
                 if row.name_ui in self.db_list[row.reference_id].keys():
@@ -203,7 +209,8 @@ class AnnotationDatabaseManager:
                  FROM annotation_field a \
                  INNER JOIN annotation_database d ON a.database_uid=d.uid \
                  ORDER BY d.uid, a.ord"
-        for row in Model.execute(query):
+        result = await Model.execute_aio(query)
+        for row in result:
             meta = None if row.meta is None else json.loads(row.meta)
             self.fields_map[row.fuid] = {"uid": row.fuid, "name": row.name, "description": row.desc, "type": row.type, "meta": meta, "order": row.ford, "dbuid": row.duid}
             if row.duid in self.db_map.keys():

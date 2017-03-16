@@ -5,6 +5,7 @@ import datetime
 import logging
 import uuid
 import time
+import asyncio
 from sqlalchemy.sql.expression import ClauseElement
 from sqlalchemy.exc import IntegrityError
 
@@ -14,6 +15,9 @@ from config import ANNSO_DIR
 # =====================================================================================================================
 # TOOLS
 # =====================================================================================================================
+asyncio_main_loop = asyncio.get_event_loop()
+def run_until_complete(future):
+    asyncio_main_loop.run_until_complete(future)
 
 
 def humansize(nbytes):
