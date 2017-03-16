@@ -235,7 +235,7 @@ CREATE TABLE public.sample_variant_hg19
     ref text NOT NULL,
     alt text NOT NULL,
     variant_id bigint,
-    genotype character varying(1),
+    genotype integer,
     depth integer,
     info character varying(255)[][] COLLATE pg_catalog."C.UTF-8",
     mosaic real,

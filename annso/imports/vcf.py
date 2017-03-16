@@ -25,6 +25,7 @@ async def import_data(file_id, filepath, annso_core=None, reference_id = 2):
     from pysam import VariantFile
 
 
+<<<<<<< HEAD
     from core.framework import log, war, err
     import core.model as Model
 
@@ -474,14 +475,14 @@ async def import_data(file_id, filepath, annso_core=None, reference_id = 2):
     start_0 = datetime.datetime.now()
     job_in_progress = []
 
-    ipdb.set_trace()
     vcf_metadata = prepare_vcf_parsing(filepath)
     db_ref_suffix="_hg19" # TODO/FIXME : retrieve data from annso core
 
     # Prepare database for import of custom annotation, and set the mapping between VCF info fields and DB schema
     for annotation in vcf_metadata['annotations'].keys():
-        data = prepare_annotation_db(reference_id, vcf_metadata['annotations'][annotation])
-        vcf_metadata['annotations'][annotation].update(data)
+        if vcf_metadata['annotations'][annotation]:
+            data = prepare_annotation_db(reference_id, vcf_metadata['annotations'][annotation])
+            vcf_metadata['annotations'][annotation].update(data)
 
 
     if filepath.endswith(".vcf") or filepath.endswith(".vcf.gz"):
@@ -550,50 +551,44 @@ async def import_data(file_id, filepath, annso_core=None, reference_id = 2):
 
                     # Import custom annotation for the variant
                     for ann_name, metadata in vcf_metadata['annotations'].items():
-                        for info in r.info[metadata['flag']]:
-                            data = info.split('|')
-                            q_fields = []
-                            q_values = []
-                            transcript_id = 'NULL'
-                            allele   = ""
-                            for col_pos, col_name in enumerate(metadata['columns']):
-                                q_fields.append(metadata['db_map'][col_name]['name'])
-                                val = escape_value_for_sql(data[col_pos])
-                                if col_name == 'Allele':
-                                    allele = val.strip().strip("-")
-                                if col_name == metadata['db_pk']:
-                                    transcript_id = val if val != '' and val is not None else 'NULL'
-                                else:
+                        if metadata:
+                            for info in r.info[metadata['flag']]:
+                                data = info.split('|')
+                                q_fields = []
+                                q_values = []
+                                allele   = ""
+                                for col_pos, col_name in enumerate(metadata['columns']):
+                                    q_fields.append(metadata['db_map'][col_name]['name'])
+                                    val = escape_value_for_sql(data[col_pos])
+                                    if col_name == 'Allele':
+                                        allele = val.strip().strip("-")
                                     q_values.append('\'{}\''.format(val) if val != '' and val is not None else 'NULL')
 
 
-                            pos, ref, alt = normalize(r.pos, r.ref, s.alleles[0])
-                            # print(pos, ref, alt, allele)
-                            if pos is not None and alt==allele:
-                                # print("ok")
-                                sql_query3 += sql_pattern3.format(metadata['table'], ','.join(q_fields), ','.join(q_values), bin, chrm, pos, ref, alt, transcript_id)
-                                count += 1
-                            pos, ref, alt = normalize(r.pos, r.ref, s.alleles[1])
-                            # print(pos, ref, alt, allele)
-                            if pos is not None and alt==allele:
-                                # print("ok")
-                                sql_query3 += sql_pattern3.format(metadata['table'], ','.join(q_fields), ','.join(q_values), bin, chrm, pos, ref, alt, transcript_id)
-                                count += 1
+                                pos, ref, alt = normalize(r.pos, r.ref, s.alleles[0])
+                                # print(pos, ref, alt, allele)
+                                if pos is not None and alt==allele:
+                                    # print("ok")
+                                    sql_query3 += sql_pattern3.format(metadata['table'], ','.join(q_fields), ','.join(q_values), bin, chrm, pos, ref, alt)
+                                    count += 1
+                                pos, ref, alt = normalize(r.pos, r.ref, s.alleles[1])
+                                # print(pos, ref, alt, allele)
+                                if pos is not None and alt==allele:
+                                    # print("ok")
+                                    sql_query3 += sql_pattern3.format(metadata['table'], ','.join(q_fields), ','.join(q_values), bin, chrm, pos, ref, alt)
+                                    count += 1
 
 
 
                     # manage split big request to avoid sql out of memory transaction
                     if count >= 10000:
                         count = 0
-                        # transaction1 = sql_query1
-                        # transaction2 = sql_query2
-                        # transaction3 = sql_query3
                         # Model.execute_async(transaction1 + transaction2 + transaction3, transaction_end)
                         transaction = sql_query1 + sql_query2 + sql_query3
                         job_id = Model.execute_bw(transaction, transaction_end)
                         job_in_progress.append(job_id)
                         log("VCF import : Execute async query, new job_id : {}. Jobs running [{}]".format(job_id, ','.join([job_in_progress])))
-
+                        # Reset query buffers
                         sql_query1 = ""
                         sql_query2 = ""
                         sql_query3 = ""
@@ -603,12 +598,12 @@ async def import_data(file_id, filepath, annso_core=None, reference_id = 2):
         job_id = Model.execute_bw(transaction, transaction_end)
         job_in_progress.append(job_id)
 
-
         # waiting end of all running job
         ipdb.set_trace()
         while len(job_in_progress) > 0:
             await asyncio.sleep(1.0)
         ipdb.set_trace()
+
 
     end = datetime.datetime.now()
     if annso_core is not None:

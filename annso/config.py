@@ -7,14 +7,15 @@ DEBUG = True
 
 
 # HOST (internal)
-HOST = "0.0.0.0"
+HOST = "127.0.0.1"
 PORT = 8100
 VERSION = "v1"
-HOSTNAME = "{}:{}/{}".format(HOST, PORT, VERSION)
+HOSTNAME = "{}:{}/{}".format(HOST, PORT, VERSION)  # This is the internal host on which aioHTTP will run the service.
+
 
 
 # HOST (public)
-HOST_P = "annso.absolumentg.fr/" + VERSION
+HOST_P = "annso.absolumentg.fr"  # THIS url must be change if the annso server is reach via a public namespace that user
 RANGE_DEFAULT = 100
 RANGE_MAX = 1000
 
@@ -35,9 +36,9 @@ CACHE_DIR = "/var/regovar/annso/cache"
 
 
 # MODULES ACTIVATED
-EXPORTS_MODULES = ["csv"]
+EXPORTS_MODULES = []
 IMPORTS_MODULES = ["vcf"]
-REPORTS_MODULES = ["dims"]
+REPORTS_MODULES = []
 
 
 # AUTOCOMPUTED VALUES
