@@ -160,7 +160,7 @@ class TusManager:
         except IOError as e:
             return TusManager.build_response(code=500, body="Unable to create file: {}".format(e))
 
-        return TusManager.build_response(code=201, headers={'Location' : "{}://{}".format(request.scheme, fw.upload_url), 'Tus-Temp-Filename' : str(fw.id)})
+        return TusManager.build_response(code=201, headers={'Location' : fw.upload_url, 'Tus-Temp-Filename' : str(fw.id)})
 
 
 

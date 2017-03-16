@@ -587,7 +587,7 @@
                             <form class="form">
                                 <div class="input-group">
 
-                                    <input type="hidden" id="modal_new_file_tus_endpoint" name="modal_new_file_tus_endpoint" value="{{ hostname }}/sample/upload"/>
+                                    <input type="hidden" id="modal_new_file_tus_endpoint" name="modal_new_file_tus_endpoint" value="sample/upload"/>
                                     <input type="hidden" id="modal_new_file_tus_chunksize" name="modal_new_file_tus_chunksize" value="256000"/>
 
                                     <span class="input-group-addon"><i class="fa fa-file" aria-hidden="true"></i></span>
@@ -866,7 +866,7 @@
     <script src="/assets/model.js"></script>
     <script src="/assets/gui.js"></script>
     <script>
-        var rootURL = location.protocol + "//{{ hostname }}";
+        var rootURL = "" ; //location.protocol + "//{{ hostname }}";
 
         var ws = null;
         var $message = $('#message');

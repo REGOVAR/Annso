@@ -487,7 +487,7 @@ function AnnsoUIControler ()
             chunkSize = Infinity;
         }
         var options = {
-            endpoint: location.protocol + "//" + $('#modal_new_file_tus_endpoint').val(),
+            endpoint: $('#modal_new_file_tus_endpoint').val(),
             resume: true,
             chunkSize: chunkSize,
             metadata: { 'filename': file.name },

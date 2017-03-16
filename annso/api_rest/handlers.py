@@ -468,7 +468,7 @@ class SampleFileWrapper (TusFileWrapper):
             self.upload_offset = self.file.upload_offset
             self.path = self.file.path
             self.size = self.file.size
-            self.upload_url = HOST_P + "/sample/upload/" + str(id)
+            self.upload_url = "sample/upload/" + str(id)
         else:
             return TusManager.build_response(code=500, body="Unknow id: {}".format(id))
 

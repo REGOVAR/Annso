@@ -24,8 +24,6 @@ async def import_data(file_id, filepath, annso_core=None, reference_id = 2):
     import gzip
     from pysam import VariantFile
 
-
-<<<<<<< HEAD
     from core.framework import log, war, err
     import core.model as Model
 
@@ -117,9 +115,7 @@ async def import_data(file_id, filepath, annso_core=None, reference_id = 2):
                     'columns' : d[1].strip().split('|'),
                 }
             }
-            if 'Feature' in vep['vep']['columns']:
-                vep['vep']['columns'].remove('Feature')
-            else:
+            if 'Feature' not in vep['vep']['columns']:
                 vep = {'vep' : False }
 
         # Check for SnpEff
@@ -141,9 +137,7 @@ async def import_data(file_id, filepath, annso_core=None, reference_id = 2):
                         'description' : d[0].strip(),
                     }
                 }
-                if 'Transcript_ID' in snpeff['snpeff']['columns']:
-                    snpeff['snpeff']['columns'].remove('Transcript_ID')
-                else:
+                if 'Transcript_ID' not in snpeff['snpeff']['columns']:
                     snpeff = {'snpeff' : False }
 
 
@@ -189,9 +183,9 @@ async def import_data(file_id, filepath, annso_core=None, reference_id = 2):
             Create an annotation database according to information retrieved from the VCF file with the prepare_vcf_parsing method
         """
         # Create annotation table
-        ipdb.set_trace()
         pk = 'transcript_id character varying(50), ' if vcf_annotation_metadata['db_type'] == 'transcript' else ''
-        pattern = "CREATE TABLE {0} (variant_id bigint, bin integer, chr integer, pos bigint, ref text, alt text, " + pk + "{1});"
+        pk2 = ',transcript_id' if vcf_annotation_metadata['db_type'] == 'transcript' else ''
+        pattern = "CREATE TABLE {0} (variant_id bigint, bin integer, chr integer, pos bigint, ref text, alt text, " + pk + "{1}, CONSTRAINT {0}_ukey UNIQUE (variant_id" + pk2 +"));"
         query   = ""
         db_map = {}
         fields = []
@@ -206,7 +200,7 @@ async def import_data(file_id, filepath, annso_core=None, reference_id = 2):
             query += "CREATE INDEX {0}_idx_tid ON {0} USING btree (transcript_id);".format(table_name)
 
         # Register annotation
-        db_hasname = session.execute("SELECT MD5('{}')".format(table_name)).first()[0]
+        db_hasname = Model.execute("SELECT MD5('{}')".format(table_name)).first()[0]
         query += "INSERT INTO public.annotation_database (uid, reference_id, name, version, name_ui, description, ord, jointure, type) VALUES "
         query += "('{0}', {1}, '{2}', '{3}', '{4}', '{5}', {6}, '{2} ON {2}.bin={{0}}.bin AND {2}.chr={{0}}.chr AND {2}.pos={{0}}.pos', 'variant');".format(db_hasname, reference_id, table_name, vcf_annotation_metadata['version'], vcf_annotation_metadata['name'], vcf_annotation_metadata['description'], 30)
         query += "INSERT INTO public.annotation_field (database_uid, ord, name, name_ui, type) VALUES "
@@ -492,7 +486,7 @@ async def import_data(file_id, filepath, annso_core=None, reference_id = 2):
         vcf_reader = VariantFile(filepath)
 
         # get samples in the VCF 
-        samples = {i : get_or_create(Model.session(), Sample, name=i)[0] for i in list((vcf_reader.header.samples))}
+        samples = {i : Model.get_or_create(Model.session(), Model.Sample, name=i)[0] for i in list((vcf_reader.header.samples))}
 
         if len(samples.keys()) == 0 : 
             war("VCF files without sample cannot be imported in the database.")
@@ -517,8 +511,8 @@ async def import_data(file_id, filepath, annso_core=None, reference_id = 2):
         # bar = Bar('\tparsing  : ', max=records_count, suffix='%(percent).1f%% - %(elapsed_td)s')
         
         sql_pattern1 = "INSERT INTO {0} (chr, pos, ref, alt, is_transition, bin, sample_list) VALUES ({1}, {2}, '{3}', '{4}', {5}, {6}, array[{7}]) ON CONFLICT (chr, pos, ref, alt) DO UPDATE SET sample_list=array_multi_remove({0}.sample_list, array[{7}])  WHERE {0}.chr={1} AND {0}.pos={2} AND {0}.ref='{3}' AND {0}.alt='{4}';"
-        sql_pattern2 = "INSERT INTO sample_variant" + db_ref_suffix + " (sample_id, variant_id, bin, chr, pos, ref, alt, genotype, depth) SELECT {0}, id, {1}, '{2}', {3}, '{4}', '{5}', '{6}', {7} FROM variant" + db_ref_suffix + " WHERE bin={1} AND chr={2} AND pos={3} AND ref='{4}' AND alt='{5}' ON CONFLICT DO NOTHING;"
-        sql_pattern3 = "INSERT INTO {0} (bin,chr,pos,ref,alt, transcript_id, {1}) VALUES ({3},{4},{5},'{6}','{7}', {8}, {2}) ON CONFLICT (bin,chr,pos,ref,alt, transcript_id) DO  NOTHING;" # TODO : on conflict, shall update fields with value in the VCF to complete database annotation with (maybe) new fields
+        sql_pattern2 = "INSERT INTO sample_variant" + db_ref_suffix + " (sample_id, variant_id, bin, chr, pos, ref, alt, genotype, depth) SELECT {0}, id, {1}, '{2}', {3}, '{4}', '{5}', '{6}', {7} FROM variant" + db_ref_suffix + " WHERE bin={1} AND chr={2} AND pos={3} AND ref='{4}' AND alt='{5}' ON CONFLICT (sample_id, variant_id) DO NOTHING;"
+        sql_pattern3 = "INSERT INTO {0} (bin,chr,pos,ref,alt, transcript_id, {1}) VALUES ({3},{4},{5},'{6}','{7}', '{8}', {2}) ON CONFLICT (variant_id, transcript_id) DO  NOTHING;" # TODO : on conflict, shall update fields with value in the VCF to complete database annotation with (maybe) new fields
         sql_tail = " ON CONFLICT DO NOTHING;"
         sql_query1 = ""
         sql_query2 = ""
@@ -557,7 +551,11 @@ async def import_data(file_id, filepath, annso_core=None, reference_id = 2):
                                 q_fields = []
                                 q_values = []
                                 allele   = ""
+                                trx_id   = ""
                                 for col_pos, col_name in enumerate(metadata['columns']):
+                                    if col_name != metadata['db_pk']:
+                                        trx_id = escape_value_for_sql(data[col_pos])
+                                        
                                     q_fields.append(metadata['db_map'][col_name]['name'])
                                     val = escape_value_for_sql(data[col_pos])
                                     if col_name == 'Allele':
@@ -569,15 +567,14 @@ async def import_data(file_id, filepath, annso_core=None, reference_id = 2):
                                 # print(pos, ref, alt, allele)
                                 if pos is not None and alt==allele:
                                     # print("ok")
-                                    sql_query3 += sql_pattern3.format(metadata['table'], ','.join(q_fields), ','.join(q_values), bin, chrm, pos, ref, alt)
+                                    sql_query3 += sql_pattern3.format(metadata['table'], ','.join(q_fields), ','.join(q_values), bin, chrm, pos, ref, alt, trx_id)
                                     count += 1
                                 pos, ref, alt = normalize(r.pos, r.ref, s.alleles[1])
                                 # print(pos, ref, alt, allele)
                                 if pos is not None and alt==allele:
                                     # print("ok")
-                                    sql_query3 += sql_pattern3.format(metadata['table'], ','.join(q_fields), ','.join(q_values), bin, chrm, pos, ref, alt)
+                                    sql_query3 += sql_pattern3.format(metadata['table'], ','.join(q_fields), ','.join(q_values), bin, chrm, pos, ref, alt, trx_id)
                                     count += 1
-
 
 
                     # manage split big request to avoid sql out of memory transaction
@@ -585,24 +582,20 @@ async def import_data(file_id, filepath, annso_core=None, reference_id = 2):
                         count = 0
                         # Model.execute_async(transaction1 + transaction2 + transaction3, transaction_end)
                         transaction = sql_query1 + sql_query2 + sql_query3
-                        job_id = Model.execute_bw(transaction, transaction_end)
-                        job_in_progress.append(job_id)
-                        log("VCF import : Execute async query, new job_id : {}. Jobs running [{}]".format(job_id, ','.join([job_in_progress])))
+                        log("VCF import : Execute async query (as coroutine)")
+                        await Model.execute_aio(transaction)
+                        # job_id = Model.execute_bw(transaction, transaction_end)
+                        # job_in_progress.append(job_id)
+                        # log("VCF import : Execute async query, new job_id : {}. Jobs running [{}]".format(job_id, ','.join([job_in_progress])))
                         # Reset query buffers
                         sql_query1 = ""
                         sql_query2 = ""
                         sql_query3 = ""
 
         # Loop done, execute last pending query 
+        log("VCF import : Execute last async query (as coroutine)")
         transaction = sql_query1 + sql_query2 + sql_query3
-        job_id = Model.execute_bw(transaction, transaction_end)
-        job_in_progress.append(job_id)
-
-        # waiting end of all running job
-        ipdb.set_trace()
-        while len(job_in_progress) > 0:
-            await asyncio.sleep(1.0)
-        ipdb.set_trace()
+        await Model.execute_aio(transaction)
 
 
     end = datetime.datetime.now()

@@ -6,8 +6,6 @@ import logging
 import uuid
 import time
 import asyncio
-from sqlalchemy.sql.expression import ClauseElement
-from sqlalchemy.exc import IntegrityError
 
 from config import ANNSO_DIR
 

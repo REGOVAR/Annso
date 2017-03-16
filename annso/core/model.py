@@ -10,6 +10,8 @@ import multiprocessing as mp
 
 from sqlalchemy.ext.automap import automap_base
 from sqlalchemy import create_engine
+from sqlalchemy.exc import IntegrityError
+from sqlalchemy.sql.expression import ClauseElement
 from sqlalchemy.orm import sessionmaker
 
 
@@ -183,8 +185,8 @@ def cancel(async_job_id):
         Cancel an asynch job running in the threads pool
     """
     if async_job_id in __async_jobs.keys():
-        __async_jobs.keys[async_job_id]["task"].terminate()
-        __async_jobs.keys[async_job_id]["task"].join()
+        loop = asyncio.get_event_loop()
+        loop.call_soon_threadsafe(__async_jobs.keys[async_job_id]["task"].cancel)
         log("Model async query (id:{}) canceled".format(async_job_id))
     else:
         log("Model unable to cancel async query (id:{}) because it doesn't exists".format(async_job_id))
