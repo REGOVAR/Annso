@@ -268,7 +268,7 @@ CREATE TABLE public.annotation_database
     url character varying(255) COLLATE pg_catalog."C.UTF-8" ,
     update_date timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
     jointure character varying(255) COLLATE pg_catalog."C.UTF-8",
-    db_pk character varying(255) COLLATE pg_catalog."C.UTF-8",
+    db_pk_field_uid character varying(32) COLLATE pg_catalog."C.UTF-8",
     CONSTRAINT annotation_database_pkey PRIMARY KEY (reference_id, name, version),
     CONSTRAINT annotation_database_reference_id_fkey FOREIGN KEY (reference_id)
         REFERENCES public."reference" (id) MATCH SIMPLE
@@ -432,9 +432,9 @@ INSERT INTO public."parameter" (key, description, value) VALUES
 -- d9121852fc1a279b95cb7e18c976f112 = SELECT MD5(concat(reference_id=2, name='Variant', version=NULL))
 -- 7363e34fee56d2cb43583f9bd19d3980 = SELECT MD5(concat(reference_id=3, name='Variant', version=NULL))
 INSERT INTO public.annotation_database(uid, reference_id, name, version, name_ui, description, url, ord, update_date, jointure, type) VALUES
-      ('8beee586e1cd098bc64b48403ed7755d', 1, 'sample_variant_hg18', '', 'Variant', 'Basic information about the variant.', '',  0, CURRENT_TIMESTAMP, 'sample_variant_hg18', 'variant'),
-      ('d9121852fc1a279b95cb7e18c976f112', 2, 'sample_variant_hg19', '', 'Variant', 'Basic information about the variant.', '',  0, CURRENT_TIMESTAMP, 'sample_variant_hg19', 'variant'),
-      ('7363e34fee56d2cb43583f9bd19d3980', 3, 'sample_variant_hg38', '', 'Variant', 'Basic information about the variant.', '',  0, CURRENT_TIMESTAMP, 'sample_variant_hg38', 'variant');
+  ('8beee586e1cd098bc64b48403ed7755d', 1, 'sample_variant_hg18', '', 'Variant', 'Basic information about the variant.', '',  0, CURRENT_TIMESTAMP, 'sample_variant_hg18', 'variant'),
+  ('d9121852fc1a279b95cb7e18c976f112', 2, 'sample_variant_hg19', '', 'Variant', 'Basic information about the variant.', '',  0, CURRENT_TIMESTAMP, 'sample_variant_hg19', 'variant'),
+  ('7363e34fee56d2cb43583f9bd19d3980', 3, 'sample_variant_hg38', '', 'Variant', 'Basic information about the variant.', '',  0, CURRENT_TIMESTAMP, 'sample_variant_hg38', 'variant');
 
 
 INSERT INTO public.annotation_field(database_uid, ord, wt_default, name, name_ui, type, description, meta) VALUES

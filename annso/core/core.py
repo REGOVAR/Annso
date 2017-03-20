@@ -140,8 +140,8 @@ class FileManager:
                 log('Start import of the file (id={0}) with the module {1} ({2})'.format(file_id, m['info']['name'], m['info']['description']))
                 await m['do'](file.id, file.path, annso)
                 # Reload annotation's databases/fields metadata as some new annot db/fields may have been created during the import
-                annso.annotation_db.load_annotation_metadata()
-                annso.filter.load_annotation_metadata()
+                await annso.annotation_db.load_annotation_metadata()
+                await annso.filter.load_annotation_metadata()
                 break
         # Notify all about the new status
         # msg = {"action":"file_changed", "data": [pfile.to_json_data()] }
@@ -618,10 +618,12 @@ class FilterEngine:
     sql_type_map = {'int': 'integer', 'string': 'text', 'float': 'real', 'percent': 'real', 'enum': 'integer', 'range': 'int8range', 'bool': 'boolean',
                     'list_i': 'text', 'list_s': 'text', 'list_f': 'text', 'list_i': 'text', 'list_pb': 'text'}
 
-    def __init__(self):
-        self.load_annotation_metadata()
 
-    def load_annotation_metadata(self):
+    def __init__(self):
+        run_until_complete(self.load_annotation_metadata())
+
+
+    async def load_annotation_metadata(self):
         """
             Init Annso Filtering engine.
             Init mapping collection for annotations databases and fields
@@ -631,12 +633,14 @@ class FilterEngine:
         self.fields_map = {}
         self.db_map = {}
         self.variant_table = "sample_variant_{0}".format(refname)
-        query = "SELECT d.uid AS duid, d.name AS dname, d.name_ui AS dname_ui, d.jointure, d.reference_id, a.uid AS fuid, a.name AS fname, a.type, a.wt_default FROM annotation_field a LEFT JOIN annotation_database d ON a.database_uid=d.uid"
-        for row in Model.execute(query):
+        query = "SELECT d.uid AS duid, d.name AS dname, d.name_ui AS dname_ui, d.jointure, d.reference_id, d.type AS dtype, a.uid AS fuid, a.name AS fname, a.type, a.wt_default FROM annotation_field a LEFT JOIN annotation_database d ON a.database_uid=d.uid"
+        result = await Model.execute_aio(query)
+        for row in result:
             if row.duid not in self.db_map:
-                self.db_map[row.duid] = {"name": row.dname, "join": row.jointure, "fields": {}, "reference_id": row.reference_id}
+                self.db_map[row.duid] = {"name": row.dname, "join": row.jointure, "fields": {}, "reference_id": row.reference_id, "type": row.dtype}
             self.db_map[row.duid]["fields"][row.fuid] = {"name": row.fname, "type": row.type}
-            self.fields_map[row.fuid] = {"name": row.fname, "type": row.type, "db_uid": row.duid, "db_name_ui": row.dname_ui, "db_name": row.dname, "join": row.jointure, "wt_default": row.wt_default}
+            self.fields_map[row.fuid] = {"name": row.fname, "type": row.type, "db_uid": row.duid, "db_name_ui": row.dname_ui, "db_name": row.dname, "db_type": row.dtype, "join": row.jointure, "wt_default": row.wt_default}
+
 
     def create_working_table(self, analysis_id, sample_ids, field_uids, dbs_uids, filter_ids=[], attributes={}):
         """
@@ -656,6 +660,8 @@ class FilterEngine:
             pos integer, \
             ref text, \
             alt text,\
+            transcript_pk_field_uid character varying(32), \
+            transcript_pk_value character varying(100), \
             genotype integer, \
             depth integer, \
             is_transition boolean, \
@@ -677,15 +683,17 @@ class FilterEngine:
         query = "CREATE INDEX {0}_idx_ann ON {0} USING btree (annotated);".format(w_table)
         query = "CREATE INDEX {0}_idx_vid ON {0} USING btree (variant_id);".format(w_table)
         query += "CREATE INDEX {0}_idx_sid ON {0} USING btree (sample_id);".format(w_table)
-        query += "CREATE INDEX {0}_idx_var ON {0} USING btree (bin, chr, pos);".format(w_table)
-        query += "CREATE INDEX {0}_idx_gt ON {0}  USING btree (genotype);".format(w_table)
-        query += "CREATE INDEX {0}_idx_dp ON {0}  USING btree (depth);".format(w_table)
+        query += "CREATE INDEX {0}_idx_var ON {0} USING btree (bin, chr, pos, transcript_pk_field_uid, transcript_pk_value);".format(w_table)
+        query += "CREATE INDEX {0}_idx_var ON {0} USING btree (transcript_pk_field_uid, transcript_pk_value);".format(w_table)
+        query += "CREATE INDEX {0}_idx_gt ON {0} USING btree (genotype);".format(w_table)
+        query += "CREATE INDEX {0}_idx_dp ON {0} USING btree (depth);".format(w_table)
         Model.execute(query)
         # Update count stat of the analysis
         query = "UPDATE analysis SET total_variants=(SELECT COUNT(*) FROM {}), status='ANNOTATING' WHERE id={}".format(w_table, analysis_id)
         Model.execute(query)
         # Update working table by computing annotation
         self.update_working_table(analysis_id, sample_ids, field_uids, dbs_uids, filter_ids, attributes)
+
 
     def update_working_table(self, analysis_id, sample_ids, field_uids, dbs_uids, filter_ids=[], attributes={}):
         """
@@ -902,6 +910,7 @@ class FilterEngine:
         query = ""
         field_uids = []
         db_uids = []
+        with_trx = False
 
         # Build SELECT
         fields_names = []
@@ -912,7 +921,10 @@ class FilterEngine:
             if self.fields_map[f_uid]['db_name_ui'] == 'Variant':
                 fields_names.append('{}.{}'.format(wt, self.fields_map[f_uid]["name"]))
             else:
+                with_trx = with_trx or self.fields_map[f_uid]["db_type"] == "transcript"
                 fields_names.append('{}._{}'.format(wt, f_uid))
+            if with_trx:
+                ""
         q_select = 'variant_id{} {}'.format(',' if len(fields_names) > 0 else '', ', '.join(fields_names))
 
         # Build FROM/JOIN
