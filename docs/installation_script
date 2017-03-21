@@ -1,6 +1,12 @@
+Optional, to create a lxd container::
+
     $ lxc-create -n regovar_annso -t download -- -d ubuntu -r xenial -a amd64
     $ lxc-start -n regovar_annso
     $ lxc-attach -n regovar_annso
+    
+    
+Installation script for annso on a fresh Ubuntu Xenial::
+
     # apt update && apt upgrade
     # apt install git ca-certificates nginx uwsgi postgresql postgresql-contrib postgresql-server-dev-9.5 build-essential libssl-dev libffi-dev python3-dev virtualenv libpq-dev libmagickwand-dev
     # useradd annso --create-home
