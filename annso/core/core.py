@@ -647,13 +647,16 @@ class FilterEngine:
             Create a working sql table for the analysis to improove speed of filtering/annotation.
             A Working table contains all variants used by the analysis, with all annotations used by filters or displayed
         """
+        if len(sample_ids) == 0: raise AnnsoException("No sample... so not able to retrieve data")
+
+        db_ref_suffix= "hg19"  # Model.execute("SELECT table_suffix FROM reference WHERE id={}".format(reference_id)).first().table_suffix
         progress = {"msg": "wt_processing", "start": datetime.datetime.now().ctime(), "analysis_id": analysis_id, "step": 1}
         annso.notify_all(progress)
         # Create schema
         w_table = 'wt_{}'.format(analysis_id)
         query = "DROP TABLE IF EXISTS {0} CASCADE; CREATE TABLE {0} (\
+            is_variant boolean DEFAULT False, \
             annotated boolean DEFAULT False, \
-            sample_id integer, \
             variant_id bigint, \
             bin integer, \
             chr bigint, \
@@ -662,34 +665,48 @@ class FilterEngine:
             alt text,\
             transcript_pk_field_uid character varying(32), \
             transcript_pk_value character varying(100), \
-            genotype integer, \
-            depth integer, \
             is_transition boolean, \
             sample_tlist integer[], \
             sample_tcount integer, \
             sample_alist integer[], \
-            sample_acount integer);"
+            sample_acount integer, \
+            depth integer, "
+        query += ", ".join(["s{}_gt integer".format(i) for i in sample_ids]) + ", "
+        query += ", ".join(["s{}_dp integer".format(i) for i in sample_ids]) 
+        query += ", CONSTRAINT {0}_ukey UNIQUE (variant_id, transcript_pk_field_uid, transcript_pk_value));"
         Model.execute(query.format(w_table))
         # Insert variant without annotation first
-        query = "INSERT INTO {0} (sample_id, variant_id, bin, chr, pos, ref, alt, genotype, depth, is_transition, sample_tlist, sample_tcount, sample_alist, sample_acount) \
-            SELECT sample_variant_{1}.sample_id, sample_variant_{1}.variant_id, sample_variant_{1}.bin, sample_variant_{1}.chr, sample_variant_{1}.pos, sample_variant_{1}.ref, sample_variant_{1}.alt, \
-            sample_variant_{1}.genotype, sample_variant_{1}.depth, variant_{1}.is_transition, \
-            variant_{1}.sample_list, array_length(variant_{1}.sample_list,1), \
-            array_intersect(variant_{1}.sample_list, array[{2}]), array_length(array_intersect(variant_{1}.sample_list, array[{2}]),1) \
-            FROM sample_variant_{1} INNER JOIN variant_{1} ON sample_variant_{1}.variant_id=variant_{1}.id\
-            WHERE sample_variant_{1}.sample_id IN ({2});"
-        Model.execute(query.format(w_table, 'hg19', ','.join([str(i) for i in sample_ids])))
+        ipdb.set_trace()
+        query =  "INSERT INTO {0} (variant_id, bin, chr, pos, ref, alt, is_transition, sample_tlist) \
+            SELECT DISTINCT sample_variant_{1}.variant_id, sample_variant_{1}.bin, sample_variant_{1}.chr, sample_variant_{1}.pos, sample_variant_{1}.ref, sample_variant_{1}.alt, \
+                variant_{1}.is_transition, \
+                variant_{1}.sample_list \
+            FROM sample_variant_{1} INNER JOIN variant_{1} ON sample_variant_{1}.variant_id=variant_{1}.id \
+            WHERE sample_variant_{1}.sample_id IN ({2}) \
+            ON CONFLICT (variant_id, transcript_pk_field_uid, transcript_pk_value) DO NOTHING;"
+        Model.execute(query.format(w_table, db_ref_suffix, ','.join([str(i) for i in sample_ids])))
+        # Complete sample-variant's associations
+        for sid in sample_ids:
+            Model.execute("UPDATE {0} SET s{2}_gt=_sub.genotype, s{2}_dp=_sub.depth FROM (SELECT variant_id, genotype, depth FROM sample_variant_{1} WHERE sample_id={2}) AS _sub WHERE {0}.variant_id=_sub.variant_id".format(w_table, db_ref_suffix, sid))
+
+        query = "UPDATE {0} SET \
+            is_variant=(CASE WHEN ref<>alt THEN True ELSE False END), \
+            sample_tcount=array_length(sample_tlist,1), \
+            sample_alist=array_intersect(sample_tlist, array[{1}]), \
+            sample_acount=array_length(array_intersect(sample_tlist, array[{1}]),1), \
+            depth=GREATEST({2})"
+        Model.execute(query.format(w_table, ",".join([str(i) for i in sample_ids]), ", ".join(["s{}_dp integer".format(i) for i in sample_ids])))
         # Create indexes
-        query = "CREATE INDEX {0}_idx_ann ON {0} USING btree (annotated);".format(w_table)
+        # FIXME : do we need to create index on boolean fields ? Is partition a better way to do for low cardinality fields : http://www.postgresql.org/docs/9.1/static/ddl-partitioning.html
+        # query = "CREATE INDEX {0}_idx_ann ON {0} USING btree (annotated);".format(w_table)
         query = "CREATE INDEX {0}_idx_vid ON {0} USING btree (variant_id);".format(w_table)
-        query += "CREATE INDEX {0}_idx_sid ON {0} USING btree (sample_id);".format(w_table)
         query += "CREATE INDEX {0}_idx_var ON {0} USING btree (bin, chr, pos, transcript_pk_field_uid, transcript_pk_value);".format(w_table)
-        query += "CREATE INDEX {0}_idx_var ON {0} USING btree (transcript_pk_field_uid, transcript_pk_value);".format(w_table)
-        query += "CREATE INDEX {0}_idx_gt ON {0} USING btree (genotype);".format(w_table)
-        query += "CREATE INDEX {0}_idx_dp ON {0} USING btree (depth);".format(w_table)
+        query += "CREATE INDEX {0}_idx_trx ON {0} USING btree (transcript_pk_field_uid, transcript_pk_value);".format(w_table)
+        query += "".join(["CREATE INDEX {0}_idx_s{1}_gt ON {0} USING btree (s{1}_gt);".format(w_table, i) for i in sample_ids])
+        query += "".join(["CREATE INDEX {0}_idx_s{1}_dp ON {0} USING btree (s{1}_dp);".format(w_table, i) for i in sample_ids])
         Model.execute(query)
         # Update count stat of the analysis
-        query = "UPDATE analysis SET total_variants=(SELECT COUNT(*) FROM {}), status='ANNOTATING' WHERE id={}".format(w_table, analysis_id)
+        query = "UPDATE analysis SET total_variants=(SELECT COUNT(*) FROM {} WHERE is_variant), status='ANNOTATING' WHERE id={}".format(w_table, analysis_id)
         Model.execute(query)
         # Update working table by computing annotation
         self.update_working_table(analysis_id, sample_ids, field_uids, dbs_uids, filter_ids, attributes)
@@ -741,7 +758,7 @@ class FilterEngine:
         # Create update query to retrieve annotation
         qset_ann = ', '.join(['{0}=_ann.{0}'.format(f_uid) for f_uid in diff_fields])
         qslt_ann = ','.join(['{0}.{1} AS {2}'.format(self.fields_map[f_uid[1:]]['db_name'], self.fields_map[f_uid[1:]]['name'], f_uid) for f_uid in diff_fields])
-        qslt_var = 'SELECT variant_id, bin, chr, pos, ref, alt FROM wt_{0} WHERE annotated=False LIMIT {1}'.format(analysis_id, C.RANGE_DEFAULT)
+        qslt_var = 'SELECT variant_id, bin, chr, pos, ref, alt, transcript_pk_field_uid, transcript_pk_value FROM wt_{0} WHERE annotated=False LIMIT {1}'.format(analysis_id, C.RANGE_DEFAULT)
         qjoin = ' '.join(['LEFT JOIN {0} '.format(self.db_map[db_uid]['join'].format('_var'), self.db_map[db_uid]) for db_uid in diff_dbs])
 
         # Loop to update working table annotation

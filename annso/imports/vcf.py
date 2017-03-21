@@ -200,10 +200,19 @@ async def import_data(file_id, filepath, annso_core=None, reference_id = 2):
             query += "CREATE INDEX {0}_idx_tid ON {0} USING btree (transcript_id);".format(table_name)
 
         # Register annotation
-        db_uid = Model.execute("SELECT MD5('{}')".format(table_name)).first()[0]
-        query += "INSERT INTO public.annotation_database (uid, reference_id, name, version, name_ui, description, ord, jointure, type, db_pk_field_uid) VALUES "
-        query += "('{0}', {1}, '{2}', '{3}', '{4}', '{5}', {6}, '{2} ON {2}.bin={{0}}.bin AND {2}.chr={{0}}.chr AND {2}.pos={{0}}.pos', '{7}', MD5(concat('{0}', '{8}')));".format(db_uid, reference_id, table_name, vcf_annotation_metadata['version'], vcf_annotation_metadata['name'], vcf_annotation_metadata['description'], 30, vcf_annotation_metadata['db_type'], normalise_annotation_name(vcf_annotation_metadata['db_pk_field']))
-        query += "INSERT INTO public.annotation_field (database_uid, ord, name, name_ui, type) VALUES "
+        db_uid, pk_uid = Model.execute("SELECT MD5('{0}'), MD5(concat(MD5('{0}'), '{1}'))".format(table_name, normalise_annotation_name(vcf_annotation_metadata['db_pk_field']))).first()
+        query += "INSERT INTO annotation_database (uid, reference_id, name, version, name_ui, description, ord, type, db_pk_field_uid, jointure) VALUES "
+        query += "('{0}', {1}, '{2}', '{3}', '{4}', '{5}', {6}, '{7}', '{8}', '{2} ON {2}.bin={{0}}.bin AND {2}.chr={{0}}.chr AND {2}.pos={{0}}.pos AND {2}.ref={{0}}.ref AND {2}.alt={{0}}.alt AND {{0}}.transcript_pk_field_uid=\"{8}\" AND {2}.transcript_id={{0}}.transcript_pk_value');".format(
+            db_uid, 
+            reference_id, 
+            table_name, 
+            vcf_annotation_metadata['version'], 
+            vcf_annotation_metadata['name'], 
+            vcf_annotation_metadata['description'], 
+            30, 
+            vcf_annotation_metadata['db_type'], 
+            pk_uid)
+        query += "INSERT INTO annotation_field (database_uid, ord, name, name_ui, type) VALUES "
         for idx, f in enumerate(vcf_annotation_metadata['columns']):
             query += "('{0}', {1}, '{2}', '{3}', 'string'),".format(db_uid, idx, normalise_annotation_name(f), f)
         Model.execute(query[:-1])

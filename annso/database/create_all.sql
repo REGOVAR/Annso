@@ -265,9 +265,9 @@ CREATE TABLE public.annotation_database
     description text,
     type annotation_db_type,
     ord integer,
-    url character varying(255) COLLATE pg_catalog."C.UTF-8" ,
+    url text ,
     update_date timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
-    jointure character varying(255) COLLATE pg_catalog."C.UTF-8",
+    jointure text,
     db_pk_field_uid character varying(32) COLLATE pg_catalog."C.UTF-8",
     CONSTRAINT annotation_database_pkey PRIMARY KEY (reference_id, name, version),
     CONSTRAINT annotation_database_reference_id_fkey FOREIGN KEY (reference_id)
