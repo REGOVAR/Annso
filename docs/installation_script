@@ -56,7 +56,7 @@ Installation script for annso on a fresh Ubuntu Xenial:
     # /etc/init.d/nginx restart
     # exit
     
+    
 Optional, if annso wrapped into a lxd container:
-
     $ IP=$(lxc-info -n regovar_annso | grep IP | sed 's/.* //')
     $ firefox $IP
