@@ -1497,7 +1497,8 @@ function init_variants_list(json, container_id)
 function insert_variant_row(json)
 {
     html = "";
-    selected = (analysis.analysis.selection.indexOf(json["id"].toString()) == -1) ? "" : " checked";
+
+    selected = ""; // (analysis.analysis.selection.indexOf(json["id"].toString()) == -1) ? "" : " checked";
     html += variants_table_row_start.format(json["id"], selected);
     for (var i=0; i<analysis.analysis.fields.length; i++)
     {

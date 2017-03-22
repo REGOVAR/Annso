@@ -495,25 +495,6 @@ class AnalysisManager:
         return output_path
 
 
-    # def get_report(self, variants_ids, report_template=None, report_lang=None, report_option=None):
-    #     # Importing to the database according to the type (if an import module can manage it)
-    #     for m in annso.report_modules.values():
-    #         if file.type in m['info']['input']:
-    #             log('Start import of the file (id={0}) with the module {1} ({2})'.format(file_id, m['info']['name'], m['info']['description']))
-    #             m['do'](file.id, file.path, annso)
-    #             break;
-    #     # Retrieve gene from variant ids list
-    #     return Gene("GJB2", [])
-    #     result = []
-    #     sql =  "SELECT v.chr, v.pos, v.ref, v.alt, array_agg(rg.name) "
-    #     sql += "FROM variant_hg19 v "
-    #     sql += "INNER JOIN refgene_hg19 rg ON v.chr = rg.chrom AND rg.txrange @> int8(v.pos) "
-    #     sql += "WHERE v.id IN (" + ','.join(variants_ids) + ") GROUP BY v.id"
-    #     for r in Model.execute():
-    #         result.append((r[1], r[0], r[3], r[4], r[5], r[6]))
-    #     return Gene("GJB2", [])
-
-
     def export(self, analysis_id, export_id, report_data):
         return "<h1>Your export!</h1>"
 
@@ -633,11 +614,11 @@ class FilterEngine:
         self.fields_map = {}
         self.db_map = {}
         self.variant_table = "sample_variant_{0}".format(refname)
-        query = "SELECT d.uid AS duid, d.name AS dname, d.name_ui AS dname_ui, d.jointure, d.reference_id, d.type AS dtype, a.uid AS fuid, a.name AS fname, a.type, a.wt_default FROM annotation_field a LEFT JOIN annotation_database d ON a.database_uid=d.uid"
+        query = "SELECT d.uid AS duid, d.name AS dname, d.name_ui AS dname_ui, d.jointure, d.reference_id, d.type AS dtype, d.db_pk_field_uid, a.uid AS fuid, a.name AS fname, a.type, a.wt_default FROM annotation_field a LEFT JOIN annotation_database d ON a.database_uid=d.uid"
         result = await Model.execute_aio(query)
         for row in result:
             if row.duid not in self.db_map:
-                self.db_map[row.duid] = {"name": row.dname, "join": row.jointure, "fields": {}, "reference_id": row.reference_id, "type": row.dtype}
+                self.db_map[row.duid] = {"name": row.dname, "join": row.jointure, "fields": {}, "reference_id": row.reference_id, "type": row.dtype, "db_pk_field_uid" : row.db_pk_field_uid}
             self.db_map[row.duid]["fields"][row.fuid] = {"name": row.fname, "type": row.type}
             self.fields_map[row.fuid] = {"name": row.fname, "type": row.type, "db_uid": row.duid, "db_name_ui": row.dname_ui, "db_name": row.dname, "db_type": row.dtype, "join": row.jointure, "wt_default": row.wt_default}
 
@@ -676,7 +657,6 @@ class FilterEngine:
         query += ", CONSTRAINT {0}_ukey UNIQUE (variant_id, transcript_pk_field_uid, transcript_pk_value));"
         Model.execute(query.format(w_table))
         # Insert variant without annotation first
-        ipdb.set_trace()
         query =  "INSERT INTO {0} (variant_id, bin, chr, pos, ref, alt, is_transition, sample_tlist) \
             SELECT DISTINCT sample_variant_{1}.variant_id, sample_variant_{1}.bin, sample_variant_{1}.chr, sample_variant_{1}.pos, sample_variant_{1}.ref, sample_variant_{1}.alt, \
                 variant_{1}.is_transition, \
@@ -695,7 +675,7 @@ class FilterEngine:
             sample_alist=array_intersect(sample_tlist, array[{1}]), \
             sample_acount=array_length(array_intersect(sample_tlist, array[{1}]),1), \
             depth=GREATEST({2})"
-        Model.execute(query.format(w_table, ",".join([str(i) for i in sample_ids]), ", ".join(["s{}_dp integer".format(i) for i in sample_ids])))
+        Model.execute(query.format(w_table, ",".join([str(i) for i in sample_ids]), ", ".join(["s{}_dp".format(i) for i in sample_ids])))
         # Create indexes
         # FIXME : do we need to create index on boolean fields ? Is partition a better way to do for low cardinality fields : http://www.postgresql.org/docs/9.1/static/ddl-partitioning.html
         # query = "CREATE INDEX {0}_idx_ann ON {0} USING btree (annotated);".format(w_table)
@@ -734,6 +714,7 @@ class FilterEngine:
         except:
             # working table doesn't exist
             return False
+
         # Alter working table to add new fields
         pattern = "ALTER TABLE wt_{0} ADD COLUMN {1}{2} {3};"
         query = ""
@@ -750,39 +731,85 @@ class FilterEngine:
         if query != "":
             # Add new annotation columns to the working table
             Model.execute(query)
-            # Mark all variant as not annotated (to be able to do a resumable update)
-            Model.execute("UPDATE wt_{} SET annotated=False".format(analysis_id))
         progress.update({"step": 3})
         annso.notify_all(progress)
 
-        # Create update query to retrieve annotation
-        qset_ann = ', '.join(['{0}=_ann.{0}'.format(f_uid) for f_uid in diff_fields])
-        qslt_ann = ','.join(['{0}.{1} AS {2}'.format(self.fields_map[f_uid[1:]]['db_name'], self.fields_map[f_uid[1:]]['name'], f_uid) for f_uid in diff_fields])
-        qslt_var = 'SELECT variant_id, bin, chr, pos, ref, alt, transcript_pk_field_uid, transcript_pk_value FROM wt_{0} WHERE annotated=False LIMIT {1}'.format(analysis_id, C.RANGE_DEFAULT)
-        qjoin = ' '.join(['LEFT JOIN {0} '.format(self.db_map[db_uid]['join'].format('_var'), self.db_map[db_uid]) for db_uid in diff_dbs])
-
-        # Loop to update working table annotation
-        if qset_ann != "":
-            for page in range(0, total, C.RANGE_DEFAULT * 10):
-                query = "UPDATE wt_{0} SET annotated=True, {1} FROM (SELECT _var.variant_id, {2} FROM ({3}) AS _var {4}) AS _ann WHERE wt_{0}.variant_id=_ann.variant_id".format(analysis_id, qset_ann, qslt_ann, qslt_var, qjoin)
+        # Loop over new annotation's databases, because if new: need to add new transcripts to the working table
+        fields_to_copy_from_variant = ["variant_id","bin","chr","pos","ref","alt","is_transition","sample_tlist","sample_tcount","sample_alist","sample_acount","depth"]
+        fields_to_copy_from_variant.extend(['s{}_gt'.format(s) for s in sample_ids])
+        fields_to_copy_from_variant.extend(['s{}_dp'.format(s) for s in sample_ids])
+        fields_to_copy_from_variant.extend(['attr_{}'.format(a.lower()) for a in attributes.keys()])
+        fields_to_copy_from_variant.extend(['filter_{}'.format(a.lower()) for f in filter_ids])
+        pattern = "INSERT INTO wt_{0} (annotated, transcript_pk_field_uid, transcript_pk_value, {1}) \
+        SELECT False, '{2}', {4}.transcript_id, {3} \
+        FROM (SELECT {1} FROM wt_{0} WHERE transcript_pk_field_uid IS NULL) AS _var \
+        INNER JOIN {4} ON _var.variant_id={4}.variant_id" # TODO : check if more optim to select with JOIN ON bin/chr/pos/ref/alt
+        for uid in diff_dbs:
+            if self.db_map[uid]["type"] == "transcript":
+                query = pattern.format(analysis_id, 
+                                       ', '.join(fields_to_copy_from_variant), 
+                                       self.db_map[uid]["db_pk_field_uid"], 
+                                       ', '.join(["_var.{}".format(f) for f in fields_to_copy_from_variant]), 
+                                       self.db_map[uid]["name"])
                 Model.execute(query)
-                progress.update({"progress_current": page})
-                annso.notify_all(progress)
-        progress.update({"step": 4, "progress_current": total})
+        progress.update({"step": 4})
         annso.notify_all(progress)
+
+        # Create update query to retrieve annotation
+        UPDATE_LOOP_RANGE = 1000
+        to_update = {}
+        for f_uid in diff_fields:
+            if self.fields_map[f_uid[1:]]['db_uid'] not in to_update.keys():
+                to_update[self.fields_map[f_uid[1:]]['db_uid']] = []
+            to_update[self.fields_map[f_uid[1:]]['db_uid']].append({
+                "name": self.fields_map[f_uid[1:]]['name'], 
+                "uid":f_uid[1:], 
+                "db_name": self.fields_map[f_uid[1:]]['db_name']})
+        # Loop to update working table annotation (queries "packed" fields requested by annotation's database)
+        ipdb.set_trace()
+        for db_uid in to_update.keys():
+            if self.db_map[db_uid]["type"] == "transcript":
+                qset_ann = ', '.join(['_{0}=_ann._{0}'.format(f["uid"]) for f in to_update[db_uid]])
+                qslt_ann = ','.join(['{0}.{1} AS _{2}'.format(f['db_name'], f["name"], f["uid"]) for f in to_update[db_uid]])
+                qslt_var = "SELECT variant_id, bin, chr, pos, ref, alt, transcript_pk_value FROM wt_{0} WHERE annotated=False AND transcript_pk_field_uid='{1}' LIMIT {2}".format(analysis_id, self.db_map[self.fields_map[f_uid[1:]]['db_uid']]['db_pk_field_uid'], UPDATE_LOOP_RANGE)
+                qjoin = 'LEFT JOIN {0} '.format(self.db_map[db_uid]['join'].format('_var'))
+                query = "UPDATE wt_{0} SET annotated=True, {1} FROM (SELECT _var.variant_id, _var.transcript_pk_value, {2} FROM ({3}) AS _var {4}) AS _ann \
+                    WHERE wt_{0}.variant_id=_ann.variant_id AND wt_{0}.transcript_pk_field_uid='{5}' AND wt_{0}.transcript_pk_value=_ann.transcript_pk_value".format(
+                    analysis_id, 
+                    qset_ann, 
+                    qslt_ann, 
+                    qslt_var, 
+                    qjoin,
+                    self.db_map[self.fields_map[f_uid[1:]]['db_uid']]['db_pk_field_uid'])
+            else:
+                qset_ann = ', '.join(['{0}=_ann._{0}'.format(f_uid) for f_uid in diff_fields])
+                qslt_ann = ','.join(['{0}.{1} AS _{2}'.format(self.fields_map[f_uid[1:]]['db_name'], self.fields_map[f_uid[1:]]['name'], f_uid) for f_uid in diff_fields])
+                qslt_var = 'SELECT variant_id, bin, chr, pos, ref, alt FROM wt_{0} WHERE annotated=False AND transcript_pk_field_uid IS NULL LIMIT {1}'.format(analysis_id, UPDATE_LOOP_RANGE)
+                qjoin = ' '.join(['LEFT JOIN {0} '.format(self.db_map[db_uid]['join'].format('_var'), self.db_map[db_uid]) for db_uid in diff_dbs])
+                query = "UPDATE wt_{0} SET annotated=True, {1} FROM (SELECT _var.variant_id, {2} FROM ({3}) AS _var {4}) AS _ann WHERE wt_{0}.variant_id=_ann.variant_id".format(analysis_id, qset_ann, qslt_ann, qslt_var, qjoin)
+
+            if qset_ann != "":
+                # Mark all variant as not annotated (to be able to do a "resumable update")
+                Model.execute("UPDATE wt_{} SET annotated=False".format(analysis_id))
+                for page in range(0, total, UPDATE_LOOP_RANGE):
+                    Model.execute(query)
+                    progress.update({"progress_current": page})
+                    annso.notify_all(progress)
+            progress.update({"step": 5, "progress_current": total})
+            annso.notify_all(progress)
 
         # Loop to update working table attributes
         query = ""
         for a_name in attributes:
             if 'attr_{}'.format(a_name.lower()) not in current_fields:
                 for sid in attributes[a_name].keys():
-                    query += "UPDATE wt_{} SET attr_{}='{}' WHERE sample_id={}; ".format(analysis_id, a_name, attributes[a_name][sid], sid)
+                    query += "UPDATE wt_{} SET attr_{}='{}' WHERE s{}_gt IS NOT NULL; ".format(analysis_id, a_name, attributes[a_name][sid], sid)
                     query += "CREATE INDEX wt_{0}_idx_attr_{1} ON wt_{0} USING btree (filter_{1});".format(analysis_id, a_name)
         if query != "":
             Model.execute(query)
 
         # Loop to update working table filter
-        progress.update({"step": 5})
+        progress.update({"step": 6})
         annso.notify_all(progress)
         for f_id in filter_ids:
             if 'filter_{}'.format(f_id) not in current_fields:
@@ -797,7 +824,7 @@ class FilterEngine:
                     query += "CREATE INDEX wt_{0}_idx_filter_{1} ON wt_{0} USING btree (filter_{1});".format(analysis_id, f_id)
                     Model.execute(query)
 
-        progress.update({"step": 6})
+        progress.update({"step": 7})
         annso.notify_all(progress)
 
         # Update count stat of the analysis
@@ -816,6 +843,9 @@ class FilterEngine:
 
 
     def request(self, analysis_id, mode, filter_json, fields=None, order=None, limit=100, offset=0, count=False):
+        """
+
+        """
         # Check parameters: if no field, select by default the first field avalaible to avoir error
         if fields is None:
             fields = [next(iter(self.fields_map.keys()))]
@@ -864,13 +894,22 @@ class FilterEngine:
             result = []
             with Timer() as t:
                 if sql_result is not None:
-                    for s in sql_result:
-                        variant = {'id': s.variant_id}
-                        i = 1
-                        for f_id in fields:
-                            variant[f_id] = FilterEngine.parse_result(s[i])
-                            i += 1
-                        result.append(variant)
+                    for row in sql_result:
+                        entry = {"id" : "{}_{}_{}".format(row.variant_id, row.transcript_pk_field_uid, row.transcript_pk_value )}
+                        for f_uid in fields:
+                            # Manage special case for fields splitted by sample
+                            if self.fields_map[f_uid]['name'].startswith('s{}_'):
+                                pattern = "row." + self.fields_map[f_uid]['name']
+                                r = {}
+                                for sid in sample_ids:
+                                    r[sid] = FilterEngine.parse_result(eval(pattern.format(sid)))
+                                entry[f_uid] = r
+                            else:
+                                if self.fields_map[f_uid]['db_name_ui'] == 'Variant':
+                                    entry[f_uid] = FilterEngine.parse_result(eval("row.{}".format(self.fields_map[f_uid]['name'])))
+                                else:
+                                    entry[f_uid] = FilterEngine.parse_result(eval("row._{}".format(f_uid)))
+                        result.append(entry)
             log("Result processing: {0}\nTotal result: {1}".format(t, "-"))
         return result
 
@@ -922,7 +961,11 @@ class FilterEngine:
 
 
     def parse_filter(self, analysis_id, mode, sample_ids, filters, fields=[], order=None, limit=100, offset=0, count=False):
-        # Get working table
+        """
+            This method parse the json filter and return the corresponding postgreSQL query, and also the list of fields and databases uid used by the query
+            (thoses databases/fields must be present in the working table to be run succefully the query)
+        """
+        # Init some global variables
         wt = 'wt_{}'.format(analysis_id)
         query = ""
         field_uids = []
@@ -936,13 +979,15 @@ class FilterEngine:
                 db_uids.append(self.fields_map[f_uid]["db_uid"])
             field_uids.append(f_uid)
             if self.fields_map[f_uid]['db_name_ui'] == 'Variant':
-                fields_names.append('{}.{}'.format(wt, self.fields_map[f_uid]["name"]))
+                # Manage special case for fields splitted by sample
+                if self.fields_map[f_uid]['name'].startswith('s{}_'):
+                    fields_names.extend(['{}.'.format(wt) + self.fields_map[f_uid]['name'].format(s) for s in sample_ids])
+                else:
+                    fields_names.append('{}.{}'.format(wt, self.fields_map[f_uid]["name"]))
             else:
                 with_trx = with_trx or self.fields_map[f_uid]["db_type"] == "transcript"
                 fields_names.append('{}._{}'.format(wt, f_uid))
-            if with_trx:
-                ""
-        q_select = 'variant_id{} {}'.format(',' if len(fields_names) > 0 else '', ', '.join(fields_names))
+        q_select = 'variant_id, transcript_pk_field_uid, transcript_pk_value{} {}'.format(',' if len(fields_names) > 0 else '', ', '.join(fields_names))
 
         # Build FROM/JOIN
         q_from = wt
@@ -957,22 +1002,29 @@ class FilterEngine:
                 field_uids.append(data[1])
 
         def build_filter(data):
-            """ Recursive method that build the query from the filter json data at operator level """
+            """ 
+                Recursive method that build the query from the filter json data at operator level 
+            """
             operator = data[0]
             if operator in ['AND', 'OR']:
                 if len(data[1]) == 0:
                     return ''
                 return ' (' + FilterEngine.op_map[operator].join([build_filter(f) for f in data[1]]) + ') '
             elif operator in ['==', '!=', '>', '<', '>=', '<=']:
+                # If comparaison with a field, the field MUST BE the first operande
                 if data[1][0] == 'field':
-                    t = self.fields_map[data[1][1]]["type"]
-                elif data[2][0] == 'field':
-                    t = self.fields_map[data[2][1]]["type"]
+                    metadata = self.fields_map[data[1][1]]
                 else:
-                    t = 'string'
+                    metadata = {"type": "string", "name":""}
                 check_field_uid(data[1])
                 check_field_uid(data[2])
-                return '{0}{1}{2}'.format(parse_value(t, data[1]), FilterEngine.op_map[operator], parse_value(t, data[2]))
+                # Manage special case for fields splitted by sample
+                if metadata['name'].startswith('s{}_'):
+                    # With these special fields, we don't allow field tot field comparaison. 
+                    # First shall always be the special fields, and the second shall be everythong except another special fields
+                    return ' (' + ' OR '.join(['{0}{1}{2}'.format(metadata['name'].format(s), FilterEngine.op_map[operator], parse_value(metadata["type"], data[2])) for s in sample_ids]) + ') '
+                else:
+                    return '{0}{1}{2}'.format(parse_value(metadata["type"], data[1]), FilterEngine.op_map[operator], parse_value(metadata["type"], data[2]))
             elif operator in ['~', '!~']:
                 check_field_uid(data[1])
                 check_field_uid(data[2])
@@ -996,9 +1048,9 @@ class FilterEngine:
             if data[0] == 'sample':
                 tmp_table_name = "tmp_sample_{0}_{1}".format(data[1], mode)
                 if mode == 'site':
-                    tmp_table_query = ttable_quer_map.format(tmp_table_name, "SELECT DISTINCT {0}.bin, {0}.chr, {0}.pos FROM {0} WHERE {0}.sample_id={1}".format(wt, data[1]))
+                    tmp_table_query = ttable_quer_map.format(tmp_table_name, "SELECT DISTINCT {0}.bin, {0}.chr, {0}.pos FROM {0} WHERE {0}.s{1}_gt IS NOT NULL".format(wt, data[1]))
                 else:  # if mode = 'variant':
-                    tmp_table_query = ttable_quer_map.format(tmp_table_name, "SELECT DISTINCT {0}.bin, {0}.chr, {0}.pos, {0}.ref, {0}.alt FROM {0} WHERE {0}.sample_id={1}".format(wt, data[1]))
+                    tmp_table_query = ttable_quer_map.format(tmp_table_name, "SELECT DISTINCT {0}.bin, {0}.chr, {0}.pos, {0}.ref, {0}.alt FROM {0} WHERE {0}.s{1}_gt IS NOT NULL".format(wt, data[1]))
             elif data[0] == 'filter':
                 tmp_table_name = "tmp_filter_{0}".format(data[1])
                 if mode == 'site':
@@ -1034,19 +1086,22 @@ class FilterEngine:
             raise AnnsoException("FilterEngine.request.parse_value - Unknow type: {0} ({1})".format(ftype, data))
 
         q_where = ""
-        if len(sample_ids) == 1:
-            q_where = "{0}.sample_id={1}".format(wt, sample_ids[0])
-        elif len(sample_ids) > 1:
-            q_where = "{0}.sample_id IN ({1})".format(wt, ','.join(sample_ids))
+        # if len(sample_ids) == 1:
+        #     q_where = "{0}.sample_id={1}".format(wt, sample_ids[0])
+        # elif len(sample_ids) > 1:
+        #     q_where = "{0}.sample_id IN ({1})".format(wt, ','.join(sample_ids))
 
         q_where2 = build_filter(filters)
         if q_where2 is not None and len(q_where2.strip()) > 0:
             q_where += " AND " + q_where2
+        if q_where == "":
+            q_where = "True"
 
         # Build FROM/JOIN according to the list of used annotations databases
         q_from += " ".join([t['from'] for t in temporary_to_import.values()])
 
         # Build ORDER BY
+        # TODO : actually, it's not possible to do "order by" on special fields (GT and DP because they are split by sample)
         q_order = ""
         if order is not None and len(order) > 0:
             orders = []
@@ -1057,7 +1112,11 @@ class FilterEngine:
                     f_uid = f_uid[1:]
                     asc = 'DESC'
                 if self.fields_map[f_uid]['db_name_ui'] == 'Variant':
-                    orders.append('{} {}'.format(self.fields_map[f_uid]["name"], asc))
+                    # Manage special case for fields splitted by sample
+                    if self.fields_map[f_uid]['name'].startswith('s{}_'):
+                        pass
+                    else:
+                        orders.append('{} {}'.format(self.fields_map[f_uid]["name"], asc))
                 else:
                     orders.append('_{} {}'.format(f_uid, asc))
             q_order = 'ORDER BY {}'.format(', '.join(orders))
@@ -1089,8 +1148,8 @@ class FilterEngine:
         """
             Parse value returned by sqlAlchemy and cast it, if needed, into "simples" python types
         """
-        if value is None:
-            return ""
+        # if value is None:
+        #     return ""
         if type(value) == psycopg2._range.NumericRange:
             return (value.lower, value.upper)
         return value
