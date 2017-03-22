@@ -766,7 +766,6 @@ class FilterEngine:
                 "uid":f_uid[1:], 
                 "db_name": self.fields_map[f_uid[1:]]['db_name']})
         # Loop to update working table annotation (queries "packed" fields requested by annotation's database)
-        ipdb.set_trace()
         for db_uid in to_update.keys():
             if self.db_map[db_uid]["type"] == "transcript":
                 qset_ann = ', '.join(['_{0}=_ann._{0}'.format(f["uid"]) for f in to_update[db_uid]])
@@ -939,10 +938,10 @@ class FilterEngine:
                 attributes[row.name].update({row.sample_id: row.value})
 
         # Init fields uid and db uids with the defaults annotations fields according to the reference (hg19 by example)
-        for row in Model.execute("SELECT d.uid AS duid, f.uid FROM annotation_database d INNER JOIN annotation_field f ON d.uid=f.database_uid WHERE d.reference_id={} AND d.type='variant' AND f.wt_default=True".format(reference_id)):
-            if row.duid not in db_uids:
-                db_uids.append(row.duid)
-            field_uids.append(row.uid)
+        # for row in Model.execute("SELECT d.uid AS duid, f.uid FROM annotation_database d INNER JOIN annotation_field f ON d.uid=f.database_uid WHERE d.reference_id={} AND d.type='variant' AND f.wt_default=True".format(reference_id)):
+        #     if row.duid not in db_uids:
+        #         db_uids.append(row.duid)
+        #     field_uids.append(row.uid)
 
         # Retrieve saved filter's ids of the analysis - and parse their filter to get list of dbs/fields used by filters
         for row in Model.execute("select id, filter from filter where analysis_id={0} ORDER BY id ASC".format(analysis_id)):  # ORDER BY is important as a filter can "called" an oldest filter to be build.
