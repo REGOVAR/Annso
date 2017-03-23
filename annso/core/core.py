@@ -706,10 +706,14 @@ class FilterEngine:
         try:
             query = "SELECT column_name FROM information_schema.columns WHERE table_name='wt_{}'".format(analysis_id)
             current_fields = [row.column_name if row.column_name[0] != '_' else row.column_name[1:] for row in Model.execute(query)]
+            current_dbs = []
+            for f_uid in current_fields:
+                 if f_uid in self.fields_map and self.fields_map[f_uid]['db_uid'] not in current_dbs:
+                    current_dbs.append(self.fields_map[f_uid]['db_uid'])
             for f_uid in field_uids:
                 if f_uid not in current_fields and self.fields_map[f_uid]['db_name_ui'] != 'Variant':
                     diff_fields.append('_{}'.format(f_uid))
-                    if self.fields_map[f_uid]['db_uid'] not in diff_dbs:
+                    if self.fields_map[f_uid]['db_uid'] not in diff_dbs and self.fields_map[f_uid]['db_uid'] not in current_dbs:
                         diff_dbs.append(self.fields_map[f_uid]['db_uid'])
         except:
             # working table doesn't exist
@@ -1084,17 +1088,15 @@ class FilterEngine:
                     return 'int8range({0}, {1})'.format(data[1], data[2])
             raise AnnsoException("FilterEngine.request.parse_value - Unknow type: {0} ({1})".format(ftype, data))
 
-        q_where = ""
+        # q_where = ""
         # if len(sample_ids) == 1:
         #     q_where = "{0}.sample_id={1}".format(wt, sample_ids[0])
         # elif len(sample_ids) > 1:
         #     q_where = "{0}.sample_id IN ({1})".format(wt, ','.join(sample_ids))
 
-        q_where2 = build_filter(filters)
-        if q_where2 is not None and len(q_where2.strip()) > 0:
-            q_where += " AND " + q_where2
-        if q_where == "":
-            q_where = "True"
+        q_where = build_filter(filters)
+        if q_where is not None and len(q_where.strip()) > 0:
+            q_where = "WHERE " + q_where
 
         # Build FROM/JOIN according to the list of used annotations databases
         q_from += " ".join([t['from'] for t in temporary_to_import.values()])
@@ -1123,10 +1125,10 @@ class FilterEngine:
         # build final query
         query_tpm = [t['query'] for t in temporary_to_import.values()]
         if count:
-            query_req = "SELECT DISTINCT {0} FROM {1} WHERE {2}".format(q_select, q_from, q_where)
+            query_req = "SELECT DISTINCT {0} FROM {1} {2}".format(q_select, q_from, q_where)
             query = query_tpm + ['SELECT COUNT(*) FROM ({0}) AS sub;'.format(query_req)]
         else:
-            query_req = "SELECT DISTINCT {0} FROM {1} WHERE {2} {3} {4} {5};".format(q_select, q_from, q_where, q_order, 'LIMIT {}'.format(limit) if limit is not None else '', 'OFFSET {}'.format(offset) if offset is not None else '')
+            query_req = "SELECT DISTINCT {0} FROM {1} {2} {3} {4} {5};".format(q_select, q_from, q_where, q_order, 'LIMIT {}'.format(limit) if limit is not None else '', 'OFFSET {}'.format(offset) if offset is not None else '')
             query = query_tpm + [query_req]
         return query, field_uids, db_uids
 
