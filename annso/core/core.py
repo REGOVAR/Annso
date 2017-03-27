@@ -722,16 +722,38 @@ class FilterEngine:
         # Alter working table to add new fields
         pattern = "ALTER TABLE wt_{0} ADD COLUMN {1}{2} {3};"
         query = ""
+        update_queries = []
         for f_uid in diff_fields:
             if f_uid[0] == '_':
                 f_uid = f_uid[1:]
             query += pattern.format(analysis_id, '_', f_uid, self.sql_type_map[self.fields_map[f_uid]['type']])
         for a_name in attributes.keys():
-            if 'attr_{}'.format(a_name.lower()) not in current_fields:
-                query += pattern.format(analysis_id, 'attr_', a_name, 'character varying(255) COLLATE pg_catalog."C.UTF-8"')
+            att_checked = []
+            for sid, att in attributes[a_name].items():
+                if 'attr_{}_{}'.format(a_name.lower(), att.lower()) in current_fields:
+                    # We consider that if the first key_value for the attribute is define, the whole attribute's columns are defined,
+                    # So break and switch to the next attribute.
+                    # That's why before updating and attribute-value, we need before to drop all former columns in the wt 
+                    break;
+                else:
+                    if att not in att_checked:
+                        att_checked.append(att)
+                        query += pattern.format(analysis_id, 'attr_', "{}_{}".format(a_name.lower(), att.lower()), 'boolean DEFAULT False')
+                        update_queries.append("UPDATE wt_{} SET attr_{}_{}=True WHERE s{}_gt IS NOT NULL; ".format(analysis_id, a_name.lower(), att.lower(), sid))
         for f_id in filter_ids:
             if 'filter_{}'.format(f_id) not in current_fields:
-                query += pattern.format(analysis_id, 'filter_', f_id, 'boolean')
+                query += pattern.format(analysis_id, 'filter_', f_id, 'boolean DEFAULT False')
+                f_filter = json.loads(Model.execute("SELECT filter FROM filter WHERE id={}".format(f_id)).first().filter)
+                q = self.build_query(analysis_id, analysis.reference_id, 'table', f_filter, [], None, None)
+                queries = q[0]
+                if len(queries) > 0:
+                    # add all query to create temps tables needed by the filter if they do not yet exists
+                    for q in queries[:-1]:
+                        query += q
+                    # add the query to update wt with the filter
+                    # Note : As transcript_pk_field_uid and transcript_pk_field_value may be null, we cannot use '=' operator and must use 'IS NOT DISTINCT FROM' 
+                    #        as two expressions that return 'null' are not considered as equal in SQL.
+                    update_queries.append("UPDATE wt_{0} SET filter_{1}=True FROM ({2}) AS _sub WHERE wt_{0}.variant_id=_sub.variant_id AND wt_{0}.transcript_pk_field_uid IS NOT DISTINCT FROM _sub.transcript_pk_field_uid AND wt_{0}.transcript_pk_value IS NOT DISTINCT FROM _sub.transcript_pk_value ; ".format(analysis_id, f_id, queries[-1].strip()[:-1]))
         if query != "":
             # Add new annotation columns to the working table
             Model.execute(query)
@@ -743,17 +765,17 @@ class FilterEngine:
         fields_to_copy_from_variant.extend(['s{}_gt'.format(s) for s in sample_ids])
         fields_to_copy_from_variant.extend(['s{}_dp'.format(s) for s in sample_ids])
         fields_to_copy_from_variant.extend(['attr_{}'.format(a.lower()) for a in attributes.keys()])
-        fields_to_copy_from_variant.extend(['filter_{}'.format(a.lower()) for f in filter_ids])
+        fields_to_copy_from_variant.extend(['filter_{}'.format(f) for f in filter_ids])
         pattern = "INSERT INTO wt_{0} (annotated, transcript_pk_field_uid, transcript_pk_value, {1}) \
         SELECT False, '{2}', {4}.transcript_id, {3} \
         FROM (SELECT {1} FROM wt_{0} WHERE transcript_pk_field_uid IS NULL) AS _var \
         INNER JOIN {4} ON _var.variant_id={4}.variant_id" # TODO : check if more optim to select with JOIN ON bin/chr/pos/ref/alt
         for uid in diff_dbs:
             if self.db_map[uid]["type"] == "transcript":
-                query = pattern.format(analysis_id, 
-                                       ', '.join(fields_to_copy_from_variant), 
-                                       self.db_map[uid]["db_pk_field_uid"], 
-                                       ', '.join(["_var.{}".format(f) for f in fields_to_copy_from_variant]), 
+                query = pattern.format(analysis_id,
+                                       ', '.join(fields_to_copy_from_variant),
+                                       self.db_map[uid]["db_pk_field_uid"],
+                                       ', '.join(["_var.{}".format(f) for f in fields_to_copy_from_variant]),
                                        self.db_map[uid]["name"])
                 Model.execute(query)
         progress.update({"step": 4})
@@ -801,48 +823,16 @@ class FilterEngine:
             progress.update({"step": 5, "progress_current": total})
             annso.notify_all(progress)
 
-        # Loop to update working table attributes
-        query = ""
-        for a_name in attributes:
-            if 'attr_{}'.format(a_name.lower()) not in current_fields:
-                for sid in attributes[a_name].keys():
-                    query += "UPDATE wt_{} SET attr_{}='{}' WHERE s{}_gt IS NOT NULL; ".format(analysis_id, a_name, attributes[a_name][sid], sid)
-                    query += "CREATE INDEX wt_{0}_idx_attr_{1} ON wt_{0} USING btree (filter_{1});".format(analysis_id, a_name)
-        if query != "":
-            Model.execute(query)
-
-        # Loop to update working table filter
+        # Apply queries to update attributes and filters columns in the wt
+        if len(update_queries) > 0:
+            Model.execute("".join(update_queries))
         progress.update({"step": 6})
-        annso.notify_all(progress)
-        for f_id in filter_ids:
-            if 'filter_{}'.format(f_id) not in current_fields:
-                f_filter = json.loads(Model.execute("SELECT filter FROM filter WHERE id={}".format(f_id)).first().filter)
-                q = self.build_query(analysis_id, analysis.reference_id, 'table', f_filter, [], None, None)
-                queries = q[0]
-                if len(queries) > 0:
-                    query = ""
-                    for q in queries[:-1]:
-                        query += q
-                    query += "UPDATE wt_{} SET filter_{}=True WHERE variant_id IN ({}); ".format(analysis_id, f_id, queries[-1].strip()[:-1])
-                    query += "CREATE INDEX wt_{0}_idx_filter_{1} ON wt_{0} USING btree (filter_{1});".format(analysis_id, f_id)
-                    Model.execute(query)
-
-        progress.update({"step": 7})
         annso.notify_all(progress)
 
         # Update count stat of the analysis
         query = "UPDATE analysis SET status='READY' WHERE id={}".format(analysis_id)
         Model.execute(query)
 
-        # 1- Finir Update Working table simple (ajout d'annotation existante)
-        # 2- Avec upload async dans un thread a pars (notif realtime avec progress bar UI)
-        # 3- Feature: Quick site search bar: Core+UI
-        # 4- Gestion des attributs dans la working table
-        # 5- Gestion des saved filters dans la working table
-
-
-        # 6- Ajout notion de status pour les analysis (IMPORTING VCF, ANNOTATING, READY, CLOSED)
-        #    Avec meta data (pour progress bar notament)
 
 
     def request(self, analysis_id, mode, filter_json, fields=None, order=None, limit=100, offset=0, count=False):

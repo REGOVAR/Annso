@@ -14,6 +14,8 @@ CREATE TYPE field_type AS ENUM ('int', 'string', 'float', 'percent', 'enum', 'ra
 CREATE TYPE annotation_db_type AS ENUM ('site', 'variant', 'transcript');
 
 
+-- CREATE TYPE analysis_status AS ENUM ('SETTING', 'COMPUTING', 'READY', 'CLOSE');
+
 
 
 
