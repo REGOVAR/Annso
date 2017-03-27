@@ -1,6 +1,10 @@
+Optional, to create a lxd container:
     $ lxc-create -n regovar_annso -t download -- -d ubuntu -r xenial -a amd64
     $ lxc-start -n regovar_annso
     $ lxc-attach -n regovar_annso
+    
+    
+Installation script for annso on a fresh Ubuntu Xenial:
     # apt update && apt upgrade
     # apt install git ca-certificates nginx uwsgi postgresql postgresql-contrib postgresql-server-dev-9.5 build-essential libssl-dev libffi-dev python3-dev virtualenv libpq-dev libmagickwand-dev
     # useradd annso --create-home
@@ -13,7 +17,6 @@
     $ cd ~/Annso
     $ virtualenv -p /usr/bin/python3.5 venv
     $ source venv/bin/activate
-    $ pip install -r requirements.txt
     $ pip install -r requirements.txt
     $ psql -U annso -d annso -f ./annso/database/create_all.sql
     $ psql -U annso -d annso -f ./annso/database/scripts/import_refgen.sql
@@ -51,5 +54,8 @@
     # ln -s /etc/nginx/sites-available/annso /etc/nginx/sites-enabled
     # /etc/init.d/nginx restart
     # exit
+    
+    
+Optional, if annso wrapped into a lxd container:
     $ IP=$(lxc-info -n regovar_annso | grep IP | sed 's/.* //')
     $ firefox $IP
