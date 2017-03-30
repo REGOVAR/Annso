@@ -89,7 +89,7 @@ Replace <PORT> and <HOST> with the good value::
                 }
 
                 location /static {
-                        root /tmp/annso_v1;
+                        root /var/regovar/annso;
                 }
         }
 
