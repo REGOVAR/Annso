@@ -37,12 +37,12 @@ Then clone the repository and install requirements ::
 
 
 
-You will need to create following empty folder in the /tmp directory (you can change the location, but don't forget to update the config.py file) ::
+You will need to create following empty folder in the /var directory (you can change the location, but don't forget to update the config.py file) ::
 
-        mkdir /tmp/annso_v1
-        mkdir /tmp/annso_v1/cache
-        mkdir /tmp/annso_v1/downloads
-        mkdir /tmp/annso_v1/files
+        mkdir -p /var/regovar/annso
+        mkdir /var/regovar/annso/cache
+        mkdir /var/regovar/annso/downloads
+        mkdir /var/regovar/annso/files
         
         
 
