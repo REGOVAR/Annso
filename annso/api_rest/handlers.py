@@ -468,7 +468,7 @@ class SampleFileWrapper (TusFileWrapper):
             self.upload_offset = self.file.upload_offset
             self.path = self.file.path
             self.size = self.file.size
-            self.upload_url = HOST_P + "/sample/upload/" + str(id)
+            self.upload_url = "sample/upload/" + str(id)
         else:
             return TusManager.build_response(code=500, body="Unknow id: {}".format(id))
 
@@ -476,17 +476,17 @@ class SampleFileWrapper (TusFileWrapper):
     def save(self):
         try:
             f = File.from_id(self.id)
-            db_session.add(f)
+            Model.session().add(f)
             f.upload_offset=self.upload_offset
-            db_session.commit()
+            Model.session().commit()
         except Exception as error:
             return TusManager.build_response(code=500, body="Unexpected error occured: {}".format(error))
 
 
-    def complete(self, checksum=None, checksum_type="md5"):
+    async def complete(self, checksum=None, checksum_type="md5"):
         try:
             log ('Upload of the file (id={0}) is complete.'.format(self.id))
-            annso.file.upload_finish(self.id, checksum, checksum_type)
+            await annso.file.upload_finish(self.id, checksum, checksum_type)
         except Exception as error:
             return TusManager.build_response(code=500, body="Unexpected error occured: {}".format(error))
 

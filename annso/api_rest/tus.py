@@ -124,7 +124,7 @@ class TusManager:
         fw.save()
         # file transfer complete
         if fw.size == fw.upload_offset: 
-            fw.complete()
+            await fw.complete()
         headers = { 'Upload-Offset' : str(fw.upload_offset), 'Tus-Temp-Filename' : str(fw.id) }
         return TusManager.build_response(code=200, headers=headers)
 
@@ -160,7 +160,7 @@ class TusManager:
         except IOError as e:
             return TusManager.build_response(code=500, body="Unable to create file: {}".format(e))
 
-        return TusManager.build_response(code=201, headers={'Location' : "{}://{}".format(request.scheme, fw.upload_url), 'Tus-Temp-Filename' : str(fw.id)})
+        return TusManager.build_response(code=201, headers={'Location' : fw.upload_url, 'Tus-Temp-Filename' : str(fw.id)})
 
 
 

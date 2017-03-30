@@ -92,11 +92,8 @@
 
                             <div style="padding:10px; margin-left:75px; border-left: 1px solid #ddd;">
                                 <div class="btn-group ">
-                                    <a class="btn btn-default" href="#modal_import_sample_file" title="Import sample/variant data from local file" data-toggle="modal">
-                                        <i class="fa fa-download" style="width:20px; text-align:center;" aria-hidden="true"></i> From VCF
-                                    </a>
-                                    <a class="btn btn-default" href="#modal_import_sample_db" onclick="javascript:ui.load_sample_database();" title="Import sample/variant data from database" data-toggle="modal">
-                                        <i class="fa fa-database" style="width:20px; text-align:center;" aria-hidden="true"></i> From Database
+                                    <a class="btn btn-default" href="#modal_import_sample_db" onclick="javascript:ui.load_sample_database();" title="Add a sample to your analysis" data-toggle="modal">
+                                        <i class="fa fa-plus" style="width:20px; text-align:center;" aria-hidden="true"></i> Add sample
                                     </a>
                                 </div>
                                 &nbsp;
@@ -360,7 +357,7 @@
                                     <div id="browserNavFiltersPanelFilters_vcoding" class="collapse">
                                         <ul>
                                             <li><a href="#"><i class="fa fa-eye" style="width:20px; text-align:center;" aria-hidden="true"></i> STOP</a></li>
-                                            <li><a href="#"><i class="fa fa-eye" style="width:20px; text-align:center;" aria-hidden="true"></i> Missence</a></li>
+                                            <li><a href="#"><i class="fa fa-eye" style="width:20px; text-align:center;" aria-hidden="true"></i> Missense</a></li>
                                         </ul>
                                     </div>
 
@@ -546,6 +543,35 @@
 
 
 
+            <!--                                   -->
+            <!-- MODAL POPUP - DB Sample selection -->
+            <!--                                   -->
+            <div id="modal_import_sample_db" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+                <div class="modal-dialog" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                            <h4 class="modal-title"><i class="fa fa-folder-open-o" aria-hidden="true"></i> Import sample/variant from annso database</h4>
+                        </div>
+                        <div id="modal_import_sample_db_content" class="modal-body" style="height:450px; padding:0;">
+                            <i class="fa fa-refresh fa-spin fa-3x fa-fw" style="margin:200px 250px;"></i><span class="sr-only">Loading data from database</span>
+                            
+
+                        </div>
+                        <div class="modal-footer">
+                            <a class="btn btn-default" style="float:left;" href="#modal_import_sample_file" title="Import sample/variant data from local file" data-toggle="modal">
+                                <i class="fa fa-download" style="width:20px; text-align:center;" aria-hidden="true"></i> Import new sample from VCF
+                            </a>
+                            <button id="modal_new_file_cancel_btn" type="button" class="btn btn-default" data-dismiss="modal">Done</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
+
+
+
             <!--                           -->
             <!-- MODAL POPUP - File Upload -->
             <!--                           -->
@@ -561,7 +587,7 @@
                             <form class="form">
                                 <div class="input-group">
 
-                                    <input type="hidden" id="modal_new_file_tus_endpoint" name="modal_new_file_tus_endpoint" value="{{ hostname }}/sample/upload"/>
+                                    <input type="hidden" id="modal_new_file_tus_endpoint" name="modal_new_file_tus_endpoint" value="sample/upload"/>
                                     <input type="hidden" id="modal_new_file_tus_chunksize" name="modal_new_file_tus_chunksize" value="256000"/>
 
                                     <span class="input-group-addon"><i class="fa fa-file" aria-hidden="true"></i></span>
@@ -585,29 +611,6 @@
                 </div>
             </div>
 
-
-
-            <!--                                   -->
-            <!-- MODAL POPUP - DB Sample selection -->
-            <!--                                   -->
-            <div id="modal_import_sample_db" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
-                <div class="modal-dialog" role="document">
-                    <div class="modal-content">
-                        <div class="modal-header">
-                            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                            <h4 class="modal-title"><i class="fa fa-folder-open-o" aria-hidden="true"></i> Import sample/variant from annso database</h4>
-                        </div>
-                        <div id="modal_import_sample_db_content" class="modal-body" style="height:450px; padding:0;">
-                            <i class="fa fa-refresh fa-spin fa-3x fa-fw" style="margin:200px 250px;"></i><span class="sr-only">Loading data from database</span>
-                            
-
-                        </div>
-                        <div class="modal-footer">
-                            <button id="modal_new_file_cancel_btn" type="button" class="btn btn-default" data-dismiss="modal">Done</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
 
 
 
@@ -863,7 +866,7 @@
     <script src="/assets/model.js"></script>
     <script src="/assets/gui.js"></script>
     <script>
-        var rootURL = location.protocol + "//{{ hostname }}";
+        var rootURL = "" ; //location.protocol + "//{{ hostname }}";
 
         var ws = null;
         var $message = $('#message');
@@ -879,6 +882,7 @@
             'de2b02e8a7f3c77cf55efd18e0832f22' : annotation_format_sequence,
             'ab1e6b068bd1618d0422a462df93f28b' : annotation_format_sequence,
             '0b917b488efb09716ade1fab64227ff9' : annotation_format_gt,
+            '4394ca9f690ca3e84c20b969bb975269' : annotation_format_dp,
 
             'b92654754996e36dc866e28585e8ab08' : annotation_format_chr,
             'e7030fb58c6e3021bf712c049a955b72' : annotation_format_pos,
@@ -886,7 +890,7 @@
             '20eb2930e751cda9d11e27b18168fcc4' : annotation_format_pos,
             '7b0bdcb8fdc88a2ed5512ac885d15e6b' : annotation_format_chr,
             'eb22f43bff7f3d4a0f7c9847d5f8a97d' : annotation_format_pos
-        }
+        };
 
 
         // Internal data for autocomplete form used to filter fields (populated in the ui.start_analysis() js method )

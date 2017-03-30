@@ -487,7 +487,7 @@ function AnnsoUIControler ()
             chunkSize = Infinity;
         }
         var options = {
-            endpoint: location.protocol + "//" + $('#modal_new_file_tus_endpoint').val(),
+            endpoint: $('#modal_new_file_tus_endpoint').val(),
             resume: true,
             chunkSize: chunkSize,
             metadata: { 'filename': file.name },
@@ -503,6 +503,7 @@ function AnnsoUIControler ()
                 var percentage = (bytesUploaded / bytesTotal * 100).toFixed(2);
                 console.log(bytesUploaded, bytesTotal, percentage + "%");
                 buildProgressBar(percentage, "modal_new_file_progress");
+                $('#modal_new_file_start_btn').hide();
             },
             onSuccess: function() 
             {
@@ -510,7 +511,6 @@ function AnnsoUIControler ()
                 $("#modal_import_file_tus_localinput").val("");
                 buildProgressBar(100, "modal_new_file_progress");
                 ui.tus_uploader = null;
-                $('#modal_new_file_start_btn').show();
             }
         }
 
@@ -1497,7 +1497,8 @@ function init_variants_list(json, container_id)
 function insert_variant_row(json)
 {
     html = "";
-    selected = (analysis.analysis.selection.indexOf(json["id"].toString()) == -1) ? "" : " checked";
+
+    selected = ""; // (analysis.analysis.selection.indexOf(json["id"].toString()) == -1) ? "" : " checked";
     html += variants_table_row_start.format(json["id"], selected);
     for (var i=0; i<analysis.analysis.fields.length; i++)
     {
@@ -1519,7 +1520,10 @@ function insert_variant_row(json)
                 html += annotation_format_percent(json[fid]);
             }
             else 
-                html += variants_table_row_cell.format(json[fid]);
+            {
+                value = (json[fid] != null) ? json[fid] : "";
+                html += variants_table_row_cell.format(value);
+            }
         }
     }
     html += variants_table_row_end;
@@ -1534,11 +1538,16 @@ function annotation_format_number(value, td=true)
 {
     var model = (td) ? "<td class=\"number\">{0}</td>" : "<span class=\"number\">{0}</span>"
     var n = value.toString(), p = n.indexOf('.');
-    return model.format(
-        n.replace(/\d(?=(?:\d{3})+(?:\.|$))/g, function($0, i)
-        {
-            return p<0 || i<p ? ($0+'&nbsp;') : $0;
-        }));
+
+    if (typeof(value)== "number")
+    {
+        return model.format(
+            n.replace(/\d(?=(?:\d{3})+(?:\.|$))/g, function($0, i)
+            {
+                return p<0 || i<p ? ($0+'&nbsp;') : $0;
+            }));
+    }
+    return (td) ? "<td class=\"empty\"></td>" : "";    
 }
 
 function annotation_format_sequence(seq)
@@ -1563,13 +1572,42 @@ function annotation_format_sampleid(id)
     name = analysis.analysis.samples[id]["nickname"];
     if (name == null || name == "")
         name = analysis.analysis.samples[id]["name"];
-
-    return "<td>{0}</td>".format(name);
+    return name;
+}
+function annotation_format_gtid(gtid)
+{
+    gt = "";
+    if (typeof(gtid)== "number" && gtid >= 0 && gtid <=4)
+        gt = ['<span style="font-weight:100">Homo</span>&nbsp;Ref/Ref ', '<span style="font-weight:100">Homo</span>&nbsp;Alt/Alt ', '<span style="font-weight:100">Hetero</span>&nbsp;Ref/Alt ', '<span style="font-weight:100">Hetero</span>&nbsp;Alt1/Aly2 '][gtid];
+    return gt;
 }
 
-function annotation_format_gt(gt)
+function annotation_format_gt(data)
 {
-    return "<td class=\"seq\">{0}</td>".format(['Ref/Ref <span style="font-weight:100">Homo</span>', 'Alt/Alt <span style="font-weight:100">Homo</span>', 'Ref/Alt <span style="font-weight:100">Hetero</span>', 'Alt1/Aly2 <span style="font-weight:100">Hetero</span>'][gt]);
+    html = "";
+    $.each(data, function( sid, gtid ) 
+    {
+        sample = annotation_format_sampleid(sid);
+        gt = annotation_format_gtid(gtid);
+        if (gt != "")
+        {
+            html += "<div>{0}&nbsp;:&nbsp;{1}</div>".format(sample, gt);
+        }
+    });
+    return "<td style='padding:2px 8px; font-size:10px;'>{0}</td>".format(html);
+}
+function annotation_format_dp(data)
+{
+    html = "";
+    $.each(data, function( sid, dp ) 
+    {
+        sample = annotation_format_sampleid(sid);
+        if (typeof(dp)== "number")
+        {
+            html += "<div>{0}&nbsp;:&nbsp;{1}</div>".format(sample, dp);
+        }
+    });
+    return "<td style='padding:2px 8px; font-size:10px;'>{0}</td>".format(html);
 }
 
 function annotation_format_chr(chr)
