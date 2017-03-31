@@ -250,7 +250,7 @@ CREATE TABLE public.sample_variant_hg19
         ON UPDATE NO ACTION ON DELETE NO ACTION,
     CONSTRAINT sample_variant_hg19_ukey UNIQUE (sample_id, variant_id)
 );
-ALTER TABLE public.variant_hg19 OWNER TO annso;
+ALTER TABLE public.sample_variant_hg19 OWNER TO annso;
 
 
 
