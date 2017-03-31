@@ -308,7 +308,7 @@ class AnalysisHandler:
         # Create the project 
         analysis, success = annso.analysis.create(name, ref_id, template_id)
         if not success or analysis is None:
-            return rest_error("Unable to create an analsis with provided information.")
+            return rest_error("Unable to create an analysis with provided information.")
         return rest_success(analysis)
 
 
@@ -319,7 +319,7 @@ class AnalysisHandler:
         try:
             settings = Analysis.from_id(analysis_id).setting
         except Exception as err:
-            return rest_error("Unable to get analsis settings with provided information. " + str(err))
+            return rest_error("Unable to get analysis settings with provided information. " + str(err))
         if settings is None: settings = {}
         return rest_success(settings)
 
