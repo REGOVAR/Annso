@@ -2,6 +2,9 @@ Optional, to create a lxd container:
     $ lxc-create -n regovar_annso -t download -- -d ubuntu -r xenial -a amd64
     $ lxc-start -n regovar_annso
     $ lxc-attach -n regovar_annso
+or (with ubuntu)
+   $ lxc launch images:ubuntu/xenial regovar_annso
+   $ lxc exec regovar_annso -- /bin/bash
     
     
 Installation script for annso on a fresh Ubuntu Xenial:
