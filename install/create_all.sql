@@ -9,7 +9,7 @@
 -- psql -U postgres -d annso -f database/create_all.sql
 --
 
-
+CREATE TYPE file_status AS ENUM ('uploading', 'uploaded', 'checked', 'error');
 CREATE TYPE field_type AS ENUM ('int', 'string', 'float', 'percent', 'enum', 'range', 'bool', 'list_i', 'list_s', 'list_f', 'list_p', 'list_b');
 CREATE TYPE annotation_db_type AS ENUM ('site', 'variant', 'transcript');
 
@@ -22,14 +22,14 @@ CREATE TYPE annotation_db_type AS ENUM ('site', 'variant', 'transcript');
 CREATE TABLE public.template
 (
     id serial NOT NULL,
-    name character varying(100) COLLATE pg_catalog."C.UTF-8",
-    author character varying(255) COLLATE pg_catalog."C.UTF-8",
-    description text COLLATE pg_catalog."C.UTF-8",
-    version character varying(20) COLLATE pg_catalog."C.UTF-8",
+    name character varying(100) COLLATE pg_catalog."C",
+    author character varying(255) COLLATE pg_catalog."C",
+    description text COLLATE pg_catalog."C",
+    version character varying(20) COLLATE pg_catalog."C",
     creation_date timestamp without time zone,
     update_date timestamp without time zone,
     parent_id integer,
-    configuration text COLLATE pg_catalog."C.UTF-8",
+    configuration text COLLATE pg_catalog."C",
     CONSTRAINT template_pkey PRIMARY KEY (id)
 );
 ALTER TABLE public.template OWNER TO annso;
@@ -41,19 +41,16 @@ ALTER TABLE public.template OWNER TO annso;
 CREATE TABLE public.analysis
 (
     id serial NOT NULL,
-    name character varying(50) COLLATE pg_catalog."C.UTF-8",
-    comments text COLLATE pg_catalog."C.UTF-8",
+    name character varying(50) COLLATE pg_catalog."C",
+    comments text COLLATE pg_catalog."C",
     template_id integer,
-    settings text COLLATE pg_catalog."C.UTF-8",
+    settings text COLLATE pg_catalog."C",
     creation_date timestamp without time zone,
     update_date timestamp without time zone,
     total_variants integer DEFAULT 0,
-    status character varying(20) COLLATE pg_catalog."C.UTF-8",
+    status character varying(20) COLLATE pg_catalog."C",
     reference_id integer DEFAULT 2,  -- 2 is for Hg19
-    CONSTRAINT analysis_pkey PRIMARY KEY (id),
-    CONSTRAINT analysis_template_id_fkey FOREIGN KEY (template_id)
-        REFERENCES public."template" (id) MATCH SIMPLE
-        ON UPDATE NO ACTION ON DELETE NO ACTION
+    CONSTRAINT analysis_pkey PRIMARY KEY (id)
 );
 ALTER TABLE public.analysis OWNER TO annso;
 
@@ -64,10 +61,10 @@ CREATE TABLE public.report
 (
     id serial NOT NULL,
     analysis_id integer,
-    name character varying(255) COLLATE pg_catalog."C.UTF-8",
-    path character varying(255) COLLATE pg_catalog."C.UTF-8",
-    type character varying(50) COLLATE pg_catalog."C.UTF-8",
-    module_id character varying(50) COLLATE pg_catalog."C.UTF-8",
+    name character varying(255) COLLATE pg_catalog."C",
+    path character varying(255) COLLATE pg_catalog."C",
+    type character varying(50) COLLATE pg_catalog."C",
+    module_id character varying(50) COLLATE pg_catalog."C",
     creation_date timestamp without time zone,
     CONSTRAINT report_pkey PRIMARY KEY (id)
 );
@@ -80,14 +77,11 @@ CREATE TABLE public.filter
 (
     id serial NOT NULL,
     analysis_id integer,
-    name character varying(255) COLLATE pg_catalog."C.UTF-8",
-    description text COLLATE pg_catalog."C.UTF-8",
-    filter text COLLATE pg_catalog."C.UTF-8",
+    name character varying(255) COLLATE pg_catalog."C",
+    description text COLLATE pg_catalog."C",
+    filter text COLLATE pg_catalog."C",
     total_variants integer,
-    CONSTRAINT filter_pkey PRIMARY KEY (id),
-    CONSTRAINT filter_analysis_id_fkey FOREIGN KEY (analysis_id)
-        REFERENCES public."analysis" (id) MATCH SIMPLE
-        ON UPDATE NO ACTION ON DELETE NO ACTION
+    CONSTRAINT filter_pkey PRIMARY KEY (id)
 );
 ALTER TABLE public.filter OWNER TO annso;
 
@@ -106,10 +100,10 @@ ALTER TABLE public.filter OWNER TO annso;
 CREATE TABLE public."reference"
 (
     id serial NOT NULL,
-    name character varying(50) COLLATE pg_catalog."C.UTF-8",
-    description character varying(255) COLLATE pg_catalog."C.UTF-8",
-    url character varying(255) COLLATE pg_catalog."C.UTF-8",
-    table_suffix character varying(10) COLLATE pg_catalog."C.UTF-8",
+    name character varying(50) COLLATE pg_catalog."C",
+    description character varying(255) COLLATE pg_catalog."C",
+    url character varying(255) COLLATE pg_catalog."C",
+    table_suffix character varying(10) COLLATE pg_catalog."C",
     CONSTRAINT reference_pkey PRIMARY KEY (id)
 );
 ALTER TABLE public."reference" OWNER TO annso;
@@ -121,22 +115,22 @@ ALTER TABLE public."reference" OWNER TO annso;
 CREATE TABLE public.file
 (
     id serial NOT NULL,
-    filename character varying(255) COLLATE pg_catalog."C.UTF-8",
+    name character varying(255) COLLATE pg_catalog."C",
     comments text,
-    type character varying(10) COLLATE pg_catalog."C.UTF-8",
-    "path" character varying(255) COLLATE pg_catalog."C.UTF-8",
-    size integer,
-    upload_offset integer,
+    type character varying(10) COLLATE pg_catalog."C",
+    "path" character varying(255) COLLATE pg_catalog."C",
+    size bigint DEFAULT 0,
+    upload_offset bigint DEFAULT 0,
     reference_id integer,
-    import_date timestamp without time zone,
+    status file_status,
+    create_date timestamp without time zone NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    update_date timestamp without time zone NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    tags text COLLATE pg_catalog."C",
+    md5sum character varying(32) COLLATE pg_catalog."C",
     CONSTRAINT file_pkey PRIMARY KEY (id),
-    CONSTRAINT file_reference_id_fkey FOREIGN KEY (reference_id)
-        REFERENCES public."reference" (id) MATCH SIMPLE
-        ON UPDATE NO ACTION ON DELETE NO ACTION
+    CONSTRAINT file_ukey UNIQUE ("path")
 );
 ALTER TABLE public.file OWNER TO annso;
-
-
 
 
 
@@ -145,8 +139,8 @@ ALTER TABLE public.file OWNER TO annso;
 CREATE TABLE public.sample
 (
     id serial NOT NULL,
-    name character varying(50) COLLATE pg_catalog."C.UTF-8",
-    comments character varying(255) COLLATE pg_catalog."C.UTF-8",
+    name character varying(50) COLLATE pg_catalog."C",
+    comments character varying(255) COLLATE pg_catalog."C",
     is_mosaic boolean,
     CONSTRAINT sample_pkey PRIMARY KEY (id)
 );
@@ -158,13 +152,7 @@ CREATE TABLE public.sample_file
 (
     sample_id integer NOT NULL,
     file_id integer NOT NULL,
-    CONSTRAINT sample_file_pkey PRIMARY KEY (sample_id, file_id),
-    CONSTRAINT sample_file_sample_id_fkey FOREIGN KEY (sample_id)
-        REFERENCES public."sample" (id) MATCH SIMPLE
-        ON UPDATE NO ACTION ON DELETE NO ACTION,
-    CONSTRAINT sample_file_file_id_fkey FOREIGN KEY (file_id)
-        REFERENCES public."file" (id) MATCH SIMPLE
-        ON UPDATE NO ACTION ON DELETE NO ACTION
+    CONSTRAINT sample_file_pkey PRIMARY KEY (sample_id, file_id)
 );
 ALTER TABLE public.sample_file OWNER TO annso;
 
@@ -174,14 +162,8 @@ CREATE TABLE public.analysis_sample
 (
     analysis_id integer NOT NULL,
     sample_id integer NOT NULL,
-    nickname character varying(255) COLLATE pg_catalog."C.UTF-8",
-    CONSTRAINT analysis_sample_pkey PRIMARY KEY (analysis_id, sample_id),
-    CONSTRAINT analysis_sample_analysis_id_fkey FOREIGN KEY (analysis_id)
-        REFERENCES public."analysis" (id) MATCH SIMPLE
-        ON UPDATE NO ACTION ON DELETE NO ACTION,
-    CONSTRAINT analysis_sample_sample_id_fkey FOREIGN KEY (sample_id)
-        REFERENCES public."sample" (id) MATCH SIMPLE
-        ON UPDATE NO ACTION ON DELETE NO ACTION
+    nickname character varying(255) COLLATE pg_catalog."C",
+    CONSTRAINT analysis_sample_pkey PRIMARY KEY (analysis_id, sample_id)
 );
 ALTER TABLE public.analysis_sample OWNER TO annso;
 
@@ -190,15 +172,9 @@ CREATE TABLE public.attribute
 (
     analysis_id integer NOT NULL,
     sample_id integer NOT NULL,
-    name character varying(255) COLLATE pg_catalog."C.UTF-8" NOT NULL,
-    value character varying(255) COLLATE pg_catalog."C.UTF-8",
-    CONSTRAINT attribute_pkey PRIMARY KEY (analysis_id, sample_id, name),
-    CONSTRAINT attribute_analysis_id_fkey FOREIGN KEY (analysis_id)
-        REFERENCES public."analysis" (id) MATCH SIMPLE
-        ON UPDATE NO ACTION ON DELETE NO ACTION,
-    CONSTRAINT attribute_sample_id_fkey FOREIGN KEY (sample_id)
-        REFERENCES public."sample" (id) MATCH SIMPLE
-        ON UPDATE NO ACTION ON DELETE NO ACTION
+    name character varying(255) COLLATE pg_catalog."C" NOT NULL,
+    value character varying(255) COLLATE pg_catalog."C",
+    CONSTRAINT attribute_pkey PRIMARY KEY (analysis_id, sample_id, name)
 );
 ALTER TABLE public.attribute OWNER TO annso;
 
@@ -239,18 +215,12 @@ CREATE TABLE public.sample_variant_hg19
     variant_id bigint,
     genotype integer,
     depth integer,
-    info character varying(255)[][] COLLATE pg_catalog."C.UTF-8",
+    info character varying(255)[][] COLLATE pg_catalog."C",
     mosaic real,
     CONSTRAINT sample_variant_hg19_pkey PRIMARY KEY (sample_id, chr, pos, ref, alt),
-    CONSTRAINT sample_variant_hg19_variant_id_fkey FOREIGN KEY (variant_id)
-        REFERENCES public."variant_hg19" (id) MATCH SIMPLE
-        ON UPDATE NO ACTION ON DELETE NO ACTION,
-    CONSTRAINT sample_variant_hg19_sample_id_fkey FOREIGN KEY (sample_id)
-        REFERENCES public."sample" (id) MATCH SIMPLE
-        ON UPDATE NO ACTION ON DELETE NO ACTION,
     CONSTRAINT sample_variant_hg19_ukey UNIQUE (sample_id, variant_id)
 );
-ALTER TABLE public.variant_hg19 OWNER TO annso;
+ALTER TABLE public.sample_variant_hg19 OWNER TO annso;
 
 
 
@@ -259,31 +229,29 @@ ALTER TABLE public.variant_hg19 OWNER TO annso;
 
 CREATE TABLE public.annotation_database
 (
-    uid character varying(32) COLLATE pg_catalog."C.UTF-8",
+    uid character varying(32) COLLATE pg_catalog."C",
     reference_id integer NOT NULL,
-    name character varying(255) COLLATE pg_catalog."C.UTF-8" NOT NULL,
-    version character varying(255) COLLATE pg_catalog."C.UTF-8" NOT NULL,
-    name_ui character varying(255) COLLATE pg_catalog."C.UTF-8",
+    name character varying(255) COLLATE pg_catalog."C" NOT NULL,
+    version character varying(255) COLLATE pg_catalog."C" NOT NULL,
+    name_ui character varying(255) COLLATE pg_catalog."C",
     description text,
     type annotation_db_type,
     ord integer,
     url text ,
     update_date timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
     jointure text,
-    db_pk_field_uid character varying(32) COLLATE pg_catalog."C.UTF-8",
-    CONSTRAINT annotation_database_pkey PRIMARY KEY (reference_id, name, version),
-    CONSTRAINT annotation_database_reference_id_fkey FOREIGN KEY (reference_id)
-        REFERENCES public."reference" (id) MATCH SIMPLE
-        ON UPDATE NO ACTION ON DELETE NO ACTION
+    db_pk_field_uid character varying(32) COLLATE pg_catalog."C",
+    CONSTRAINT annotation_database_pkey PRIMARY KEY (reference_id, name, version)
 );
 ALTER TABLE public.annotation_database OWNER TO annso;
 
+
 CREATE TABLE public.annotation_field
 (
-    uid character varying(32) COLLATE pg_catalog."C.UTF-8",
-    database_uid character varying(32) COLLATE pg_catalog."C.UTF-8" NOT NULL,
-    name character varying(255) COLLATE pg_catalog."C.UTF-8" NOT NULL,
-    name_ui character varying(255) COLLATE pg_catalog."C.UTF-8",
+    uid character varying(32) COLLATE pg_catalog."C",
+    database_uid character varying(32) COLLATE pg_catalog."C" NOT NULL,
+    name character varying(255) COLLATE pg_catalog."C" NOT NULL,
+    name_ui character varying(255) COLLATE pg_catalog."C",
     ord integer,
     description text,
     type field_type,
@@ -299,9 +267,9 @@ ALTER TABLE public.annotation_field OWNER TO annso;
 
 CREATE TABLE public."parameter"
 (
-    key character varying(255) COLLATE pg_catalog."C.UTF-8" NOT NULL ,
-    value character varying(255) COLLATE pg_catalog."C.UTF-8" NOT NULL,
-    description character varying(255) COLLATE pg_catalog."C.UTF-8",
+    key character varying(255) COLLATE pg_catalog."C" NOT NULL ,
+    value character varying(255) COLLATE pg_catalog."C" NOT NULL,
+    description character varying(255) COLLATE pg_catalog."C",
     CONSTRAINT parameter_pkey PRIMARY KEY (key)
 );
 ALTER TABLE public."parameter" OWNER TO annso;
@@ -316,89 +284,73 @@ ALTER TABLE public."parameter" OWNER TO annso;
 --
 -- INDEXES
 --
-DROP INDEX IF EXISTS public.sample_idx;
 CREATE INDEX sample_idx
   ON public.sample
   USING btree
   (id);
 
 
-
-
-DROP INDEX IF EXISTS public.sample_variant_hg19_idx_id;
 CREATE INDEX sample_variant_hg19_idx_id
   ON public.sample_variant_hg19
   USING btree
   (variant_id);
 
-DROP INDEX IF EXISTS public.sample_variant_hg19_idx_samplevar;
+
 CREATE INDEX sample_variant_hg19_idx_samplevar
   ON public.sample_variant_hg19
   USING btree
   (sample_id);
 
-DROP INDEX IF EXISTS public.sample_variant_hg19_idx_site;
+
 CREATE INDEX sample_variant_hg19_idx_site
   ON public.sample_variant_hg19
   USING btree
   (sample_id, bin, chr, pos);
 
 
-DROP INDEX IF EXISTS public.attribute_idx;
 CREATE INDEX attribute_idx
   ON public.attribute
   USING btree
   (analysis_id, sample_id, name COLLATE pg_catalog."default");
 
 
-
-
-DROP INDEX IF EXISTS public.variant_hg19_idx_id;
 CREATE INDEX variant_hg19_idx_id
   ON public.variant_hg19
   USING btree
   (id);
 
-DROP INDEX IF EXISTS public.variant_hg19_idx_site;
+
 CREATE INDEX variant_hg19_idx_site
   ON public.variant_hg19
   USING btree
   (bin, chr, pos);
 
 
-DROP INDEX IF EXISTS public.analysis_idx;
 CREATE INDEX analysis_idx
   ON public.analysis
   USING btree
   (id);
 
 
-
-
-DROP INDEX IF EXISTS public.filter_idx;
 CREATE INDEX filter_idx
   ON public.filter
   USING btree
   (id);
     
 
-
-DROP INDEX IF EXISTS public.annotation_database_idx;
 CREATE INDEX annotation_database_idx
   ON public.annotation_database
   USING btree
   (reference_id, name, version);
-DROP INDEX IF EXISTS public.annotation_database_idx2;
 CREATE INDEX annotation_database_idx2
   ON public.annotation_database
   USING btree (uid);
 
-DROP INDEX IF EXISTS public.annotation_field_idx;
+
 CREATE INDEX annotation_field_idx
   ON public.annotation_field
   USING btree
   (database_uid, name);
-DROP INDEX IF EXISTS public.annotation_field_idx2;
 CREATE INDEX annotation_field_idx2
   ON public.annotation_field
   USING btree (uid);

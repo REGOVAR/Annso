@@ -4,4 +4,4 @@
 
 from core.framework import *
 from core.model import *
-from core.core import annso
+from core.core import core

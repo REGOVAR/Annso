@@ -14,8 +14,16 @@ drop:
 	psql -U postgres -c "SELECT pg_terminate_backend(pid) FROM pg_stat_activity WHERE datname = 'annso'"
 	psql -U postgres -c "DROP DATABASE annso"
 	psql -U postgres -c "CREATE DATABASE annso OWNER annso"
-	psql -U annso -d annso -f ./database/create_all.sql
+	psql -U annso -d annso -f ./install/create_all.sql
 	psql -U annso -d annso -f /tmp/hg19_db/refGene.sql
+
+install:
+	database_name=$$(sed -n 's/^\s*DATABASE_NAME\s*=\s*"\([^"]\+\)".*/\1/p' config.py) ; \
+	sudo -u postgres psql -c "SELECT pg_terminate_backend(pid) FROM pg_stat_activity WHERE datname = '$${database_name}'" ; \
+	sudo -u postgres psql -c "DROP DATABASE $${database_name}" ; \
+	sudo -u postgres psql -c "CREATE DATABASE $${database_name} OWNER annso" ; \
+	psql -U annso -d $$database_name -f ../install/create_all.sql
+	
 	
 clear:
 	psql -U annso -d annso -c "DELETE FROM sample_file"

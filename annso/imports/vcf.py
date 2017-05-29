@@ -12,7 +12,7 @@ metadata = {
 
 
 
-async def import_data(file_id, filepath, annso_core=None, reference_id = 2):
+async def import_data(file_id, filepath, core=None, reference_id = 2):
     import ipdb
 
     import os
@@ -24,7 +24,7 @@ async def import_data(file_id, filepath, annso_core=None, reference_id = 2):
     import gzip
     from pysam import VariantFile
 
-    from core.framework import log, war, err
+    from core.framework.common import log, war, err, RegovarException
     import core.model as Model
 
 
@@ -472,7 +472,7 @@ async def import_data(file_id, filepath, annso_core=None, reference_id = 2):
     def transaction_end(job_id, result):
         job_in_progress.remove(job_id)
         if result is Exception or result is None:
-            annso_core.notify_all({'msg':'import_vcf_end', 'data' : {'file_id' : file_id, 'msg' : 'Error occured : ' + str(err)}})
+            core.notify_all({'msg':'import_vcf_end', 'data' : {'file_id' : file_id, 'msg' : 'Error occured : ' + str(err)}})
 
 
 
@@ -500,12 +500,12 @@ async def import_data(file_id, filepath, annso_core=None, reference_id = 2):
 
         if len(samples.keys()) == 0 : 
             war("VCF files without sample cannot be imported in the database.")
-            if annso_core is not None:
-                annso_core.notify_all({'msg':'import_vcf_end', 'data' : {'file_id' : file_id, 'msg' : "VCF files without sample cannot be imported in the database."}})
+            if core is not None:
+                core.notify_all({'msg':'import_vcf_end', 'data' : {'file_id' : file_id, 'msg' : "VCF files without sample cannot be imported in the database."}})
             return;
 
-        if annso_core is not None:
-            annso_core.notify_all({'msg':'import_vcf_start', 'data' : {'file_id' : file_id, 'samples' : [ {'id' : samples[s].id, 'name' : samples[s].name} for s in samples.keys()]}})
+        if core is not None:
+            core.notify_all({'msg':'import_vcf_start', 'data' : {'file_id' : file_id, 'samples' : [ {'id' : samples[s].id, 'name' : samples[s].name} for s in samples.keys()]}})
 
 
         # Associate sample to the file
@@ -529,8 +529,8 @@ async def import_data(file_id, filepath, annso_core=None, reference_id = 2):
         count = 0
         for r in vcf_reader: 
             records_current += 1 
-            if annso_core is not None:
-                annso_core.notify_all({'msg':'import_vcf', 'data' : {'file_id' : file_id, 'progress_total' : records_count, 'progress_current' : records_current, 'progress_percent' : round(records_current / max(1,records_count) * 100, 2)}})
+            if core is not None:
+                core.notify_all({'msg':'import_vcf', 'data' : {'file_id' : file_id, 'progress_total' : records_count, 'progress_current' : records_current, 'progress_percent' : round(records_current / max(1,records_count) * 100, 2)}})
             
             chrm = normalize_chr(str(r.chrom))
             samples_array = ','.join([str(samples[s].id) for s in r.samples])
@@ -610,5 +610,5 @@ async def import_data(file_id, filepath, annso_core=None, reference_id = 2):
 
 
     end = datetime.datetime.now()
-    if annso_core is not None:
-        annso_core.notify_all({'msg':'import_vcf_end', 'data' : {'file_id' : file_id, 'msg' : 'Import done without error.', 'samples': [ {'id' : samples[s].id, 'name' : samples[s].name} for s in samples.keys()]}})
+    if core is not None:
+        core.notify_all({'msg':'import_vcf_end', 'data' : {'file_id' : file_id, 'msg' : 'Import done without error.', 'samples': [ {'id' : samples[s].id, 'name' : samples[s].name} for s in samples.keys()]}})

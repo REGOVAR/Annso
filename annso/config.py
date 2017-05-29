@@ -43,6 +43,7 @@ REPORTS_MODULES = []
 
 # AUTOCOMPUTED VALUES
 ANNSO_DIR = os.path.dirname(os.path.abspath(__file__))
+LOG_DIR = ANNSO_DIR
 TEMPLATE_DIR = os.path.join(ANNSO_DIR, "api_rest/templates/")
 ERROR_ROOT_URL = "api.annso.org/errorcode/"
 
